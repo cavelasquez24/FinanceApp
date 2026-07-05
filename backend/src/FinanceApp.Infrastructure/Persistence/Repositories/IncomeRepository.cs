@@ -48,6 +48,14 @@ public class IncomeRepository : BaseRepository<Income>, IIncomeRepository
         return (items, totalCount);
     }
 
+    public override async Task<Income?> GetByIdAsync(
+    Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Incomes
+            .Include(i => i.Category)
+            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+    }
+
     public async Task<decimal> GetTotalByUserAndPeriodAsync(
         Guid userId,
         int month,
