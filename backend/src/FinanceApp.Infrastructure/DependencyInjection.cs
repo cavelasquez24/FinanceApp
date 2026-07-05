@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+
 namespace FinanceApp.Infrastructure;
 
 public static class DependencyInjection
@@ -29,12 +30,16 @@ public static class DependencyInjection
         // ── Repositorios ───────────────────────────────────────────────
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IIncomeRepository, IncomeRepository>();
+
 
         // ── Servicios ──────────────────────────────────────────────────
         services.AddScoped<IJwtService, JwtService>();
 
         // Al corregir el using de arriba, esto se acoplará perfectamente al controlador
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IIncomeService, IncomeService>();
+
 
         return services;
     }
