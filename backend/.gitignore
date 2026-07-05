@@ -1,0 +1,17 @@
+## Visual Studio Cache y Configuraciones
+.vs/
+*.suo
+*.user
+*.slnx.user
+
+## Carpetas de Compilación (Binarios)
+**/bin/
+**/obj/
+
+## Archivos de usuario y temporales
+*.log
+.idea/
+.vscode/
+
+## Configuración local secreta (¡No subir contraseñas!)
+**/appsettings.Development.json

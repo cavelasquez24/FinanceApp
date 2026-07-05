@@ -2,9 +2,11 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registra todos los servicios de Infrastructure (DbContext, etc.)
+//Conectar infraestructura para IAutService
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Servicios básicos por ahora
+// En pasos siguientes agregaremos JWT, EF Core, etc.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
