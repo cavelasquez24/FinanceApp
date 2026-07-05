@@ -1,0 +1,11 @@
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\bin\Debug\net10.0\FinanceApp.Domain.deps.json
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\bin\Debug\net10.0\FinanceApp.Domain.dll
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\bin\Debug\net10.0\FinanceApp.Domain.pdb
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\obj\Debug\net10.0\FinanceApp.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\obj\Debug\net10.0\FinanceApp.Domain.AssemblyInfoInputs.cache
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\obj\Debug\net10.0\FinanceApp.Domain.AssemblyInfo.cs
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\obj\Debug\net10.0\FinanceApp.Domain.csproj.CoreCompileInputs.cache
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\obj\Debug\net10.0\FinanceApp.Domain.dll
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\obj\Debug\net10.0\refint\FinanceApp.Domain.dll
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\obj\Debug\net10.0\FinanceApp.Domain.pdb
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.Domain\obj\Debug\net10.0\ref\FinanceApp.Domain.dll

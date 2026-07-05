@@ -1,0 +1,121 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Develop\\Projects\\FinanceApp\\backend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{923548AB-5A10-6949-DEB7-2743F389BFC2}|src\\FinanceApp.Infrastructure\\FinanceApp.Infrastructure.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.infrastructure\\persistence\\configurations\\categoryconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{923548AB-5A10-6949-DEB7-2743F389BFC2}|src\\FinanceApp.Infrastructure\\FinanceApp.Infrastructure.csproj|solutionrelative:src\\financeapp.infrastructure\\persistence\\configurations\\categoryconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|solutionrelative:src\\financeapp.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{923548AB-5A10-6949-DEB7-2743F389BFC2}|src\\FinanceApp.Infrastructure\\FinanceApp.Infrastructure.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{923548AB-5A10-6949-DEB7-2743F389BFC2}|src\\FinanceApp.Infrastructure\\FinanceApp.Infrastructure.csproj|solutionrelative:src\\financeapp.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|solutionrelative:src\\financeapp.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9B1BE911-F156-C0D1-81CD-D873AFC0BCD8}|src\\FinanceApp.Domain\\FinanceApp.Domain.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.domain\\interfaces\\repositories\\irefreshtokenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9B1BE911-F156-C0D1-81CD-D873AFC0BCD8}|src\\FinanceApp.Domain\\FinanceApp.Domain.csproj|solutionrelative:src\\financeapp.domain\\interfaces\\repositories\\irefreshtokenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9B1BE911-F156-C0D1-81CD-D873AFC0BCD8}|src\\FinanceApp.Domain\\FinanceApp.Domain.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.domain\\interfaces\\repositories\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9B1BE911-F156-C0D1-81CD-D873AFC0BCD8}|src\\FinanceApp.Domain\\FinanceApp.Domain.csproj|solutionrelative:src\\financeapp.domain\\interfaces\\repositories\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CategoryConfiguration.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Infrastructure\\Persistence\\Configurations\\CategoryConfiguration.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Infrastructure\\Persistence\\Configurations\\CategoryConfiguration.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Infrastructure\\Persistence\\Configurations\\CategoryConfiguration.cs",
+              "RelativeToolTip": "src\\FinanceApp.Infrastructure\\Persistence\\Configurations\\CategoryConfiguration.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAAwHEAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T05:54:06.754Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Program.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.API\\Program.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Program.cs",
+              "RelativeToolTip": "src\\FinanceApp.API\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T05:48:51.496Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "DependencyInjection.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Infrastructure\\DependencyInjection.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Infrastructure\\DependencyInjection.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Infrastructure\\DependencyInjection.cs",
+              "RelativeToolTip": "src\\FinanceApp.Infrastructure\\DependencyInjection.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T05:48:28.004Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\appsettings.json",
+              "RelativeDocumentMoniker": "src\\FinanceApp.API\\appsettings.json",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\appsettings.json",
+              "RelativeToolTip": "src\\FinanceApp.API\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-05T05:43:36.312Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "IRefreshTokenRepository.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Domain\\Interfaces\\Repositories\\IRefreshTokenRepository.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Domain\\Interfaces\\Repositories\\IRefreshTokenRepository.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Domain\\Interfaces\\Repositories\\IRefreshTokenRepository.cs",
+              "RelativeToolTip": "src\\FinanceApp.Domain\\Interfaces\\Repositories\\IRefreshTokenRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-04T06:32:04.143Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Domain\\Interfaces\\Repositories\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Domain\\Interfaces\\Repositories\\IUserRepository.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Domain\\Interfaces\\Repositories\\IUserRepository.cs",
+              "RelativeToolTip": "src\\FinanceApp.Domain\\Interfaces\\Repositories\\IUserRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-04T06:23:57.043Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

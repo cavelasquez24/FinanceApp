@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\FinanceApp.Domain\FinanceApp.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\Budget\" />
+    <Folder Include="DTOs\Investment\" />
+    <Folder Include="DTOs\SavingsGoal\" />
+    <Folder Include="DTOs\Category\" />
+    <Folder Include="DTOs\Dashboard\" />
+    <Folder Include="DTOs\Common\" />
+    <Folder Include="DTOs\Expense\" />
+    <Folder Include="DTOs\Income\" />
+    <Folder Include="DTOs\Auth\" />
+    <Folder Include="Mappings\" />
+    <Folder Include="Validators\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
