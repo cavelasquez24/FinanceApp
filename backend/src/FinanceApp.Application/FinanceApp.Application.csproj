@@ -17,7 +17,6 @@
     <Folder Include="DTOs\SavingsGoal\" />
     <Folder Include="DTOs\Category\" />
     <Folder Include="DTOs\Dashboard\" />
-    <Folder Include="DTOs\Expense\" />
     <Folder Include="Mappings\" />
   </ItemGroup>
 

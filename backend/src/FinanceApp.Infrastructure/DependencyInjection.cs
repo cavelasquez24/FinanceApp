@@ -31,10 +31,14 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IIncomeRepository, IncomeRepository>();
+        services.AddScoped<IExpenseRepository, ExpenseRepository>();
+
 
 
         // ── Servicios ──────────────────────────────────────────────────
         services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IExpenseService, ExpenseService>();
+
 
         // Al corregir el using de arriba, esto se acoplará perfectamente al controlador
         services.AddScoped<IAuthService, AuthService>();
