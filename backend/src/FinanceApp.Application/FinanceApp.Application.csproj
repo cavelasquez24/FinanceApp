@@ -16,7 +16,6 @@
     <Folder Include="DTOs\Investment\" />
     <Folder Include="DTOs\SavingsGoal\" />
     <Folder Include="DTOs\Category\" />
-    <Folder Include="DTOs\Dashboard\" />
     <Folder Include="Mappings\" />
   </ItemGroup>
 
