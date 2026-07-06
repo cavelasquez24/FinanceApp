@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         services.AddScoped<IInvestmentRepository, InvestmentRepository>();
         services.AddScoped<ISavingsGoalRepository, SavingsGoalRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 
         // ── Servicios ──────────────────────────────────────────────────
@@ -45,7 +46,8 @@ public static class DependencyInjection
         // Al corregir el using de arriba, esto se acoplará perfectamente al controlador
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IIncomeService, IncomeService>();
-
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IProfileService, ProfileService>();
 
         return services;
     }
