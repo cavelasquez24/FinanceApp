@@ -42,7 +42,8 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IExpenseService, ExpenseService>();
         services.AddScoped<IDashboardService, DashboardService>();
-
+        services.AddScoped<IInvestmentService, InvestmentService>();
+        services.AddScoped<ISavingsGoalService, SavingsGoalService>();
 
         // Al corregir el using de arriba, esto se acoplará perfectamente al controlador
         services.AddScoped<IAuthService, AuthService>();
