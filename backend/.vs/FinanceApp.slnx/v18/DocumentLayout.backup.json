@@ -3,24 +3,44 @@
   "WorkspaceRootPath": "C:\\Develop\\Projects\\FinanceApp\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{923548AB-5A10-6949-DEB7-2743F389BFC2}|src\\FinanceApp.Infrastructure\\FinanceApp.Infrastructure.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{923548AB-5A10-6949-DEB7-2743F389BFC2}|src\\FinanceApp.Infrastructure\\FinanceApp.Infrastructure.csproj|solutionrelative:src\\financeapp.infrastructure\\dependencyinjection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.api\\controllers\\budgetscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|solutionrelative:src\\financeapp.api\\controllers\\budgetscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\services\\budgetservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\services\\budgetservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\interfaces\\ibudgetservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\interfaces\\ibudgetservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{923548AB-5A10-6949-DEB7-2743F389BFC2}|src\\FinanceApp.Infrastructure\\FinanceApp.Infrastructure.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.infrastructure\\persistence\\repositories\\budgetrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{923548AB-5A10-6949-DEB7-2743F389BFC2}|src\\FinanceApp.Infrastructure\\FinanceApp.Infrastructure.csproj|solutionrelative:src\\financeapp.infrastructure\\persistence\\repositories\\budgetrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\validators\\budgetcreatevalidator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\validators\\budgetcreatevalidator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\dtos\\budget\\budgetstatusdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\dtos\\budget\\budgetstatusdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\dtos\\budget\\budgetcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\dtos\\budget\\budgetcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\dtos\\budget\\budgetresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\dtos\\budget\\budgetresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\dtos\\budget\\budgetupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\dtos\\budget\\budgetupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.api\\controllers\\profilecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|solutionrelative:src\\financeapp.api\\controllers\\profilecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\services\\profileservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\services\\profileservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\interfaces\\iprofileservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\interfaces\\iprofileservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\dtos\\auth\\changecurrencydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\dtos\\auth\\changecurrencydto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\dtos\\auth\\changepassworddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -29,10 +49,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.application\\dtos\\auth\\profileupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{584F38D2-7E84-EB7E-0833-67E1F741E52F}|src\\FinanceApp.Application\\FinanceApp.Application.csproj|solutionrelative:src\\financeapp.application\\dtos\\auth\\profileupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.api\\controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|solutionrelative:src\\financeapp.api\\controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{04EF73A3-76DF-7F4F-1E0B-65C85416178F}|src\\FinanceApp.API\\FinanceApp.API.csproj|c:\\develop\\projects\\financeapp\\backend\\src\\financeapp.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -55,71 +71,136 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "DependencyInjection.cs",
-              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Infrastructure\\DependencyInjection.cs",
-              "RelativeDocumentMoniker": "src\\FinanceApp.Infrastructure\\DependencyInjection.cs",
-              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Infrastructure\\DependencyInjection.cs",
-              "RelativeToolTip": "src\\FinanceApp.Infrastructure\\DependencyInjection.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAACIAAABKAAAAAAAAAA==",
+              "Title": "BudgetsController.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Controllers\\BudgetsController.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.API\\Controllers\\BudgetsController.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Controllers\\BudgetsController.cs",
+              "RelativeToolTip": "src\\FinanceApp.API\\Controllers\\BudgetsController.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAqwFIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:56:53.049Z",
+              "WhenOpened": "2026-07-06T01:15:14.402Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ProfileController.cs",
-              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Controllers\\ProfileController.cs",
-              "RelativeDocumentMoniker": "src\\FinanceApp.API\\Controllers\\ProfileController.cs",
-              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Controllers\\ProfileController.cs",
-              "RelativeToolTip": "src\\FinanceApp.API\\Controllers\\ProfileController.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAzwD8AAAABAAAAAAAAAA==",
+              "Title": "BudgetService.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Services\\BudgetService.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\Services\\BudgetService.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Services\\BudgetService.cs",
+              "RelativeToolTip": "src\\FinanceApp.Application\\Services\\BudgetService.cs",
+              "ViewState": "AgIAAJoAAAAAAAAAAAAqwLkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:56:39.986Z",
+              "WhenOpened": "2026-07-06T01:14:34.061Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "ProfileService.cs",
-              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Services\\ProfileService.cs",
-              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\Services\\ProfileService.cs",
-              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Services\\ProfileService.cs",
-              "RelativeToolTip": "src\\FinanceApp.Application\\Services\\ProfileService.cs",
-              "ViewState": "AgIAADQAAAAAAAAAAAAQwGcAAAABAAAAAAAAAA==",
+              "Title": "IBudgetService.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Interfaces\\IBudgetService.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\Interfaces\\IBudgetService.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Interfaces\\IBudgetService.cs",
+              "RelativeToolTip": "src\\FinanceApp.Application\\Interfaces\\IBudgetService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:56:11.409Z",
+              "WhenOpened": "2026-07-06T01:14:19.654Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "IProfileService.cs",
-              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Interfaces\\IProfileService.cs",
-              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\Interfaces\\IProfileService.cs",
-              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Interfaces\\IProfileService.cs",
-              "RelativeToolTip": "src\\FinanceApp.Application\\Interfaces\\IProfileService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAABAAAAAAAAAA==",
+              "Title": "BudgetRepository.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Infrastructure\\Persistence\\Repositories\\BudgetRepository.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Infrastructure\\Persistence\\Repositories\\BudgetRepository.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Infrastructure\\Persistence\\Repositories\\BudgetRepository.cs",
+              "RelativeToolTip": "src\\FinanceApp.Infrastructure\\Persistence\\Repositories\\BudgetRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:56:00.126Z",
+              "WhenOpened": "2026-07-06T01:13:56.653Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "ChangeCurrencyDto.cs",
-              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Auth\\ChangeCurrencyDto.cs",
-              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\DTOs\\Auth\\ChangeCurrencyDto.cs",
-              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Auth\\ChangeCurrencyDto.cs",
-              "RelativeToolTip": "src\\FinanceApp.Application\\DTOs\\Auth\\ChangeCurrencyDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
+              "Title": "BudgetCreateValidator.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Validators\\BudgetCreateValidator.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\Validators\\BudgetCreateValidator.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Validators\\BudgetCreateValidator.cs",
+              "RelativeToolTip": "src\\FinanceApp.Application\\Validators\\BudgetCreateValidator.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:55:41.651Z",
+              "WhenOpened": "2026-07-06T01:13:35.339Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
+              "Title": "BudgetStatusDto.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Budget\\BudgetStatusDto.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\DTOs\\Budget\\BudgetStatusDto.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Budget\\BudgetStatusDto.cs",
+              "RelativeToolTip": "src\\FinanceApp.Application\\DTOs\\Budget\\BudgetStatusDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:13:15.935Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "BudgetResponseDto.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Budget\\BudgetResponseDto.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\DTOs\\Budget\\BudgetResponseDto.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Budget\\BudgetResponseDto.cs",
+              "RelativeToolTip": "src\\FinanceApp.Application\\DTOs\\Budget\\BudgetResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:12:59.686Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "BudgetUpdateDto.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Budget\\BudgetUpdateDto.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\DTOs\\Budget\\BudgetUpdateDto.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Budget\\BudgetUpdateDto.cs",
+              "RelativeToolTip": "src\\FinanceApp.Application\\DTOs\\Budget\\BudgetUpdateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:12:51.424Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "BudgetCreateDto.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Budget\\BudgetCreateDto.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.Application\\DTOs\\Budget\\BudgetCreateDto.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Budget\\BudgetCreateDto.cs",
+              "RelativeToolTip": "src\\FinanceApp.Application\\DTOs\\Budget\\BudgetCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:12:31.228Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ProfileController.cs",
+              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Controllers\\ProfileController.cs",
+              "RelativeDocumentMoniker": "src\\FinanceApp.API\\Controllers\\ProfileController.cs",
+              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Controllers\\ProfileController.cs",
+              "RelativeToolTip": "src\\FinanceApp.API\\Controllers\\ProfileController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACwAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:57:53.139Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "ChangePasswordDto.cs",
               "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Auth\\ChangePasswordDto.cs",
               "RelativeDocumentMoniker": "src\\FinanceApp.Application\\DTOs\\Auth\\ChangePasswordDto.cs",
@@ -132,7 +213,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 11,
               "Title": "ProfileUpdateDto.cs",
               "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\DTOs\\Auth\\ProfileUpdateDto.cs",
               "RelativeDocumentMoniker": "src\\FinanceApp.Application\\DTOs\\Auth\\ProfileUpdateDto.cs",
@@ -145,20 +226,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "CategoriesController.cs",
-              "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Controllers\\CategoriesController.cs",
-              "RelativeDocumentMoniker": "src\\FinanceApp.API\\Controllers\\CategoriesController.cs",
-              "ToolTip": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Controllers\\CategoriesController.cs",
-              "RelativeToolTip": "src\\FinanceApp.API\\Controllers\\CategoriesController.cs",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAuwEIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:53:16.006Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 12,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.API\\Program.cs",
               "RelativeDocumentMoniker": "src\\FinanceApp.API\\Program.cs",
@@ -171,7 +239,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 13,
               "Title": "IAuthService.cs",
               "DocumentMoniker": "C:\\Develop\\Projects\\FinanceApp\\backend\\src\\FinanceApp.Application\\Interfaces\\IAuthService.cs",
               "RelativeDocumentMoniker": "src\\FinanceApp.Application\\Interfaces\\IAuthService.cs",
