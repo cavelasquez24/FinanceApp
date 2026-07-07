@@ -1,0 +1,18 @@
+# .NET
+**/bin/
+**/obj/
+*.user
+.vs/
+
+# Credenciales — NUNCA subir esto a GitHub
+**/appsettings.json
+**/appsettings.Development.json
+
+# Node
+**/node_modules/
+**/dist/
+
+# Otros
+.env
+.env.local
+*.log
