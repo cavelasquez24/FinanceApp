@@ -1,12 +1,5 @@
-C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.csproj.AssemblyReference.cache
-C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\rpswa.dswa.cache.json
-C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.GeneratedMSBuildEditorConfig.editorconfig
-C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.AssemblyInfoInputs.cache
-C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.AssemblyInfo.cs
-C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.csproj.CoreCompileInputs.cache
-C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.MvcApplicationPartsAssemblyInfo.cs
-C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.MvcApplicationPartsAssemblyInfo.cache
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\appsettings.Development.json
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\appsettings.Example.json
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\appsettings.json
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\FinanceApp.API.staticwebassets.endpoints.json
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\FinanceApp.API.exe
@@ -127,6 +120,14 @@ C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\Fina
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\FinanceApp.Infrastructure.pdb
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\FinanceApp.Application.pdb
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\bin\Debug\net10.0\FinanceApp.Domain.pdb
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.csproj.AssemblyReference.cache
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.AssemblyInfoInputs.cache
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.AssemblyInfo.cs
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.csproj.CoreCompileInputs.cache
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.MvcApplicationPartsAssemblyInfo.cache
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\rjimswa.dswa.cache.json
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
@@ -136,6 +137,7 @@ C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\stat
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\staticwebassets.development.json
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\staticwebassets.build.endpoints.json
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\swae.build.ex.cache
+C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceA.6BDE35FA.Up2Date
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\FinanceApp.API.dll
 C:\Develop\Projects\FinanceApp\backend\src\FinanceApp.API\obj\Debug\net10.0\refint\FinanceApp.API.dll

@@ -1,0 +1,41 @@
+/* 1. Fuente Inter desde Google Fonts (DEBE IR PRIMERO) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* 2. Importa Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3. Variables CSS globales */
+:root {
+  --color-income:  #22c55e;
+  --color-expense: #ef4444;
+  --color-saving:  #3b82f6;
+  --color-invest:  #8b5cf6;
+}
+
+/* 4. Reset y estilos base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f9fafb;
+  color: #111827;
+  margin: 0;
+}
+
+/* 5. Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}

@@ -22,6 +22,8 @@ public class AppDbContext : DbContext
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<BudgetPeriod> BudgetPeriods => Set<BudgetPeriod>();
     public DbSet<BudgetCategory> BudgetCategories => Set<BudgetCategory>();
+    public DbSet<Debt> Debts => Set<Debt>();
+    public DbSet<DebtPayment> DebtPayments => Set<DebtPayment>();
     public DbSet<Investment> Investments => Set<Investment>();
     public DbSet<InvestmentRecord> InvestmentRecords => Set<InvestmentRecord>();
     public DbSet<SavingsGoal> SavingsGoals => Set<SavingsGoal>();

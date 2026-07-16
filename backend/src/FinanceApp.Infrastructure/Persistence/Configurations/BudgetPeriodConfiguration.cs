@@ -45,16 +45,21 @@ public class BudgetPeriodConfiguration : IEntityTypeConfiguration<BudgetPeriod>
             .HasDefaultValueSql("NOW()");
 
         builder.Ignore(b => b.IsDeleted);
-        builder.Ignore(b => b.DeletedAt);
+        builder.Property(b => b.DeletedAt)
+            .HasColumnName("deleted_at")
+            .HasColumnType("timestamp with time zone")
+            .IsRequired(false);
 
-        // Un usuario solo puede tener un presupuesto por mes/año
         builder.HasIndex(b => new { b.UserId, b.Month, b.Year })
             .IsUnique()
-            .HasDatabaseName("idx_budget_periods_user_month_year");
+            .HasDatabaseName("idx_budget_periods_user_month_year")
+            .HasFilter("deleted_at IS NULL");
 
         builder.HasMany(b => b.BudgetCategories)
             .WithOne(bc => bc.BudgetPeriod)
             .HasForeignKey(bc => bc.BudgetPeriodId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasQueryFilter(b => b.DeletedAt == null);
     }
 }

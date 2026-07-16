@@ -17,7 +17,7 @@ namespace FinanceApp.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.4")
+                .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -69,6 +69,10 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
                     b.Property<int>("Month")
                         .HasColumnType("integer")
                         .HasColumnName("month");
@@ -99,7 +103,8 @@ namespace FinanceApp.Infrastructure.Migrations
 
                     b.HasIndex("UserId", "Month", "Year")
                         .IsUnique()
-                        .HasDatabaseName("idx_budget_periods_user_month_year");
+                        .HasDatabaseName("idx_budget_periods_user_month_year")
+                        .HasFilter("deleted_at IS NULL");
 
                     b.ToTable("budget_periods", (string)null);
                 });
@@ -305,6 +310,157 @@ namespace FinanceApp.Infrastructure.Migrations
                             Type = "Income",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         });
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.Debt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Creditor")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("creditor");
+
+                    b.Property<decimal>("CurrentBalance")
+                        .HasColumnType("numeric(15,2)")
+                        .HasColumnName("current_balance");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<int?>("DueDay")
+                        .HasColumnType("integer")
+                        .HasColumnName("due_day");
+
+                    b.Property<decimal?>("InterestRate")
+                        .HasColumnType("numeric(5,2)")
+                        .HasColumnName("interest_rate");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal?>("MinimumPayment")
+                        .HasColumnType("numeric(15,2)")
+                        .HasColumnName("minimum_payment");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasColumnType("numeric(15,2)")
+                        .HasColumnName("original_amount");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<DateOnly?>("TargetPayoffDate")
+                        .HasColumnType("date")
+                        .HasColumnName("target_payoff_date");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("idx_debts_user_id")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("debts", (string)null);
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.DebtPayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric(15,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid>("DebtId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("debt_id");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<decimal>("InterestAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(15,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("interest_amount");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("notes");
+
+                    b.Property<DateOnly>("PaymentDate")
+                        .HasColumnType("date")
+                        .HasColumnName("payment_date");
+
+                    b.Property<decimal>("PrincipalAmount")
+                        .HasColumnType("numeric(15,2)")
+                        .HasColumnName("principal_amount");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DebtId", "PaymentDate")
+                        .HasDatabaseName("idx_debt_payments_debt_id_date")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("debt_payments", (string)null);
                 });
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.Expense", b =>
@@ -745,6 +901,28 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FinanceApp.Domain.Entities.Debt", b =>
+                {
+                    b.HasOne("FinanceApp.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.DebtPayment", b =>
+                {
+                    b.HasOne("FinanceApp.Domain.Entities.Debt", "Debt")
+                        .WithMany("Payments")
+                        .HasForeignKey("DebtId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Debt");
+                });
+
             modelBuilder.Entity("FinanceApp.Domain.Entities.Expense", b =>
                 {
                     b.HasOne("FinanceApp.Domain.Entities.Category", "Category")
@@ -837,6 +1015,11 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Navigation("Expenses");
 
                     b.Navigation("Incomes");
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.Debt", b =>
+                {
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.Investment", b =>

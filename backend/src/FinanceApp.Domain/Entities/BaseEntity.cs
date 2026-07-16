@@ -8,7 +8,7 @@ public abstract class BaseEntity
     /// <summary>
     /// Identificador único universal (GUID).
     /// </summary>
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Fecha y hora de creación del registro.

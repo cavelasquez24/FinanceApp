@@ -23,7 +23,7 @@ public class BudgetRepository : BaseRepository<BudgetPeriod>, IBudgetRepository
         int month,
         int year,
         CancellationToken cancellationToken = default)
-    {
+    {   
         return await _context.BudgetPeriods
             .Include(b => b.BudgetCategories)
                 .ThenInclude(bc => bc.Category)
@@ -45,4 +45,16 @@ public class BudgetRepository : BaseRepository<BudgetPeriod>, IBudgetRepository
             .ThenByDescending(b => b.Month)
             .ToListAsync(cancellationToken);
     }
+
+    //public override async Task<BudgetPeriod> UpdateAsync(
+    //BudgetPeriod entity, CancellationToken cancellationToken = default)
+    //{
+    //    // entity ya está trackeado (viene de GetByIdAsync en el mismo DbContext).
+    //    // NO llamar a _dbSet.Update(entity): fuerza TrackGraph completo y marca
+    //    // como Modified las BudgetCategory nuevas (su Id ya viene asignado por
+    //    // BaseEntity.Id = Guid.NewGuid()), generando UPDATE sobre filas
+    //    // inexistentes → DbUpdateConcurrencyException.
+    //    await _context.SaveChangesAsync(cancellationToken);
+    //    return entity;
+    //}
 }
