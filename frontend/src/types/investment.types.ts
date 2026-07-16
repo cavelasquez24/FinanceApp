@@ -1,5 +1,3 @@
-import { type ApiResponse } from './api.types';
-
 export type InvestmentType = 'etf' | 'stock' | 'mutualfund' | 'crypto' | 'bond' | 'other';
 
 export interface Investment {

@@ -1,5 +1,3 @@
-import { type ApiResponse } from './api.types';
-
 export interface SavingsGoal {
   id: string;
   name: string;

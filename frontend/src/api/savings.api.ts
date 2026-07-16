@@ -1,6 +1,6 @@
 import { apiClient } from './client';
 import type { SavingsGoal, CreateSavingsGoalDto, DepositDto } from '../types/savings.types';
-import type { ApiResponse, PagedResponse } from '../types/api.types';
+import type { ApiResponse } from '../types/api.types';
 
 export const savingsApi = {
   // GET /api/v1/savings-goals

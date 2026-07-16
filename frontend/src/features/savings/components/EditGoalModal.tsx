@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useUpdateSavingsGoal } from '../hooks/useSavings';
 import { type SavingsGoal } from '../../../types/savings.types';
 

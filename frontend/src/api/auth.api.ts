@@ -1,4 +1,4 @@
-import type { ApiResponse, PagedResponse } from '../types/api.types';
+import type { ApiResponse } from '../types/api.types';
 import type { AuthResponse, LoginDto, RegisterDto } from '../types/auth.types';
 import { apiClient } from './client';
 
