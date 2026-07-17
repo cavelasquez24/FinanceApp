@@ -5,6 +5,8 @@ import { incomeSchema, type IncomeFormData } from '../schemas/income.schema';
 import { Button, Input } from '../../../components/ui';
 import { useCreateIncome, useUpdateIncome } from '../hooks/useIncomes';
 import type { Income } from '../../../types/income.types';
+import { Spinner } from '../../../components/ui';
+import { useCategories } from '../../categories/hooks/useCategories';
 
 interface Props {
   income?: Income; // si viene, el form entra en modo edición
@@ -12,19 +14,14 @@ interface Props {
   onCancel?: () => void;
 }
 
-// Mismas UUIDs fijas del contrato — sin tocar lógica ni origen del dato
-const INCOME_CATEGORIES = [
-  { id: '10000000-0000-0000-0000-000000000009', name: 'Salario' },
-  { id: '10000000-0000-0000-0000-000000000010', name: 'Freelance' },
-  { id: '10000000-0000-0000-0000-000000000011', name: 'Inversiones' },
-];
-
 export function IncomeForm({ income, onSuccess, onCancel }: Props) {
   const isEditMode = Boolean(income);
 
   const { mutate: createIncome, isPending: isCreating } = useCreateIncome();
   const { mutate: updateIncome, isPending: isUpdating } = useUpdateIncome();
   const isPending = isEditMode ? isUpdating : isCreating;
+  const { data: categories, isLoading: isLoadingCategories } = useCategories('income');
+
 
   const {
     register,
@@ -62,21 +59,21 @@ export function IncomeForm({ income, onSuccess, onCancel }: Props) {
         <div className="flex flex-col space-y-1.5">
           <label className="text-sm font-medium text-[#2C2A29]">Categoría</label>
           <div className="relative">
-            <select
-              {...register('categoryId')}
-              className="w-full appearance-none rounded-xl border border-[#EFEAE2] bg-white/70 px-3 py-2.5 text-sm text-[#2C2A29] backdrop-blur-sm transition-colors focus:border-[#5C7A99] focus:outline-none focus:ring-2 focus:ring-[#5C7A99]/30"
-            >
-              <option value="">Selecciona una...</option>
-              {INCOME_CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7C756E]"
-              strokeWidth={2}
-            />
+            {isLoadingCategories ? (
+              <div className="flex h-[42px] items-center rounded-xl border border-[#EFEAE2] bg-white/70 px-3">
+                <Spinner size="sm" />
+              </div>
+            ) : (
+              <>
+                <select {...register('categoryId')} className="w-full appearance-none rounded-xl ...">
+                  <option value="">Selecciona una...</option>
+                  {categories?.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7C756E]" strokeWidth={2} />
+              </>
+            )}
           </div>
           {errors.categoryId && (
             <span className="text-xs text-[#C97B63]">{errors.categoryId.message}</span>

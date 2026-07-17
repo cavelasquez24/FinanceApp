@@ -5,6 +5,8 @@ import { expenseSchema, type ExpenseFormData } from '../schemas/expense.schema';
 import { Button, Input } from '../../../components/ui';
 import { useCreateExpense, useUpdateExpense } from '../hooks/useExpenses';
 import type { Expense } from '../../../types/expense.types';
+import { useCategories } from '../../categories/hooks/useCategories';
+import { Spinner } from '../../../components/ui';
 
 interface Props {
   expense?: Expense; // si viene, el form entra en modo edición
@@ -21,6 +23,8 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
   const { mutate: createExpense, isPending: isCreating } = useCreateExpense();
   const { mutate: updateExpense, isPending: isUpdating } = useUpdateExpense();
   const isPending = isEditMode ? isUpdating : isCreating;
+  const { data: categories, isLoading: isLoadingCategories } = useCategories('expense');
+
 
   const {
     register,
@@ -71,18 +75,21 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-[#2C2A29]">Categoría</label>
+        <label className="text-sm font-medium text-[#2C2A29]">Categoría</label>
+        {isLoadingCategories ? (
+          <div className="flex h-[42px] items-center rounded-xl border border-[#EFEAE2] bg-white/70 px-3">
+            <Spinner size="sm" />
+          </div>
+        ) : (
           <select {...register('categoryId')} className={selectClassName}>
             <option value="">Selecciona una...</option>
-            {/* UUIDs fijos temporales (Semillas del backend) */}
-            <option value="10000000-0000-0000-0000-000000000001">Alimentación</option>
-            <option value="10000000-0000-0000-0000-000000000002">Transporte</option>
-            <option value="10000000-0000-0000-0000-000000000003">Vivienda</option>
+            {categories?.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
           </select>
-          {errors.categoryId && (
-            <span className="text-xs text-[#C97B63]">{errors.categoryId.message}</span>
-          )}
-        </div>
+        )}
+        {errors.categoryId && <span className="text-xs text-[#C97B63]">{errors.categoryId.message}</span>}
+      </div>
 
         <Input
           label="Monto"

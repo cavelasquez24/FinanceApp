@@ -110,9 +110,13 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
 
             <div>
               <label className="block text-sm font-medium text-[#2C2A29] mb-1.5">Tipo de Flujo</label>
-              <select
+             <select
                 {...register('type')}
-                className="w-full rounded-xl border border-[#EFEAE2] bg-white/60 px-3 py-2.5 text-sm text-[#2C2A29] backdrop-blur-sm transition-all focus:border-[#5C7A99] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5C7A99]/20"
+                disabled={isEditing}
+                className={cn(
+                  "w-full rounded-xl border ...",
+                  isEditing && "opacity-60 cursor-not-allowed bg-[#F3F1EC]"
+                )}
               >
                 <option value="expense">Gasto</option>
                 <option value="income">Ingreso</option>

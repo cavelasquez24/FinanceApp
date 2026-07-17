@@ -1,7 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { profileApi } from '../../../api/profile.api';
 import toast from 'react-hot-toast';
-import type { UpdateProfileDto, ChangePasswordDto, ChangeCurrencyDto } from '../../../types/profile.types';
+import type {
+  UpdateProfileDto,
+  ChangePasswordDto,
+  ChangeCurrencyDto,
+  UpdatePaydayDto,
+} from '../../../types/profile.types';
 
 export function useProfile() {
   return useQuery({
@@ -40,9 +45,25 @@ export function useChangeCurrency() {
     onSuccess: () => {
       toast.success('Moneda actualizada exitosamente');
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-      // Invalidar todos los queries que dependen de la moneda (dashboard, gastos, ingresos, etc)
-      queryClient.invalidateQueries(); 
+      queryClient.invalidateQueries();
     },
     onError: () => toast.error('Error al actualizar la moneda'),
+  });
+}
+
+export function useUpdatePayday() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdatePaydayDto) => profileApi.updatePayday(data),
+    onSuccess: () => {
+      toast.success('Día de pago actualizado exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      // Dashboard depende del ciclo, recalcular
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.error?.message || 'Error al actualizar el día de pago';
+      toast.error(message);
+    },
   });
 }

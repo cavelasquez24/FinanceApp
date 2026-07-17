@@ -23,14 +23,24 @@ export function FinancialChart({ data }: Props) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#EFEAE2" />
-          <XAxis dataKey="name" stroke="#7C756E" fontSize={12} tickLine={false} axisLine={{ stroke: '#EFEAE2' }} />
+          
+          <XAxis 
+            dataKey="name" 
+            stroke="#7C756E" 
+            fontSize={12} 
+            tickLine={false} 
+            axisLine={{ stroke: '#EFEAE2' }} 
+          />
+          
           <YAxis
             stroke="#7C756E"
             fontSize={12}
             tickLine={false}
             axisLine={{ stroke: '#EFEAE2' }}
             tickFormatter={(value) => `$${value}`}
+            domain={[0, 'auto']} // Bloquea el renderizado de valores negativos
           />
+          
           <Tooltip
             contentStyle={{
               backgroundColor: 'rgba(255,255,255,0.9)',
@@ -41,11 +51,34 @@ export function FinancialChart({ data }: Props) {
             labelStyle={{ color: '#2C2A29', fontWeight: 600 }}
             itemStyle={{ color: '#7C756E' }}
           />
+          
           <Legend wrapperStyle={{ paddingTop: '12px', color: '#7C756E', fontSize: '12px' }} />
-          {/* type="natural" en vez de "monotone" → curva spline suavizada (frontend-spec.md) */}
-          <Line type="natural" dataKey="Ingresos" stroke="#5C7A99" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#5C7A99' }} />
-          <Line type="natural" dataKey="Gastos" stroke="#C97B63" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#C97B63' }} />
-          <Line type="natural" dataKey="Ahorros" stroke="#8FA888" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#8FA888' }} />
+          
+          {/* Interpolación monotoneX reemplaza a natural para prevenir el overshoot */}
+          <Line 
+            type="monotoneX" 
+            dataKey="Ingresos" 
+            stroke="#5C7A99" 
+            strokeWidth={2.5} 
+            dot={false} 
+            activeDot={{ r: 4, fill: '#5C7A99' }} 
+          />
+          <Line 
+            type="monotoneX" 
+            dataKey="Gastos" 
+            stroke="#C97B63" 
+            strokeWidth={2.5} 
+            dot={false} 
+            activeDot={{ r: 4, fill: '#C97B63' }} 
+          />
+          <Line 
+            type="monotoneX" 
+            dataKey="Ahorros" 
+            stroke="#8FA888" 
+            strokeWidth={2.5} 
+            dot={false} 
+            activeDot={{ r: 4, fill: '#8FA888' }} 
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

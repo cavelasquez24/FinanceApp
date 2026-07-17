@@ -4,6 +4,7 @@ export interface UserInfo {
   lastName: string;
   email: string;
   currencyCode: string;
+  paydayDay: number | null;
 }
 
 export interface UpdateProfileDto {
@@ -18,5 +19,9 @@ export interface ChangePasswordDto {
 }
 
 export interface ChangeCurrencyDto {
-  currencyCode: string; // "USD" | "EUR" | "COP" | "PEN" | "MXN" | "ARS" | "CLP" | "BRL"
+  currencyCode: string;
+}
+
+export interface UpdatePaydayDto {
+  paydayDay: number | null; // null = volver a mes calendario
 }
