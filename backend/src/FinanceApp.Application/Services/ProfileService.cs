@@ -93,12 +93,34 @@ public class ProfileService : IProfileService
         return MapToDto(user);
     }
 
+    public async Task<UserInfoDto> UpdatePaydayAsync(
+    Guid userId,
+    UpdatePaydayDto dto,
+    CancellationToken cancellationToken = default)
+    {
+        if (dto.PaydayDay.HasValue && (dto.PaydayDay < 1 || dto.PaydayDay > 31))
+            throw new DomainException(
+                "INVALID_PAYDAY_DAY",
+                "El día de pago debe estar entre 1 y 31");
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user == null || user.IsDeleted)
+            throw new NotFoundException("Usuario", userId);
+
+        user.PaydayDay = dto.PaydayDay;
+        await _userRepository.UpdateAsync(user, cancellationToken);
+        return MapToDto(user);
+    }
+
     private static UserInfoDto MapToDto(Domain.Entities.User user) => new()
     {
         Id = user.Id,
         FirstName = user.FirstName,
         LastName = user.LastName,
         Email = user.Email,
-        CurrencyCode = user.CurrencyCode
+        CurrencyCode = user.CurrencyCode,
+        PaydayDay = user.PaydayDay
     };
+
+
 }

@@ -20,6 +20,12 @@ public class User : BaseEntity
     /// </summary>
     public string CurrencyCode { get; set; } = "USD";
 
+    /// <summary>
+    /// Día del mes en que el usuario recibe su pago principal (1-31).
+    /// Null = usar mes calendario estándar en Dashboard.
+    /// </summary>
+    public int? PaydayDay { get; set; }
+
     // EF Core las usa para hacer JOIN entre tablas.
     public ICollection<Income> Incomes { get; set; } = new List<Income>();
     public ICollection<Expense> Expenses { get; set; } = new List<Expense>();

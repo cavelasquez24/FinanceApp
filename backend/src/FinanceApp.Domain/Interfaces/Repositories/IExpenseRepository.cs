@@ -30,4 +30,13 @@ public interface IExpenseRepository : IBaseRepository<Expense>
             int month,
             int year,
             CancellationToken cancellationToken = default);
+
+    Task<decimal> GetTotalByDateRangeAsync(
+    Guid userId, DateOnly startDate, DateOnly endDate,
+    CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<(Guid CategoryId, string CategoryName, string CategoryColor, decimal Total)>>
+    GetByCategoryByDateRangeAsync(
+        Guid userId, DateOnly startDate, DateOnly endDate,
+        CancellationToken cancellationToken = default);
 }

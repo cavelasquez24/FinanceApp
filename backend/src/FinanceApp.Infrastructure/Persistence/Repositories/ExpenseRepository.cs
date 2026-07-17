@@ -96,4 +96,41 @@ public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
 
         return results.Select(r => (r.CategoryId, r.Name, r.Color, r.Total));
     }
+
+    public async Task<decimal> GetTotalByDateRangeAsync(
+    Guid userId, DateOnly startDate, DateOnly endDate,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Expenses
+            .Where(e => e.UserId == userId
+                     && e.Date >= startDate
+                     && e.Date <= endDate
+                     && e.DeletedAt == null)
+            .SumAsync(e => e.Amount, cancellationToken);
+    }
+
+    public async Task<IEnumerable<(Guid CategoryId, string CategoryName, string CategoryColor, decimal Total)>>
+        GetByCategoryByDateRangeAsync(
+            Guid userId, DateOnly startDate, DateOnly endDate,
+            CancellationToken cancellationToken = default)
+    {
+        var results = await _context.Expenses
+            .Include(e => e.Category)
+            .Where(e => e.UserId == userId
+                     && e.Date >= startDate
+                     && e.Date <= endDate
+                     && e.DeletedAt == null)
+            .GroupBy(e => new { e.CategoryId, e.Category.Name, e.Category.Color })
+            .Select(g => new
+            {
+                g.Key.CategoryId,
+                g.Key.Name,
+                g.Key.Color,
+                Total = g.Sum(e => e.Amount)
+            })
+            .OrderByDescending(x => x.Total)
+            .ToListAsync(cancellationToken);
+
+        return results.Select(r => (r.CategoryId, r.Name, r.Color, r.Total));
+    }
 }

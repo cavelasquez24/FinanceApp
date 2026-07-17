@@ -69,4 +69,16 @@ public class IncomeRepository : BaseRepository<Income>, IIncomeRepository
                      && i.DeletedAt == null)
             .SumAsync(i => i.Amount, cancellationToken);
     }
+
+    public async Task<decimal> GetTotalByDateRangeAsync(
+    Guid userId, DateOnly startDate, DateOnly endDate,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Incomes
+            .Where(i => i.UserId == userId
+                     && i.Date >= startDate
+                     && i.Date <= endDate
+                     && i.DeletedAt == null)
+            .SumAsync(i => i.Amount, cancellationToken);
+    }
 }

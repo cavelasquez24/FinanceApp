@@ -10,6 +10,8 @@ public class DashboardService : IDashboardService
     private readonly IExpenseRepository _expenseRepository;
     private readonly IInvestmentRepository _investmentRepository;
     private readonly ISavingsGoalRepository _savingsGoalRepository;
+    private readonly IUserRepository _userRepository;
+
 
     // Nombres de los meses en español para las etiquetas del gráfico
     private static readonly string[] MonthNames =
@@ -22,49 +24,40 @@ public class DashboardService : IDashboardService
         IIncomeRepository incomeRepository,
         IExpenseRepository expenseRepository,
         IInvestmentRepository investmentRepository,
-        ISavingsGoalRepository savingsGoalRepository)
+        ISavingsGoalRepository savingsGoalRepository,
+        IUserRepository userRepository)
     {
         _incomeRepository = incomeRepository;
         _expenseRepository = expenseRepository;
         _investmentRepository = investmentRepository;
         _savingsGoalRepository = savingsGoalRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<DashboardOverviewDto> GetOverviewAsync(
-    Guid userId,
-    int month,
-    int year,
+    Guid userId, int month, int year,
     CancellationToken cancellationToken = default)
     {
-        // Calculamos el mes anterior para comparación
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var paydayDay = user?.PaydayDay;
+
         var prevMonth = month == 1 ? 12 : month - 1;
         var prevYear = month == 1 ? year - 1 : year;
 
-        // ✅ Ejecutamos secuencialmente — EF Core no es thread-safe
-        var totalIncome = await _incomeRepository
-            .GetTotalByUserAndPeriodAsync(userId, month, year, cancellationToken);
+        var (start, end) = GetCycleRange(month, year, paydayDay);
+        var (prevStart, prevEnd) = GetCycleRange(prevMonth, prevYear, paydayDay);
 
-        var totalExpenses = await _expenseRepository
-            .GetTotalByUserAndPeriodAsync(userId, month, year, cancellationToken);
+        var totalIncome = await _incomeRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var totalExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var prevIncome = await _incomeRepository.GetTotalByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+        var prevExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
 
-        var prevIncome = await _incomeRepository
-            .GetTotalByUserAndPeriodAsync(userId, prevMonth, prevYear, cancellationToken);
-
-        var prevExpenses = await _expenseRepository
-            .GetTotalByUserAndPeriodAsync(userId, prevMonth, prevYear, cancellationToken);
-
-        var totalInvestments = await _investmentRepository
-            .GetTotalCurrentValueAsync(userId, cancellationToken);
-
-        var totalSavings = await _savingsGoalRepository
-            .GetTotalSavedAsync(userId, cancellationToken);
+        var totalInvestments = await _investmentRepository.GetTotalCurrentValueAsync(userId, cancellationToken);
+        var totalSavings = await _savingsGoalRepository.GetTotalSavedAsync(userId, cancellationToken);
 
         var netSavings = totalIncome - totalExpenses;
         var prevNetSavings = prevIncome - prevExpenses;
-        var savingsRate = totalIncome > 0
-            ? Math.Round(netSavings / totalIncome * 100, 2)
-            : 0;
-
+        var savingsRate = totalIncome > 0 ? Math.Round(netSavings / totalIncome * 100, 2) : 0;
         var netWorth = netSavings + totalInvestments + totalSavings;
 
         return new DashboardOverviewDto
@@ -98,25 +91,24 @@ public class DashboardService : IDashboardService
     }
 
     public async Task<MonthlyTrendDto> GetMonthlyTrendAsync(
-        Guid userId,
-        int months,
-        CancellationToken cancellationToken = default)
+    Guid userId, int months, CancellationToken cancellationToken = default)
     {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var paydayDay = user?.PaydayDay;
+
         var trend = new MonthlyTrendDto();
         var today = DateOnly.FromDateTime(DateTime.Today);
 
-        // Generamos los últimos N meses hacia atrás desde hoy
         for (int i = months - 1; i >= 0; i--)
         {
-            // Calculamos el mes correspondiente
             var date = today.AddMonths(-i);
             var month = date.Month;
             var year = date.Year;
 
-            var income = await _incomeRepository
-                .GetTotalByUserAndPeriodAsync(userId, month, year, cancellationToken);
-            var expenses = await _expenseRepository
-                .GetTotalByUserAndPeriodAsync(userId, month, year, cancellationToken);
+            var (start, end) = GetCycleRange(month, year, paydayDay);
+
+            var income = await _incomeRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+            var expenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
 
             trend.Labels.Add($"{MonthNames[month - 1]} {year.ToString()[2..]}");
             trend.Income.Add(income);
@@ -128,13 +120,14 @@ public class DashboardService : IDashboardService
     }
 
     public async Task<ExpenseByCategoryChartDto> GetExpensesByCategoryAsync(
-        Guid userId,
-        int month,
-        int year,
-        CancellationToken cancellationToken = default)
+    Guid userId, int month, int year,
+    CancellationToken cancellationToken = default)
     {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var (start, end) = GetCycleRange(month, year, user?.PaydayDay);
+
         var categoryData = await _expenseRepository
-            .GetByCategoryAsync(userId, month, year, cancellationToken);
+            .GetByCategoryByDateRangeAsync(userId, start, end, cancellationToken);
 
         var categoryList = categoryData.ToList();
         var totalAmount = categoryList.Sum(c => c.Total);
@@ -147,9 +140,7 @@ public class DashboardService : IDashboardService
                 CategoryName = c.CategoryName,
                 CategoryColor = c.CategoryColor,
                 Amount = c.Total,
-                Percentage = totalAmount > 0
-                    ? Math.Round(c.Total / totalAmount * 100, 2)
-                    : 0
+                Percentage = totalAmount > 0 ? Math.Round(c.Total / totalAmount * 100, 2) : 0
             }).ToList()
         };
     }
@@ -162,5 +153,29 @@ public class DashboardService : IDashboardService
     {
         if (previous == 0) return current > 0 ? 100 : 0;
         return Math.Round((current - previous) / Math.Abs(previous) * 100, 2);
+    }
+
+    /// <summary>
+    /// Calcula el rango real del "mes" según el día de pago del usuario.
+    /// Si paydayDay es null, se comporta como mes calendario estándar.
+    /// </summary>
+    private static (DateOnly Start, DateOnly End) GetCycleRange(int month, int year, int? paydayDay)
+    {
+        if (paydayDay is null)
+        {
+            var start = new DateOnly(year, month, 1);
+            var end = new DateOnly(year, month, DateTime.DaysInMonth(year, month));
+            return (start, end);
+        }
+
+        var day = Math.Min(paydayDay.Value, DateTime.DaysInMonth(year, month));
+        var cycleStart = new DateOnly(year, month, day);
+
+        var nextMonth = month == 12 ? 1 : month + 1;
+        var nextYear = month == 12 ? year + 1 : year;
+        var nextDay = Math.Min(paydayDay.Value, DateTime.DaysInMonth(nextYear, nextMonth));
+        var cycleEnd = new DateOnly(nextYear, nextMonth, nextDay).AddDays(-1);
+
+        return (cycleStart, cycleEnd);
     }
 }

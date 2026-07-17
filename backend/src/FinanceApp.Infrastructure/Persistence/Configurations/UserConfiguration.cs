@@ -108,5 +108,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(r => r.User)
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(u => u.PaydayDay)
+            .HasColumnName("payday_day")
+            .IsRequired(false);
+
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_users_payday_day",
+            "payday_day IS NULL OR (payday_day >= 1 AND payday_day <= 31)"));
     }
 }

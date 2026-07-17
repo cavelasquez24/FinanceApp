@@ -61,4 +61,15 @@ public class ProfileController : ControllerBase
         return Ok(ApiResponse<UserInfoDto>.Ok(
             result, "Moneda actualizada exitosamente"));
     }
+
+    [HttpPatch("payday")]
+    public async Task<IActionResult> UpdatePayday(
+    [FromBody] UpdatePaydayDto dto,
+    CancellationToken cancellationToken)
+    {
+        var result = await _profileService.UpdatePaydayAsync(
+            GetUserId(), dto, cancellationToken);
+        return Ok(ApiResponse<UserInfoDto>.Ok(
+            result, "Día de pago actualizado exitosamente"));
+    }
 }

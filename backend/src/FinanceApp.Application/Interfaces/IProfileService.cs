@@ -22,4 +22,10 @@ public interface IProfileService
         Guid userId,
         ChangeCurrencyDto dto,
         CancellationToken cancellationToken = default);
+
+    Task<UserInfoDto> UpdatePaydayAsync(
+        Guid userId, 
+        UpdatePaydayDto dto, 
+        CancellationToken cancellationToken = default);
+
 }

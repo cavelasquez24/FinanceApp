@@ -26,4 +26,8 @@ public interface IIncomeRepository : IBaseRepository<Income>
         int month,
         int year,
         CancellationToken cancellationToken = default);
+
+    Task<decimal> GetTotalByDateRangeAsync(
+    Guid userId, DateOnly startDate, DateOnly endDate,
+    CancellationToken cancellationToken = default);
 }

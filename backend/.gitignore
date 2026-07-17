@@ -15,3 +15,5 @@
 
 ## Configuración local secreta (¡No subir contraseñas!)
 **/appsettings.Development.json
+**/appsettings.json
+   !**/appsettings.Example.json
