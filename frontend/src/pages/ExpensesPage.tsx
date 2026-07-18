@@ -1,6 +1,6 @@
 // src/pages/ExpensesPage.tsx
 import { useState } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Plus as PlusIcon, AlertCircle, Inbox, Pencil, Trash2 } from 'lucide-react';
 import { useExpenses, useDeleteExpense } from '../features/expenses/hooks/useExpenses';
 import { ExpenseForm } from '../features/expenses/components/ExpenseForm';
@@ -102,7 +102,7 @@ export function ExpensesPage() {
                 {expenses.map((expense) => (
                   <tr key={expense.id} className="transition-colors hover:bg-[#FBF9F4]">
                     <td className="px-6 py-4 text-[#7C756E]">
-                      {format(new Date(expense.date), 'dd/MM/yyyy')}
+                      {format(parseISO(expense.date), 'dd/MM/yyyy')}
                     </td>
                     <td className="flex items-center gap-2 px-6 py-4">
                       <div
@@ -151,7 +151,7 @@ export function ExpensesPage() {
         title="¿Eliminar este gasto?"
         description={
           deletingExpense
-            ? `Se eliminará "${deletingExpense.categoryName}" del ${format(new Date(deletingExpense.date), 'dd/MM/yyyy')} por ${new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(deletingExpense.amount)}. Esta acción no se puede deshacer.`
+            ? `Se eliminará "${deletingExpense.categoryName}" del ${format(parseISO(deletingExpense.date), 'dd/MM/yyyy')} por ${new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(deletingExpense.amount)}. Esta acción no se puede deshacer.`
             : undefined
         }
         isLoading={isDeleting}

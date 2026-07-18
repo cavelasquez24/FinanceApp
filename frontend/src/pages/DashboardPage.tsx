@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertCircle, CalendarClock } from 'lucide-react';
 import { Card, CardHeader, Spinner } from '../components/ui';
 import { FinancialChart } from '../components/dashboard/FinancialChart';
@@ -17,8 +17,23 @@ export function DashboardPage() {
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [year, setYear] = useState(today.getFullYear());
+  const [adjustedForPayday, setAdjustedForPayday] = useState(false);
+
 
   const { data: profile } = useProfile();
+  
+   useEffect(() => {
+    if (adjustedForPayday || profile?.paydayDay == null) return;
+
+    if (today.getDate() < profile.paydayDay) {
+      // Payday aún no llega este mes calendario → seguimos en el ciclo
+      // que empezó el mes anterior.
+      setMonth((m) => (m === 1 ? 12 : m - 1));
+      setYear((y) => (month === 1 ? y - 1 : y));
+    }
+    setAdjustedForPayday(true);
+  }, [profile, adjustedForPayday]);
+
 
   const { data: overview, isLoading: isLoadingOverview, isError: isErrorOverview } =
     useDashboardOverview(month, year);

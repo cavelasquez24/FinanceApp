@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { useIncomes, useDeleteIncome } from '../features/incomes/hooks/useIncomes';
 import { IncomeForm } from '../features/incomes/components/IncomeForm';
 import { Button, Card, CardHeader, Spinner, ConfirmDialog } from '../components/ui';
@@ -98,7 +98,7 @@ export function IncomesPage() {
                 {incomes.map((income) => (
                   <tr key={income.id} className="transition-colors hover:bg-[#FBF9F4]">
                     <td className="px-6 py-4 text-[#7C756E]">
-                      {format(new Date(income.date), 'dd/MM/yyyy')}
+                      {format(parseISO(income.date), 'dd/MM/yyyy')}
                     </td>
                     <td className="flex items-center gap-2 px-6 py-4">
                       <div
@@ -144,7 +144,7 @@ export function IncomesPage() {
         title="¿Eliminar este ingreso?"
         description={
           deletingIncome
-            ? `Se eliminará "${deletingIncome.categoryName}" del ${format(new Date(deletingIncome.date), 'dd/MM/yyyy')} por ${new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(deletingIncome.amount)}. Esta acción no se puede deshacer.`
+            ? `Se eliminará "${deletingIncome.categoryName}" del ${format(parseISO(deletingIncome.date), 'dd/MM/yyyy')} por ${new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(deletingIncome.amount)}. Esta acción no se puede deshacer.`
             : undefined
         }
         isLoading={isDeleting}
