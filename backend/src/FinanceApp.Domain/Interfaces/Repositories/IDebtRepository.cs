@@ -15,4 +15,15 @@ public interface IDebtRepository : IBaseRepository<Debt>
     Task<decimal> GetTotalCurrentBalanceAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Suma de pagos de deuda (Amount) dentro de un rango de fechas.
+    /// Para el Dashboard: métrica de "cash out" por pagos de deuda,
+    /// separada de Expenses.
+    /// </summary>
+    Task<decimal> GetTotalPaymentsByDateRangeAsync(
+        Guid userId,
+        DateOnly start,
+        DateOnly end,
+        CancellationToken cancellationToken = default);
 }

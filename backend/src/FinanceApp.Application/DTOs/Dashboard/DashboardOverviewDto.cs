@@ -11,6 +11,8 @@ public class DashboardOverviewDto
     public decimal TotalExpenses { get; set; }
     public decimal NetSavings { get; set; }
     public decimal SavingsRate { get; set; }
+    public decimal TotalDebt { get; set; }           // saldo pendiente total, no depende de rango
+    public decimal TotalDebtPayments { get; set; }    // pagado en este ciclo
     public decimal TotalInvestments { get; set; }
     public decimal TotalSavingsGoals { get; set; }
     public decimal NetWorth { get; set; }
@@ -30,6 +32,8 @@ public class PreviousMonthDto
     public decimal TotalIncome { get; set; }
     public decimal TotalExpenses { get; set; }
     public decimal NetSavings { get; set; }
+    public decimal TotalDebtPayments { get; set; }
+
 }
 
 public class ChangesDto
@@ -41,4 +45,6 @@ public class ChangesDto
     public decimal IncomeChange { get; set; }
     public decimal ExpensesChange { get; set; }
     public decimal SavingsChange { get; set; }
+    public decimal DebtPaymentsChange { get; set; }
+
 }

@@ -10,10 +10,9 @@ public class DashboardService : IDashboardService
     private readonly IExpenseRepository _expenseRepository;
     private readonly IInvestmentRepository _investmentRepository;
     private readonly ISavingsGoalRepository _savingsGoalRepository;
+    private readonly IDebtRepository _debtRepository;
     private readonly IUserRepository _userRepository;
 
-
-    // Nombres de los meses en español para las etiquetas del gráfico
     private static readonly string[] MonthNames =
     {
         "Ene", "Feb", "Mar", "Abr", "May", "Jun",
@@ -25,18 +24,20 @@ public class DashboardService : IDashboardService
         IExpenseRepository expenseRepository,
         IInvestmentRepository investmentRepository,
         ISavingsGoalRepository savingsGoalRepository,
+        IDebtRepository debtRepository,
         IUserRepository userRepository)
     {
         _incomeRepository = incomeRepository;
         _expenseRepository = expenseRepository;
         _investmentRepository = investmentRepository;
         _savingsGoalRepository = savingsGoalRepository;
+        _debtRepository = debtRepository;
         _userRepository = userRepository;
     }
 
     public async Task<DashboardOverviewDto> GetOverviewAsync(
-    Guid userId, int month, int year,
-    CancellationToken cancellationToken = default)
+        Guid userId, int month, int year,
+        CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         var paydayDay = user?.PaydayDay;
@@ -55,10 +56,19 @@ public class DashboardService : IDashboardService
         var totalInvestments = await _investmentRepository.GetTotalCurrentValueAsync(userId, cancellationToken);
         var totalSavings = await _savingsGoalRepository.GetTotalSavedAsync(userId, cancellationToken);
 
+        // Deuda: saldo pendiente total, foto actual (no depende del rango de fechas)
+        var totalDebt = await _debtRepository.GetTotalCurrentBalanceAsync(userId, cancellationToken);
+
+        // Pagos de deuda dentro del ciclo — métrica de cash flow, separada de Expenses
+        var totalDebtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(userId, start, end, cancellationToken);
+        var prevDebtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+
         var netSavings = totalIncome - totalExpenses;
         var prevNetSavings = prevIncome - prevExpenses;
         var savingsRate = totalIncome > 0 ? Math.Round(netSavings / totalIncome * 100, 2) : 0;
-        var netWorth = netSavings + totalInvestments + totalSavings;
+
+        // netWorth ahora resta pasivos
+        var netWorth = netSavings + totalInvestments + totalSavings - totalDebt;
 
         return new DashboardOverviewDto
         {
@@ -72,6 +82,8 @@ public class DashboardService : IDashboardService
             TotalExpenses = totalExpenses,
             NetSavings = netSavings,
             SavingsRate = savingsRate,
+            TotalDebt = totalDebt,
+            TotalDebtPayments = totalDebtPayments,
             TotalInvestments = totalInvestments,
             TotalSavingsGoals = totalSavings,
             NetWorth = netWorth,
@@ -79,19 +91,21 @@ public class DashboardService : IDashboardService
             {
                 TotalIncome = prevIncome,
                 TotalExpenses = prevExpenses,
-                NetSavings = prevNetSavings
+                NetSavings = prevNetSavings,
+                TotalDebtPayments = prevDebtPayments
             },
             Changes = new ChangesDto
             {
                 IncomeChange = CalculateChange(prevIncome, totalIncome),
                 ExpensesChange = CalculateChange(prevExpenses, totalExpenses),
-                SavingsChange = CalculateChange(prevNetSavings, netSavings)
+                SavingsChange = CalculateChange(prevNetSavings, netSavings),
+                DebtPaymentsChange = CalculateChange(prevDebtPayments, totalDebtPayments)
             }
         };
     }
 
     public async Task<MonthlyTrendDto> GetMonthlyTrendAsync(
-    Guid userId, int months, CancellationToken cancellationToken = default)
+        Guid userId, int months, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         var paydayDay = user?.PaydayDay;
@@ -120,8 +134,8 @@ public class DashboardService : IDashboardService
     }
 
     public async Task<ExpenseByCategoryChartDto> GetExpensesByCategoryAsync(
-    Guid userId, int month, int year,
-    CancellationToken cancellationToken = default)
+        Guid userId, int month, int year,
+        CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         var (start, end) = GetCycleRange(month, year, user?.PaydayDay);
@@ -145,20 +159,12 @@ public class DashboardService : IDashboardService
         };
     }
 
-    /// <summary>
-    /// Calcula el porcentaje de cambio entre dos valores.
-    /// Si el valor anterior es 0, retorna 100 (crecimiento total).
-    /// </summary>
     private static decimal CalculateChange(decimal previous, decimal current)
     {
         if (previous == 0) return current > 0 ? 100 : 0;
         return Math.Round((current - previous) / Math.Abs(previous) * 100, 2);
     }
 
-    /// <summary>
-    /// Calcula el rango real del "mes" según el día de pago del usuario.
-    /// Si paydayDay es null, se comporta como mes calendario estándar.
-    /// </summary>
     private static (DateOnly Start, DateOnly End) GetCycleRange(int month, int year, int? paydayDay)
     {
         if (paydayDay is null)

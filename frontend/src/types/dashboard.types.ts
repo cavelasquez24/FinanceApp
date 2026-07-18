@@ -10,12 +10,14 @@ export interface PreviousMonth {
   totalIncome: number;
   totalExpenses: number;
   netSavings: number;
+  totalDebtPayments: number;
 }
 
 export interface DashboardChanges {
   incomeChange: number;
   expensesChange: number;
   savingsChange: number;
+  debtPaymentsChange: number;
 }
 
 export interface DashboardOverview {
@@ -24,6 +26,8 @@ export interface DashboardOverview {
   totalExpenses: number;
   netSavings: number;
   savingsRate: number;
+  totalDebt: number;
+  totalDebtPayments: number;
   totalInvestments: number;
   totalSavingsGoals: number;
   netWorth: number;

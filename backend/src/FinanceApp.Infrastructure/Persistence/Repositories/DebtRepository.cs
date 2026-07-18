@@ -41,4 +41,15 @@ public class DebtRepository : BaseRepository<Debt>, IDebtRepository
         await _context.SaveChangesAsync(cancellationToken);
         return entity;
     }
+
+    public async Task<decimal> GetTotalPaymentsByDateRangeAsync(
+    Guid userId, DateOnly start, DateOnly end,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.DebtPayments
+            .Where(p => p.Debt.UserId == userId
+                && p.PaymentDate >= start && p.PaymentDate <= end
+                && p.DeletedAt == null)
+            .SumAsync(p => p.Amount, cancellationToken);
+    }
 }
