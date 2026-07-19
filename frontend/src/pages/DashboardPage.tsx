@@ -2,16 +2,22 @@ import { useState, useEffect } from 'react';
 import { AlertCircle, CalendarClock } from 'lucide-react';
 import { Card, CardHeader, Spinner } from '../components/ui';
 import { FinancialChart } from '../components/dashboard/FinancialChart';
-import { ExpensesByCategoryChart } from '../components/dashboard/ExpensesByCategoryChart';
+import { CashFlowStatementCard } from '../components/dashboard/CashFlowStatementCard';
 import { MonthYearSelector } from '../features/dashboard/components/MonthYearSelector';
 import { OverviewStats } from '../features/dashboard/components/OverviewStats';
+import { DashboardHeroRow } from '../features/dashboard/components/DashboardHeroRow';
+import { SavingsGoalsMiniWidget } from '../features/dashboard/components/SavingsGoalsMiniWidget';
 import { useProfile } from '../features/profile/hooks/useProfile';
 import { getCycleRange, formatCycleLabel } from '../utils/cycleUtils';
 import {
   useDashboardOverview,
   useDashboardTrend,
-  useDashboardExpensesByCategory,
+  useDashboardCashFlow,
 } from '../features/dashboard/hooks/useDashboard';
+
+// v2.1 — ExpensesByCategoryChart se movió a ExpensesPage.tsx (era vista
+// de análisis, no de resumen ejecutivo). NetWorthTrendChart sigue sin
+// conectar, depende de endpoint pendiente en backend — no se simula.
 
 export function DashboardPage() {
   const today = new Date();
@@ -19,28 +25,24 @@ export function DashboardPage() {
   const [year, setYear] = useState(today.getFullYear());
   const [adjustedForPayday, setAdjustedForPayday] = useState(false);
 
-
   const { data: profile } = useProfile();
-  
-   useEffect(() => {
+
+  useEffect(() => {
     if (adjustedForPayday || profile?.paydayDay == null) return;
 
     if (today.getDate() < profile.paydayDay) {
-      // Payday aún no llega este mes calendario → seguimos en el ciclo
-      // que empezó el mes anterior.
       setMonth((m) => (m === 1 ? 12 : m - 1));
       setYear((y) => (month === 1 ? y - 1 : y));
     }
     setAdjustedForPayday(true);
   }, [profile, adjustedForPayday]);
 
-
   const { data: overview, isLoading: isLoadingOverview, isError: isErrorOverview } =
     useDashboardOverview(month, year);
   const { data: trendData, isLoading: isLoadingTrend, isError: isErrorTrend } =
     useDashboardTrend(12);
-  const { data: categoryData, isLoading: isLoadingCategory, isError: isErrorCategory } =
-    useDashboardExpensesByCategory(month, year);
+  const { data: cashFlowData, isLoading: isLoadingCashFlow, isError: isErrorCashFlow } =
+    useDashboardCashFlow(month, year);
 
   const cycleRange = getCycleRange(month, year, profile?.paydayDay);
   const cycleLabel = cycleRange ? formatCycleLabel(cycleRange) : null;
@@ -63,7 +65,8 @@ export function DashboardPage() {
             </span>
           )}
         </div>
-        <MonthYearSelector month={month} year={year} onChange={handleMonthChange} />
+        <MonthYearSelector month={month} year={year} onChange={handleMonthChange} paydayDay={profile?.paydayDay} />
+
       </div>
 
       {isLoadingOverview ? (
@@ -77,14 +80,20 @@ export function DashboardPage() {
           <span className="text-sm font-medium">Error al cargar el resumen.</span>
         </div>
       ) : overview ? (
-        <OverviewStats data={overview} />
+        <>
+          <DashboardHeroRow
+            netWorth={overview.netWorth}
+            cashFlowResidual={isErrorCashFlow ? null : cashFlowData?.cashFlowResidual ?? null}
+          />
+          <OverviewStats data={overview} />
+        </>
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2 !rounded-[28px]">
           <CardHeader
             title="Tendencia Financiera"
-            subtitle="Evolución mensual de ingresos, gastos y ahorro (últimos 12 meses)"
+            subtitle="Evolución mensual de ingresos, gastos y flujo residual (últimos 12 meses)"
           />
           {isLoadingTrend ? (
             <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
@@ -101,23 +110,28 @@ export function DashboardPage() {
           ) : null}
         </Card>
 
-        <Card className="!rounded-[28px]">
-          <CardHeader title="Gastos por Categoría" subtitle="Distribución del mes seleccionado" />
-          {isLoadingCategory ? (
-            <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
-              <Spinner />
-              <span className="text-sm">Cargando categorías...</span>
-            </div>
-          ) : isErrorCategory ? (
-            <div className="flex flex-col items-center gap-2 p-12 text-center text-[#C97B63]">
-              <AlertCircle className="h-6 w-6" strokeWidth={2} />
-              <span className="text-sm font-medium">Error al cargar categorías.</span>
-            </div>
-          ) : categoryData ? (
-            <ExpensesByCategoryChart data={categoryData} />
-          ) : null}
-        </Card>
+        <SavingsGoalsMiniWidget />
       </div>
+
+      <Card className="!rounded-[28px]">
+        <CardHeader
+          title="Aportes a Patrimonio"
+          subtitle="Construcción de patrimonio del mes seleccionado"
+        />
+        {isLoadingCashFlow ? (
+          <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
+            <Spinner />
+            <span className="text-sm">Cargando flujo de caja...</span>
+          </div>
+        ) : isErrorCashFlow ? (
+          <div className="flex flex-col items-center gap-2 p-12 text-center text-[#C97B63]">
+            <AlertCircle className="h-6 w-6" strokeWidth={2} />
+            <span className="text-sm font-medium">Error al cargar el flujo de caja.</span>
+          </div>
+        ) : cashFlowData ? (
+          <CashFlowStatementCard data={cashFlowData} />
+        ) : null}
+      </Card>
     </div>
   );
 }

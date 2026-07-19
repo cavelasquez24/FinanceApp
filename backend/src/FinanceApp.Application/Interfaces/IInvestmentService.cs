@@ -1,4 +1,4 @@
-﻿using FinanceApp.Application.DTOs.Investment;
+using FinanceApp.Application.DTOs.Investment;
 
 namespace FinanceApp.Application.Interfaces;
 
@@ -42,5 +42,16 @@ public interface IInvestmentService
         Guid investmentId,
         Guid userId,
         InvestmentRecordCreateDto dto,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// v2.0.1 — registra un aporte de caja (aumenta costo base), distinto
+    /// de AddRecordAsync que registra revalorización de mercado.
+    /// No modifica CurrentValue.
+    /// </summary>
+    Task<InvestmentContributionResponseDto> AddContributionAsync(
+        Guid investmentId,
+        Guid userId,
+        InvestmentContributionCreateDto dto,
         CancellationToken cancellationToken = default);
 }

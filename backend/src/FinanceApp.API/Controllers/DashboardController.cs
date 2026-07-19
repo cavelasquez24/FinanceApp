@@ -1,4 +1,4 @@
-﻿using FinanceApp.Application.DTOs.Common;
+using FinanceApp.Application.DTOs.Common;
 using FinanceApp.Application.DTOs.Dashboard;
 using FinanceApp.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -72,5 +72,23 @@ public class DashboardController : ControllerBase
         var result = await _dashboardService.GetExpensesByCategoryAsync(
             GetUserId(), targetMonth, targetYear, cancellationToken);
         return Ok(ApiResponse<ExpenseByCategoryChartDto>.Ok(result));
+    }
+
+    /// <summary>
+    /// v2.0.1 sección 5 — separa flujo de caja (consumo real) de
+    /// construcción de patrimonio (ahorro/inversión/pago de deuda).
+    /// </summary>
+    [HttpGet("cashflow-statement")]
+    public async Task<IActionResult> GetCashFlowStatement(
+        [FromQuery] int? month,
+        [FromQuery] int? year,
+        CancellationToken cancellationToken = default)
+    {
+        var targetMonth = month ?? DateTime.Today.Month;
+        var targetYear = year ?? DateTime.Today.Year;
+
+        var result = await _dashboardService.GetCashFlowStatementAsync(
+            GetUserId(), targetMonth, targetYear, cancellationToken);
+        return Ok(ApiResponse<CashFlowStatementDto>.Ok(result));
     }
 }

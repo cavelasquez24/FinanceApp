@@ -1,6 +1,7 @@
-﻿using FinanceApp.Application.DTOs.SavingsGoal;
+using FinanceApp.Application.DTOs.SavingsGoal;
 using FinanceApp.Application.Interfaces;
 using FinanceApp.Domain.Entities;
+using FinanceApp.Domain.Enums;
 using FinanceApp.Domain.Exceptions;
 using FinanceApp.Domain.Interfaces.Repositories;
 
@@ -127,7 +128,74 @@ public class SavingsGoalService : ISavingsGoalService
         }
 
         await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
+
+        // v2.0.1 — registro histórico. El contrato del endpoint /deposit
+        // no cambia; esto solo agrega trazabilidad, no reemplaza CurrentAmount.
+        var contribution = new SavingsGoalContribution
+        {
+            SavingsGoalId = goal.Id,
+            ContributionDate = DateOnly.FromDateTime(DateTime.UtcNow),
+            Amount = dto.Amount,
+            Notes = dto.Notes
+        };
+        await _savingsGoalRepository.AddContributionAsync(contribution, cancellationToken);
+
         return MapToResponseDto(goal);
+    }
+
+    public async Task<SavingsGoalWithdrawalResponseDto> WithdrawAsync(
+        Guid id,
+        Guid userId,
+        SavingsGoalWithdrawalCreateDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
+
+        if (goal == null || goal.UserId != userId || goal.IsDeleted)
+            throw new NotFoundException("Meta de ahorro", id);
+
+        if (dto.Amount <= 0)
+            throw new DomainException(
+                "INVALID_WITHDRAWAL_AMOUNT",
+                "El monto del retiro debe ser mayor a 0");
+
+        // Regla del spec 3.2: LinkedExpenseId solo tiene sentido si Reason = Consumed
+        if (dto.LinkedExpenseId.HasValue && dto.Reason != SavingsWithdrawalReason.Consumed)
+            throw new DomainException(
+                "INVALID_LINKED_EXPENSE",
+                "LinkedExpenseId solo es válido cuando Reason es Consumed");
+
+        goal.CurrentAmount = Math.Max(0, goal.CurrentAmount - dto.Amount);
+
+        // Un retiro puede sacar la meta de "completada" si ya lo estaba
+        goal.IsCompleted = goal.CurrentAmount >= goal.TargetAmount && goal.TargetAmount > 0;
+
+        await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
+
+        var withdrawal = new SavingsGoalWithdrawal
+        {
+            SavingsGoalId = goal.Id,
+            WithdrawalDate = dto.WithdrawalDate ?? DateOnly.FromDateTime(DateTime.UtcNow),
+            Amount = dto.Amount,
+            LinkedExpenseId = dto.Reason == SavingsWithdrawalReason.Consumed
+                ? dto.LinkedExpenseId
+                : null,
+            Reason = dto.Reason,
+            Notes = dto.Notes
+        };
+        await _savingsGoalRepository.AddWithdrawalAsync(withdrawal, cancellationToken);
+
+        return new SavingsGoalWithdrawalResponseDto
+        {
+            Id = withdrawal.Id,
+            WithdrawalDate = withdrawal.WithdrawalDate,
+            Amount = withdrawal.Amount,
+            LinkedExpenseId = withdrawal.LinkedExpenseId,
+            Reason = withdrawal.Reason,
+            Notes = withdrawal.Notes,
+            CreatedAt = withdrawal.CreatedAt,
+            GoalCurrentAmountAfter = goal.CurrentAmount
+        };
     }
 
     private static SavingsGoalResponseDto MapToResponseDto(SavingsGoal goal) => new()
@@ -142,8 +210,6 @@ public class SavingsGoalService : ISavingsGoalService
         TargetDate = goal.TargetDate,
         IsCompleted = goal.IsCompleted,
         Icon = goal.Icon,
-        // Estimamos meses restantes basado en el promedio de aportes
-        // Por ahora retornamos null — en v2 calculamos con historial
         EstimatedMonthsToComplete = null,
         CreatedAt = goal.CreatedAt
     };

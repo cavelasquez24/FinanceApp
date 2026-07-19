@@ -22,3 +22,10 @@ export function useDashboardExpensesByCategory(month: number, year: number) {
     queryFn: () => dashboardApi.getExpensesByCategory(month, year),
   });
 }
+
+export function useDashboardCashFlow(month: number, year: number) {
+  return useQuery({
+    queryKey: ['dashboard', 'cashflow-statement', month, year],
+    queryFn: () => dashboardApi.getCashFlowStatement(month, year),
+  });
+}

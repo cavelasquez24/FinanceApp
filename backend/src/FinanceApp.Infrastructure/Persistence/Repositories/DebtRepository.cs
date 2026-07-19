@@ -1,4 +1,4 @@
-﻿using FinanceApp.Domain.Entities;
+using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Interfaces.Repositories;
 using FinanceApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -51,5 +51,20 @@ public class DebtRepository : BaseRepository<Debt>, IDebtRepository
                 && p.PaymentDate >= start && p.PaymentDate <= end
                 && p.DeletedAt == null)
             .SumAsync(p => p.Amount, cancellationToken);
+    }
+
+    // v2.0.1 — Cash Flow Statement (sección 5) necesita solo la porción de
+    // capital (PrincipalAmount), no el pago total (que incluye interés).
+    // No reemplaza GetTotalPaymentsByDateRangeAsync, que se sigue usando
+    // en el Dashboard overview tal cual.
+    public async Task<decimal> GetTotalPrincipalPaidByDateRangeAsync(
+        Guid userId, DateOnly start, DateOnly end,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.DebtPayments
+            .Where(p => p.Debt.UserId == userId
+                && p.PaymentDate >= start && p.PaymentDate <= end
+                && p.DeletedAt == null)
+            .SumAsync(p => p.PrincipalAmount, cancellationToken);
     }
 }

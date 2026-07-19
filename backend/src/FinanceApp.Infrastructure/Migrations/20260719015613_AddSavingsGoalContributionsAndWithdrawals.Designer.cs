@@ -3,6 +3,7 @@ using System;
 using FinanceApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinanceApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260719015613_AddSavingsGoalContributionsAndWithdrawals")]
+    partial class AddSavingsGoalContributionsAndWithdrawals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -660,55 +663,6 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.ToTable("Investments");
                 });
 
-            modelBuilder.Entity("FinanceApp.Domain.Entities.InvestmentContribution", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric(15,2)")
-                        .HasColumnName("amount");
-
-                    b.Property<DateOnly>("ContributionDate")
-                        .HasColumnType("date")
-                        .HasColumnName("contribution_date");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("deleted_at");
-
-                    b.Property<Guid>("InvestmentId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("investment_id");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("text")
-                        .HasColumnName("notes");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InvestmentId")
-                        .HasDatabaseName("idx_investment_contributions_investment_id")
-                        .HasFilter("deleted_at IS NULL");
-
-                    b.ToTable("investment_contributions", (string)null);
-                });
-
             modelBuilder.Entity("FinanceApp.Domain.Entities.InvestmentRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1140,17 +1094,6 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FinanceApp.Domain.Entities.InvestmentContribution", b =>
-                {
-                    b.HasOne("FinanceApp.Domain.Entities.Investment", "Investment")
-                        .WithMany("Contributions")
-                        .HasForeignKey("InvestmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Investment");
-                });
-
             modelBuilder.Entity("FinanceApp.Domain.Entities.InvestmentRecord", b =>
                 {
                     b.HasOne("FinanceApp.Domain.Entities.Investment", "Investment")
@@ -1225,8 +1168,6 @@ namespace FinanceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.Investment", b =>
                 {
-                    b.Navigation("Contributions");
-
                     b.Navigation("Records");
                 });
 

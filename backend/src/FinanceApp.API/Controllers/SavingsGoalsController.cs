@@ -82,4 +82,19 @@ public class SavingsGoalsController : ControllerBase
         return Ok(ApiResponse<SavingsGoalResponseDto>.Ok(
             result, "Aporte registrado exitosamente"));
     }
+
+    // v2.0.1 — nuevo endpoint. Retiro de una meta de ahorro (transferencia,
+    // no crea Expense). Ver SavingsGoalWithdrawalCreateDto para reglas de
+    // Reason/LinkedExpenseId.
+    [HttpPost("{id:guid}/withdrawals")]
+    public async Task<IActionResult> Withdraw(
+        Guid id,
+        [FromBody] SavingsGoalWithdrawalCreateDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _savingsGoalService.WithdrawAsync(
+            id, GetUserId(), dto, cancellationToken);
+        return StatusCode(201, ApiResponse<SavingsGoalWithdrawalResponseDto>.Ok(
+            result, "Retiro registrado exitosamente"));
+    }
 }

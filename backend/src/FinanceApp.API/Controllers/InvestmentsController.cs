@@ -1,4 +1,4 @@
-﻿using FinanceApp.Application.DTOs.Common;
+using FinanceApp.Application.DTOs.Common;
 using FinanceApp.Application.DTOs.Investment;
 using FinanceApp.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -98,5 +98,19 @@ public class InvestmentsController : ControllerBase
             id, GetUserId(), dto, cancellationToken);
         return StatusCode(201, ApiResponse<InvestmentRecordResponseDto>.Ok(
             result, "Registro agregado exitosamente"));
+    }
+
+    // v2.0.1 — nuevo endpoint. Aporte de caja a la inversión (aumenta
+    // costo base). Distinto de /records, que es revalorización de mercado.
+    [HttpPost("{id:guid}/contributions")]
+    public async Task<IActionResult> AddContribution(
+        Guid id,
+        [FromBody] InvestmentContributionCreateDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _investmentService.AddContributionAsync(
+            id, GetUserId(), dto, cancellationToken);
+        return StatusCode(201, ApiResponse<InvestmentContributionResponseDto>.Ok(
+            result, "Aporte registrado exitosamente"));
     }
 }

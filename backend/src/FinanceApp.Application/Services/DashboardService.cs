@@ -1,4 +1,4 @@
-﻿using FinanceApp.Application.DTOs.Dashboard;
+using FinanceApp.Application.DTOs.Dashboard;
 using FinanceApp.Application.Interfaces;
 using FinanceApp.Domain.Interfaces.Repositories;
 
@@ -156,6 +156,37 @@ public class DashboardService : IDashboardService
                 Amount = c.Total,
                 Percentage = totalAmount > 0 ? Math.Round(c.Total / totalAmount * 100, 2) : 0
             }).ToList()
+        };
+    }
+
+    public async Task<CashFlowStatementDto> GetCashFlowStatementAsync(
+        Guid userId, int month, int year,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var (start, end) = GetCycleRange(month, year, user?.PaydayDay);
+
+        var income = await _incomeRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var consumptionExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var savingsContributions = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
+        var investmentContributions = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
+        var debtPrincipalPaid = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken);
+
+        var cashFlowResidual = income - consumptionExpenses - savingsContributions
+            - investmentContributions - debtPrincipalPaid;
+
+        var wealthBuilding = savingsContributions + investmentContributions + debtPrincipalPaid;
+
+        return new CashFlowStatementDto
+        {
+            Income = income,
+            ConsumptionExpenses = consumptionExpenses,
+            SavingsContributions = savingsContributions,
+            InvestmentContributions = investmentContributions,
+            DebtPrincipalPaid = debtPrincipalPaid,
+            CashFlowResidual = cashFlowResidual,
+            ConsumptionRate = income > 0 ? Math.Round(consumptionExpenses / income * 100, 2) : 0,
+            WealthBuildingRate = income > 0 ? Math.Round(wealthBuilding / income * 100, 2) : 0
         };
     }
 

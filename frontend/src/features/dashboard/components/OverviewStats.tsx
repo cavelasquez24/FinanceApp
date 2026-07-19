@@ -1,5 +1,5 @@
 // src/features/dashboard/components/OverviewStats.tsx
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, Landmark, LineChart as LineChartIcon, CreditCard } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, PiggyBank, LineChart as LineChartIcon, CreditCard } from 'lucide-react';
 import { Card } from '../../../components/ui';
 import type { DashboardOverview } from '../../../types/dashboard.types';
 
@@ -11,8 +11,6 @@ const currency = (value: number) =>
   new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(value);
 
 function ChangeBadge({ value, invert = false }: { value: number; invert?: boolean }) {
-  // invert: para métricas donde "subir" es malo (ej. pagos de deuda no es bueno ni malo per se,
-  // pero un aumento no debería pintarse verde como si fuera ganancia)
   const isPositive = invert ? value <= 0 : value >= 0;
   const Icon = value >= 0 ? TrendingUp : TrendingDown;
   return (
@@ -60,11 +58,16 @@ function Kpi({ label, value, change, changeInvert, icon, accent }: KpiProps) {
   );
 }
 
+// v2.1 — Patrimonio neto y Flujo Residual salieron de acá: viven ahora en
+// DashboardHeroRow como los dos KPI protagonistas. Esto cubre flujo
+// mensual (nivel 2) y ratios/contexto (nivel 3). El desglose de deuda por
+// tipo (consumo vs largo plazo) se retiró: pertenece al módulo Deudas,
+// donde el usuario puede actuar sobre esa composición — no se toca acá.
 export function OverviewStats({ data }: Props) {
   return (
     <div className="space-y-4">
-      {/* KPIs principales */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {/* Flujo mensual */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi
           label="Ingresos del mes"
           value={currency(data.totalIncome)}
@@ -87,23 +90,15 @@ export function OverviewStats({ data }: Props) {
           accent="#8FA888"
         />
         <Kpi
-          label="Pagos de deuda"
-          value={currency(data.totalDebtPayments)}
-          change={data.changes.debtPaymentsChange}
-          changeInvert
+          label="Deuda pendiente"
+          value={currency(data.totalDebt)}
           icon={<CreditCard className="h-5 w-5" strokeWidth={2} />}
           accent="#D9A46B"
         />
-        <Kpi
-          label="Patrimonio neto"
-          value={currency(data.netWorth)}
-          icon={<Landmark className="h-5 w-5" strokeWidth={2} />}
-          accent="#2C2A29"
-        />
       </div>
 
-      {/* Métricas secundarias */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Ratios y contexto */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="!rounded-[28px]">
           <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Tasa de ahorro</p>
           <p className="mt-2 font-serif text-xl font-medium text-[#2C2A29]">
@@ -121,21 +116,17 @@ export function OverviewStats({ data }: Props) {
         </Card>
         <Card className="!rounded-[28px]">
           <div className="flex items-center gap-2">
-            <PiggyBank className="h-4 w-4 text-[#8FA888]" strokeWidth={2} />
-            <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Metas de ahorro</p>
-          </div>
-          <p className="mt-2 font-serif text-xl font-medium text-[#2C2A29]">
-            {currency(data.totalSavingsGoals)}
-          </p>
-        </Card>
-        <Card className="!rounded-[28px]">
-          <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-[#D9A46B]" strokeWidth={2} />
-            <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Deuda pendiente</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Pagos de deuda</p>
           </div>
           <p className="mt-2 font-serif text-xl font-medium text-[#2C2A29]">
-            {currency(data.totalDebt)}
+            {currency(data.totalDebtPayments)}
           </p>
+          {data.changes.debtPaymentsChange !== undefined && (
+            <div className="mt-1">
+              <ChangeBadge value={data.changes.debtPaymentsChange} invert />
+            </div>
+          )}
         </Card>
       </div>
     </div>

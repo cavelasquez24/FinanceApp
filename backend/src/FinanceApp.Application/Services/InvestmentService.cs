@@ -1,4 +1,4 @@
-﻿using FinanceApp.Application.DTOs.Investment;
+using FinanceApp.Application.DTOs.Investment;
 using FinanceApp.Application.Interfaces;
 using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
@@ -188,6 +188,47 @@ public class InvestmentService : IInvestmentService
         await _investmentRepository.UpdateAsync(investment, cancellationToken);
 
         return MapRecordToResponseDto(record);
+    }
+
+    public async Task<InvestmentContributionResponseDto> AddContributionAsync(
+        Guid investmentId,
+        Guid userId,
+        InvestmentContributionCreateDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var investment = await _investmentRepository
+            .GetByIdAsync(investmentId, cancellationToken);
+
+        if (investment == null || investment.UserId != userId || investment.IsDeleted)
+            throw new NotFoundException("Inversión", investmentId);
+
+        if (dto.Amount <= 0)
+            throw new DomainException(
+                "INVALID_CONTRIBUTION_AMOUNT",
+                "El monto del aporte debe ser mayor a 0");
+
+        // v2.0.1 — solo registra el aporte de caja (costo base). NO toca
+        // CurrentValue: eso es responsabilidad exclusiva de AddRecordAsync
+        // (valuation de mercado). Van a mismo tiempo pero son eventos
+        // conceptualmente distintos.
+        var contribution = new InvestmentContribution
+        {
+            InvestmentId = investmentId,
+            ContributionDate = dto.ContributionDate ?? DateOnly.FromDateTime(DateTime.UtcNow),
+            Amount = dto.Amount,
+            Notes = dto.Notes?.Trim()
+        };
+
+        await _investmentRepository.AddContributionAsync(contribution, cancellationToken);
+
+        return new InvestmentContributionResponseDto
+        {
+            Id = contribution.Id,
+            ContributionDate = contribution.ContributionDate,
+            Amount = contribution.Amount,
+            Notes = contribution.Notes,
+            CreatedAt = contribution.CreatedAt
+        };
     }
 
     private static InvestmentResponseDto MapToResponseDto(Investment investment) => new()

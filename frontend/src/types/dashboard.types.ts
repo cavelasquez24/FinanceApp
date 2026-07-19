@@ -54,3 +54,15 @@ export interface ExpensesByCategoryResponse {
   categories: CategoryChartItem[];
   totalAmount: number;
 }
+
+// v2.0.1 — sección 5. GET /dashboard/cashflow-statement
+export interface CashFlowStatement {
+  income: number;
+  consumptionExpenses: number;
+  savingsContributions: number;
+  investmentContributions: number;
+  debtPrincipalPaid: number;
+  cashFlowResidual: number;
+  consumptionRate: number;
+  wealthBuildingRate: number;
+}

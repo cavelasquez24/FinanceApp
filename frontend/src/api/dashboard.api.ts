@@ -4,6 +4,7 @@ import type {
   DashboardOverview,
   MonthlyTrend,
   ExpensesByCategoryResponse,
+  CashFlowStatement,
 } from '../types/dashboard.types';
 import type { ApiResponse } from '../types/api.types';
 
@@ -25,6 +26,13 @@ export const dashboardApi = {
   getExpensesByCategory: async (month: number, year: number) => {
     const response = await apiClient.get<ApiResponse<ExpensesByCategoryResponse>>(
       `/dashboard/expenses-by-category?month=${month}&year=${year}`
+    );
+    return response.data.data;
+  },
+
+  getCashFlowStatement: async (month: number, year: number) => {
+    const response = await apiClient.get<ApiResponse<CashFlowStatement>>(
+      `/dashboard/cashflow-statement?month=${month}&year=${year}`
     );
     return response.data.data;
   },

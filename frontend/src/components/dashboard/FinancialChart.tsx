@@ -14,7 +14,10 @@ export function FinancialChart({ data }: Props) {
       name: label,
       Ingresos: data.income[index] || 0,
       Gastos: data.expenses[index] || 0,
-      Ahorros: data.savings[index] || 0,
+      // v2.0.1 (6.1) — "Ahorros" renombrado a "Flujo Residual": es
+      // income - expenses (caja no asignada), NO contribuciones reales a
+      // SavingsGoal. Puede ser negativo (gastar más de lo que se gana).
+      'Flujo Residual': data.savings[index] || 0,
     }));
   }, [data]);
 
@@ -23,24 +26,27 @@ export function FinancialChart({ data }: Props) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#EFEAE2" />
-          
-          <XAxis 
-            dataKey="name" 
-            stroke="#7C756E" 
-            fontSize={12} 
-            tickLine={false} 
-            axisLine={{ stroke: '#EFEAE2' }} 
+
+          <XAxis
+            dataKey="name"
+            stroke="#7C756E"
+            fontSize={12}
+            tickLine={false}
+            axisLine={{ stroke: '#EFEAE2' }}
           />
-          
+
           <YAxis
             stroke="#7C756E"
             fontSize={12}
             tickLine={false}
             axisLine={{ stroke: '#EFEAE2' }}
             tickFormatter={(value) => `$${value}`}
-            domain={[0, 'auto']} // Bloquea el renderizado de valores negativos
+            // v2.0.1 (6.2) — dominio libre: un Flujo Residual negativo es
+            // la señal de alerta más importante que este gráfico debe
+            // poder mostrar. Un piso en 0 la ocultaba.
+            domain={['auto', 'auto']}
           />
-          
+
           <Tooltip
             contentStyle={{
               backgroundColor: 'rgba(255,255,255,0.9)',
@@ -51,33 +57,33 @@ export function FinancialChart({ data }: Props) {
             labelStyle={{ color: '#2C2A29', fontWeight: 600 }}
             itemStyle={{ color: '#7C756E' }}
           />
-          
+
           <Legend wrapperStyle={{ paddingTop: '12px', color: '#7C756E', fontSize: '12px' }} />
-          
-          {/* Interpolación monotoneX reemplaza a natural para prevenir el overshoot */}
-          <Line 
-            type="monotoneX" 
-            dataKey="Ingresos" 
-            stroke="#5C7A99" 
-            strokeWidth={2.5} 
-            dot={false} 
-            activeDot={{ r: 4, fill: '#5C7A99' }} 
+
+          {/* Línea de referencia en 0 para que un Flujo Residual negativo se lea de inmediato */}
+          <Line
+            type="monotoneX"
+            dataKey="Ingresos"
+            stroke="#5C7A99"
+            strokeWidth={2.5}
+            dot={false}
+            activeDot={{ r: 4, fill: '#5C7A99' }}
           />
-          <Line 
-            type="monotoneX" 
-            dataKey="Gastos" 
-            stroke="#C97B63" 
-            strokeWidth={2.5} 
-            dot={false} 
-            activeDot={{ r: 4, fill: '#C97B63' }} 
+          <Line
+            type="monotoneX"
+            dataKey="Gastos"
+            stroke="#C97B63"
+            strokeWidth={2.5}
+            dot={false}
+            activeDot={{ r: 4, fill: '#C97B63' }}
           />
-          <Line 
-            type="monotoneX" 
-            dataKey="Ahorros" 
-            stroke="#8FA888" 
-            strokeWidth={2.5} 
-            dot={false} 
-            activeDot={{ r: 4, fill: '#8FA888' }} 
+          <Line
+            type="monotoneX"
+            dataKey="Flujo Residual"
+            stroke="#8FA888"
+            strokeWidth={2.5}
+            dot={false}
+            activeDot={{ r: 4, fill: '#8FA888' }}
           />
         </LineChart>
       </ResponsiveContainer>

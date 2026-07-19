@@ -1,4 +1,4 @@
-﻿using FinanceApp.Domain.Enums;
+using FinanceApp.Domain.Enums;
 
 namespace FinanceApp.Domain.Entities;
 
@@ -18,6 +18,9 @@ public class Investment : BaseEntity
     // Propiedades de navegación
     public User User { get; set; } = null!;
     public ICollection<InvestmentRecord> Records { get; set; } = new List<InvestmentRecord>();
+
+    // v2.0.1 — historial de aportes de caja (distinto de Records/valuation)
+    public ICollection<InvestmentContribution> Contributions { get; set; } = new List<InvestmentContribution>();
 
     // Calculadas en memoria no BD
     public decimal GainLoss => CurrentValue - InitialAmount;

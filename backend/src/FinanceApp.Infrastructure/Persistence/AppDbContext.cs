@@ -1,4 +1,4 @@
-﻿using FinanceApp.Domain.Entities;
+using FinanceApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinanceApp.Infrastructure.Persistence;
@@ -26,7 +26,10 @@ public class AppDbContext : DbContext
     public DbSet<DebtPayment> DebtPayments => Set<DebtPayment>();
     public DbSet<Investment> Investments => Set<Investment>();
     public DbSet<InvestmentRecord> InvestmentRecords => Set<InvestmentRecord>();
+    public DbSet<InvestmentContribution> InvestmentContributions => Set<InvestmentContribution>();
     public DbSet<SavingsGoal> SavingsGoals => Set<SavingsGoal>();
+    public DbSet<SavingsGoalContribution> SavingsGoalContributions => Set<SavingsGoalContribution>();
+    public DbSet<SavingsGoalWithdrawal> SavingsGoalWithdrawals => Set<SavingsGoalWithdrawal>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -14,6 +14,10 @@ public class SavingsGoal : BaseEntity
     // Propiedad de navegación
     public User User { get; set; } = null!;
 
+    // v2.0.1 — historial de movimientos (SavingsGoalContribution/Withdrawal)
+    public ICollection<SavingsGoalContribution> Contributions { get; set; } = new List<SavingsGoalContribution>();
+    public ICollection<SavingsGoalWithdrawal> Withdrawals { get; set; } = new List<SavingsGoalWithdrawal>();
+
     // Calculadas en memoria
     public decimal ProgressPercentage => TargetAmount > 0
         ? Math.Min((CurrentAmount / TargetAmount) * 100, 100)
