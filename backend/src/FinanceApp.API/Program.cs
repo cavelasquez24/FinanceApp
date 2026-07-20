@@ -1,6 +1,7 @@
 ﻿using FinanceApp.API.Middleware;
 using FinanceApp.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -97,6 +98,23 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// ── Aplicar migraciones pendientes automáticamente al arrancar ────────
+// Evita depender de correr `dotnet ef database update` manualmente
+// contra cada entorno (local/Neon). Se ejecuta en cada deploy; si no hay
+// migraciones pendientes, no hace nada.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FinanceApp.Infrastructure.Persistence.AppDbContext>();
+    db.Database.Migrate();
+}
+
+// ── 6. Pipeline de ejecución ──────────────────────────────────────────
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // ── 6. Pipeline de ejecución ──────────────────────────────────────────
 if (app.Environment.IsDevelopment())
