@@ -14,7 +14,7 @@ public interface IDebtRepository : IBaseRepository<Debt>
     /// </summary>
     Task<decimal> GetTotalCurrentBalanceAsync(
         Guid userId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default); 
 
     /// <summary>
     /// Suma de pagos de deuda (Amount) dentro de un rango de fechas.
