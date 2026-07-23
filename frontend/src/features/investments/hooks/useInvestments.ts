@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { investmentsApi } from '../../../api/investments.api';
 import toast from 'react-hot-toast';
-import type { CreateInvestmentDto, UpdateInvestmentDto, CreateInvestmentRecordDto } from '../../../types/investment.types';
+import type { CreateInvestmentDto, UpdateInvestmentDto, CreateInvestmentRecordDto, CreateInvestmentContributionDto } from '../../../types/investment.types';
+
 
 export function useInvestments() {
   return useQuery({
@@ -80,5 +81,20 @@ export function useDeleteInvestment() {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
     onError: () => toast.error('Error al eliminar la inversión'),
+  });
+}
+
+export function useAddInvestmentContribution() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CreateInvestmentContributionDto }) =>
+      investmentsApi.addContribution(id, data),
+    onSuccess: () => {
+      toast.success('Aporte registrado exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['investments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: () => toast.error('Error al registrar el aporte'),
   });
 }

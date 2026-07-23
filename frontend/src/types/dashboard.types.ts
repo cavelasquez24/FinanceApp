@@ -39,7 +39,7 @@ export interface MonthlyTrend {
   labels: string[];
   income: number[];
   expenses: number[];
-  savings: number[];
+  residual: number[];
 }
 
 export interface CategoryChartItem {
@@ -61,6 +61,7 @@ export interface CashFlowStatement {
   consumptionExpenses: number;
   savingsContributions: number;
   investmentContributions: number;
+  savingsWithdrawals: number;
   debtPrincipalPaid: number;
   cashFlowResidual: number;
   consumptionRate: number;

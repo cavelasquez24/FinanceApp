@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { SavingsGoal, CreateSavingsGoalDto, DepositDto } from '../types/savings.types';
+import type { SavingsGoal, CreateSavingsGoalDto, DepositDto, SavingsGoalWithdrawal, WithdrawDto } from '../types/savings.types';
 import type { ApiResponse } from '../types/api.types';
 
 export const savingsApi = {
@@ -36,6 +36,12 @@ export const savingsApi = {
   // PATCH /api/v1/savings-goals/{id}/deposit
   deposit: async (id: string, data: DepositDto) => {
     const response = await apiClient.patch<ApiResponse<null>>(`/savings-goals/${id}/deposit`, data);
+    return response.data.data;
+  },
+
+  // POST /api/v1/savings-goals/{id}/withdrawals  ← NUEVO, agregado aquí
+  withdraw: async (id: string, data: WithdrawDto) => {
+    const response = await apiClient.post<ApiResponse<SavingsGoalWithdrawal>>(`/savings-goals/${id}/withdrawals`, data);
     return response.data.data;
   }
 };

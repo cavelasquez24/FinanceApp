@@ -118,7 +118,8 @@ public class SavingsGoalService : ISavingsGoalService
                 "INVALID_DEPOSIT_AMOUNT",
                 "El monto del depósito debe ser mayor a 0");
 
-        goal.CurrentAmount += dto.Amount;
+        var appliedAmount = Math.Min(dto.Amount, goal.TargetAmount - goal.CurrentAmount);
+        goal.CurrentAmount += appliedAmount;
 
         // Verificamos si se completó la meta con este depósito
         if (goal.CurrentAmount >= goal.TargetAmount)
@@ -127,15 +128,13 @@ public class SavingsGoalService : ISavingsGoalService
             goal.IsCompleted = true;
         }
 
-        await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
-
         // v2.0.1 — registro histórico. El contrato del endpoint /deposit
         // no cambia; esto solo agrega trazabilidad, no reemplaza CurrentAmount.
         var contribution = new SavingsGoalContribution
         {
             SavingsGoalId = goal.Id,
             ContributionDate = DateOnly.FromDateTime(DateTime.UtcNow),
-            Amount = dto.Amount,
+            Amount = appliedAmount,
             Notes = dto.Notes
         };
         await _savingsGoalRepository.AddContributionAsync(contribution, cancellationToken);
@@ -159,18 +158,21 @@ public class SavingsGoalService : ISavingsGoalService
                 "INVALID_WITHDRAWAL_AMOUNT",
                 "El monto del retiro debe ser mayor a 0");
 
+        if (dto.Amount > goal.CurrentAmount)
+            throw new DomainException(
+                "INSUFFICIENT_SAVINGS_BALANCE",
+                "El retiro no puede superar el saldo disponible");
+
         // Regla del spec 3.2: LinkedExpenseId solo tiene sentido si Reason = Consumed
         if (dto.LinkedExpenseId.HasValue && dto.Reason != SavingsWithdrawalReason.Consumed)
             throw new DomainException(
                 "INVALID_LINKED_EXPENSE",
                 "LinkedExpenseId solo es válido cuando Reason es Consumed");
 
-        goal.CurrentAmount = Math.Max(0, goal.CurrentAmount - dto.Amount);
+        goal.CurrentAmount -= dto.Amount;
 
         // Un retiro puede sacar la meta de "completada" si ya lo estaba
         goal.IsCompleted = goal.CurrentAmount >= goal.TargetAmount && goal.TargetAmount > 0;
-
-        await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
 
         var withdrawal = new SavingsGoalWithdrawal
         {

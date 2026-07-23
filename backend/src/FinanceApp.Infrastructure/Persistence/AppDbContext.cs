@@ -31,6 +31,7 @@ public class AppDbContext : DbContext
     public DbSet<SavingsGoalContribution> SavingsGoalContributions => Set<SavingsGoalContribution>();
     public DbSet<SavingsGoalWithdrawal> SavingsGoalWithdrawals => Set<SavingsGoalWithdrawal>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<DebtWithdrawal> DebtWithdrawals => Set<DebtWithdrawal>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

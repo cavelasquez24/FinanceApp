@@ -17,6 +17,9 @@ public class Debt : BaseEntity
     public DateOnly? TargetPayoffDate { get; set; }
     public bool IsActive { get; set; } = true;
     public string? Notes { get; set; }
+    public Guid? LinkedSavingsGoalId { get; set; }
+    public ICollection<DebtWithdrawal> Withdrawals { get; set; } = new List<DebtWithdrawal>();
+
 
     // Propiedades de navegación
     public User User { get; set; } = null!;

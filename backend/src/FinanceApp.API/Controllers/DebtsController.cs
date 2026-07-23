@@ -85,4 +85,13 @@ public class DebtsController : ControllerBase
         return StatusCode(201, ApiResponse<DebtPaymentResponseDto>.Ok(
             result, "Pago registrado exitosamente"));
     }
+
+    [HttpPost("{id:guid}/withdrawals")]
+    public async Task<IActionResult> AddWithdrawal(
+    Guid id, [FromBody] DebtWithdrawalCreateDto dto, CancellationToken cancellationToken)
+    {
+        var result = await _debtService.AddWithdrawalAsync(id, GetUserId(), dto, cancellationToken);
+        return StatusCode(201, ApiResponse<DebtWithdrawalResponseDto>.Ok(
+            result, "Préstamo registrado exitosamente"));
+    }
 }

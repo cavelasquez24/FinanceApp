@@ -50,6 +50,7 @@ public class InvestmentRepository : BaseRepository<Investment>, IInvestmentRepos
     {
         return await _context.InvestmentContributions
             .Where(c => c.Investment.UserId == userId
+                && c.Investment.DeletedAt == null
                 && c.ContributionDate >= start && c.ContributionDate <= end
                 && c.DeletedAt == null)
             .SumAsync(c => c.Amount, cancellationToken);

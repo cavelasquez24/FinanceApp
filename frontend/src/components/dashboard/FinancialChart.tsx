@@ -14,10 +14,10 @@ export function FinancialChart({ data }: Props) {
       name: label,
       Ingresos: data.income[index] || 0,
       Gastos: data.expenses[index] || 0,
-      // v2.0.1 (6.1) — "Ahorros" renombrado a "Flujo Residual": es
-      // income - expenses (caja no asignada), NO contribuciones reales a
-      // SavingsGoal. Puede ser negativo (gastar más de lo que se gana).
-      'Flujo Residual': data.savings[index] || 0,
+      // Disponible real: ingreso + retiros de ahorro - gastos - aportes a
+      // ahorro/inversión - capital de deuda. Puede ser negativo cuando se
+      // asigna más caja de la que entra en el ciclo.
+      'Disponible': data.residual[index] || 0,
     }));
   }, [data]);
 
@@ -79,7 +79,7 @@ export function FinancialChart({ data }: Props) {
           />
           <Line
             type="monotoneX"
-            dataKey="Flujo Residual"
+            dataKey="Disponible"
             stroke="#8FA888"
             strokeWidth={2.5}
             dot={false}

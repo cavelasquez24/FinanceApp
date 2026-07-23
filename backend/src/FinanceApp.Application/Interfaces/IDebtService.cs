@@ -28,4 +28,8 @@ public interface IDebtService
     Task<DebtPaymentResponseDto> AddPaymentAsync(
         Guid debtId, Guid userId, DebtPaymentCreateDto dto,
         CancellationToken cancellationToken = default);
+
+    Task<DebtWithdrawalResponseDto> AddWithdrawalAsync(
+        Guid debtId, Guid userId, DebtWithdrawalCreateDto dto,
+        CancellationToken cancellationToken = default);
 }

@@ -5,6 +5,8 @@ import type {
   InvestmentRecord,
   CreateInvestmentDto,
   UpdateInvestmentDto,
+  InvestmentContribution,
+  CreateInvestmentContributionDto,
   CreateInvestmentRecordDto
 } from '../types/investment.types';
 import type { ApiResponse } from '../types/api.types';
@@ -56,6 +58,12 @@ export const investmentsApi = {
   // POST /api/v1/investments/{id}/records
   addRecord: async (id: string, data: CreateInvestmentRecordDto) => {
     const response = await apiClient.post<ApiResponse<InvestmentRecord>>(`/investments/${id}/records`, data);
+    return response.data.data;
+  },
+
+  // POST /api/v1/investments/{id}/contributions
+  addContribution: async (id: string, data: CreateInvestmentContributionDto) => {
+    const response = await apiClient.post<ApiResponse<InvestmentContribution>>(`/investments/${id}/contributions`, data);
     return response.data.data;
   }
 };

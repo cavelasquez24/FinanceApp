@@ -89,11 +89,30 @@ export function DashboardPage() {
         </>
       ) : null}
 
+      <Card className="!rounded-[28px]">
+        <CardHeader
+          title="Distribución del ingreso"
+          subtitle="Gastos, ahorro, inversión, deuda y disponible del ciclo seleccionado"
+        />
+        {isLoadingCashFlow ? (
+          <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
+            <Spinner />
+            <span className="text-sm">Cargando flujo de caja...</span>
+          </div>
+        ) : isErrorCashFlow ? (
+          <div className="flex flex-col items-center gap-2 p-12 text-center text-[#C97B63]">
+            <AlertCircle className="h-6 w-6" strokeWidth={2} />
+            <span className="text-sm font-medium">Error al cargar el flujo de caja.</span>
+          </div>
+        ) : cashFlowData ? (
+          <CashFlowStatementCard data={cashFlowData} />
+        ) : null}
+      </Card>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2 !rounded-[28px]">
           <CardHeader
-            title="Tendencia Financiera"
-            subtitle="Evolución mensual de ingresos, gastos y flujo residual (últimos 12 meses)"
+            title="Tendencia del disponible real"
+            subtitle="Ingreso, gasto y caja restante después de todas las asignaciones (últimos 12 ciclos)"
           />
           {isLoadingTrend ? (
             <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
@@ -113,25 +132,6 @@ export function DashboardPage() {
         <SavingsGoalsMiniWidget />
       </div>
 
-      <Card className="!rounded-[28px]">
-        <CardHeader
-          title="Aportes a Patrimonio"
-          subtitle="Construcción de patrimonio del mes seleccionado"
-        />
-        {isLoadingCashFlow ? (
-          <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
-            <Spinner />
-            <span className="text-sm">Cargando flujo de caja...</span>
-          </div>
-        ) : isErrorCashFlow ? (
-          <div className="flex flex-col items-center gap-2 p-12 text-center text-[#C97B63]">
-            <AlertCircle className="h-6 w-6" strokeWidth={2} />
-            <span className="text-sm font-medium">Error al cargar el flujo de caja.</span>
-          </div>
-        ) : cashFlowData ? (
-          <CashFlowStatementCard data={cashFlowData} />
-        ) : null}
-      </Card>
     </div>
   );
 }

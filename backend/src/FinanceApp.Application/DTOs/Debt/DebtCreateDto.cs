@@ -13,4 +13,5 @@ public class DebtCreateDto
     public DateOnly StartDate { get; set; }
     public DateOnly? TargetPayoffDate { get; set; }
     public string? Notes { get; set; }
+    public Guid? LinkedSavingsGoalId { get; set; }
 }

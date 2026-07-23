@@ -5,11 +5,13 @@ import { formatCurrency } from '../../../utils/formatCurrency';
 interface Props {
   goal: SavingsGoal;
   onDeposit: () => void;
+  onWithdraw: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-export default function SavingsGoalCard({ goal, onDeposit, onEdit, onDelete }: Props) {
+export default function SavingsGoalCard({ goal, onDeposit, onWithdraw, onEdit, onDelete }: Props) {
+
   const isDepositDisabled = goal.isCompleted; 
   
   // Verde salvia claro para metas según el spec
@@ -67,17 +69,26 @@ export default function SavingsGoalCard({ goal, onDeposit, onEdit, onDelete }: P
           )}
         </div>
 
-        <button
-          onClick={onDeposit}
-          disabled={isDepositDisabled}
-          className={`w-full py-2.5 rounded-xl font-medium transition-colors ${
-            isDepositDisabled 
-              ? 'bg-[#EFEAE2] text-[#7C756E] cursor-not-allowed opacity-60' 
-              : 'bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#1A1918]'
-          }`}
-        >
-          {goal.isCompleted ? 'Completada' : 'Aportar a la meta'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onDeposit}
+            disabled={isDepositDisabled}
+            className={`flex-1 py-2.5 rounded-xl font-medium transition-colors ${
+              isDepositDisabled
+                ? 'bg-[#EFEAE2] text-[#7C756E] cursor-not-allowed opacity-60'
+                : 'bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#1A1918]'
+            }`}
+          >
+            {goal.isCompleted ? 'Completada' : 'Aportar'}
+          </button>
+          <button
+            onClick={onWithdraw}
+            disabled={goal.currentAmount <= 0}
+            className="flex-1 py-2.5 rounded-xl font-medium border border-[#EFEAE2] text-[#7C756E] hover:bg-[#EFEAE2] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Retirar
+          </button>
+        </div>
       </div>
     </div>
   );

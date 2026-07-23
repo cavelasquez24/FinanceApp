@@ -19,7 +19,7 @@ export function EditInvestmentForm({ investment, onSuccess, onCancel }: Props) {
     resolver: zodResolver(updateInvestmentSchema),
     defaultValues: {
       name: investment.name,
-      type: investment.type as any,
+      type: investment.type,
       ticker: investment.ticker || '',
       broker: investment.broker || '',
       notes: investment.notes || '',

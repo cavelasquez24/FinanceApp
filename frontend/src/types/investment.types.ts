@@ -44,17 +44,38 @@ export interface CreateInvestmentDto {
   ticker?: string; 
   broker?: string;
   initialAmount: number;
+  currentValue?: number;
   purchaseDate: string; // "YYYY-MM-DD"
+  isHistoricalImport: boolean;
   notes?: string;
 }
 
-export interface UpdateInvestmentDto extends Partial<CreateInvestmentDto> {
+export interface UpdateInvestmentDto {
+  name: string;
+  type?: InvestmentType;
+  ticker?: string;
+  broker?: string;
   isActive?: boolean;
+  notes?: string;
 }
 
 export interface CreateInvestmentRecordDto {
   recordDate: string; // "YYYY-MM-DD"
   value: number;
   dividends?: number; // default 0
+  notes?: string;
+}
+
+export interface InvestmentContribution {
+  id: string;
+  contributionDate: string; // "YYYY-MM-DD"
+  amount: number;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface CreateInvestmentContributionDto {
+  contributionDate?: string; // "YYYY-MM-DD", opcional → hoy si se omite
+  amount: number;            // > 0
   notes?: string;
 }

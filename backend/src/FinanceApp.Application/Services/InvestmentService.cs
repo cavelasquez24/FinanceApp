@@ -54,11 +54,24 @@ public class InvestmentService : IInvestmentService
             Ticker = dto.Ticker?.Trim().ToUpper(),
             Broker = dto.Broker?.Trim(),
             InitialAmount = dto.InitialAmount,
-            CurrentValue = dto.CurrentValue,
+            CurrentValue = dto.IsHistoricalImport
+                ? dto.CurrentValue ?? dto.InitialAmount
+                : dto.InitialAmount,
             PurchaseDate = dto.PurchaseDate,
             Notes = dto.Notes?.Trim(),
             IsActive = true
         };
+        // A new purchase consumes cash in its cycle. A historical import only
+        // establishes the opening portfolio snapshot.
+        if (!dto.IsHistoricalImport)
+        {
+            investment.Contributions.Add(new InvestmentContribution
+            {
+                ContributionDate = dto.PurchaseDate,
+                Amount = dto.InitialAmount,
+                Notes = "Compra inicial"
+            });
+        }
 
         await _investmentRepository.CreateAsync(investment, cancellationToken);
         return MapToResponseDto(investment);
@@ -76,10 +89,15 @@ public class InvestmentService : IInvestmentService
             throw new NotFoundException("Inversión", id);
 
         investment.Name = dto.Name.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.Type))
+        {
+            investment.Type = Enum.Parse<InvestmentType>(
+                dto.Type.Replace("_", ""), ignoreCase: true);
+        }
         investment.Ticker = dto.Ticker?.Trim().ToUpper();
         investment.Broker = dto.Broker?.Trim();
-        investment.CurrentValue = dto.CurrentValue;
-        investment.IsActive = dto.IsActive;
+        if (dto.IsActive.HasValue)
+            investment.IsActive = dto.IsActive.Value;
         investment.Notes = dto.Notes?.Trim();
 
         await _investmentRepository.UpdateAsync(investment, cancellationToken);
@@ -207,10 +225,11 @@ public class InvestmentService : IInvestmentService
                 "INVALID_CONTRIBUTION_AMOUNT",
                 "El monto del aporte debe ser mayor a 0");
 
-        // v2.0.1 — solo registra el aporte de caja (costo base). NO toca
-        // CurrentValue: eso es responsabilidad exclusiva de AddRecordAsync
-        // (valuation de mercado). Van a mismo tiempo pero son eventos
-        // conceptualmente distintos.
+        // Comprar más participación incrementa el costo base y el valor actual;
+        // una valoración posterior solo modifica CurrentValue.
+        investment.InitialAmount += dto.Amount;
+        investment.CurrentValue += dto.Amount;
+
         var contribution = new InvestmentContribution
         {
             InvestmentId = investmentId,
@@ -219,6 +238,8 @@ public class InvestmentService : IInvestmentService
             Notes = dto.Notes?.Trim()
         };
 
+        // Investment está tracked: el cambio del agregado y el movimiento se
+        // guardan juntos en el SaveChanges del repositorio.
         await _investmentRepository.AddContributionAsync(contribution, cancellationToken);
 
         return new InvestmentContributionResponseDto

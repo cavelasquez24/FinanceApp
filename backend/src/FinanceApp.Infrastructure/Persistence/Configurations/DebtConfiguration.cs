@@ -102,5 +102,13 @@ public class DebtConfiguration : IEntityTypeConfiguration<Debt>
             .WithMany()
             .HasForeignKey(d => d.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(d => d.LinkedSavingsGoalId)
+            .HasColumnName("linked_savings_goal_id")
+            .IsRequired(false);
+
+        builder.HasIndex(d => d.LinkedSavingsGoalId)
+            .HasDatabaseName("idx_debts_linked_savings_goal_id")
+            .HasFilter("linked_savings_goal_id IS NOT NULL AND deleted_at IS NULL");
     }
 }

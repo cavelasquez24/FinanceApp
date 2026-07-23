@@ -44,6 +44,10 @@ public interface ISavingsGoalRepository : IBaseRepository<SavingsGoal>
         Guid userId, DateOnly start, DateOnly end,
         CancellationToken cancellationToken = default);
 
+    Task<decimal> GetTotalCashFlowWithdrawalsByDateRangeAsync(
+        Guid userId, DateOnly start, DateOnly end,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Suma de SavingsGoalWithdrawal cuyo Reason = Consumed (las únicas
     /// que representan consumo real) en un rango de fechas.

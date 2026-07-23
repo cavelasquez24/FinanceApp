@@ -1,4 +1,5 @@
 ﻿using FinanceApp.Application.DTOs.Debt;
+using FinanceApp.Application.DTOs.SavingsGoal;
 using FinanceApp.Application.Interfaces;
 using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
@@ -10,10 +11,12 @@ namespace FinanceApp.Application.Services;
 public class DebtService : IDebtService
 {
     private readonly IDebtRepository _debtRepository;
+    private readonly ISavingsGoalService _savingsGoalService;
 
-    public DebtService(IDebtRepository debtRepository)
+    public DebtService(IDebtRepository debtRepository, ISavingsGoalService savingsGoalService)
     {
         _debtRepository = debtRepository;
+        _savingsGoalService = savingsGoalService;
     }
 
     public async Task<IEnumerable<DebtResponseDto>> GetAllAsync(
@@ -172,19 +175,20 @@ public class DebtService : IDebtService
         CancellationToken cancellationToken = default)
     {
         var debt = await _debtRepository.GetByIdAsync(debtId, cancellationToken);
-
         if (debt == null || debt.UserId != userId || debt.IsDeleted)
             throw new NotFoundException("Deuda", debtId);
-
         if (debt.IsPaidOff)
-            throw new DomainException(
-               "IS_PAIDOFF",
-               "Esta deuda ya fue liquidada.");
-
+            throw new DomainException("IS_PAIDOFF", "Esta deuda ya fue liquidada.");
         if (dto.PrincipalAmount <= 0)
-            throw new DomainException(
-               "INVALID_PRINCIPAL_AMOUNT",
-               "El monto a capital debe ser mayor a 0.");
+            throw new DomainException("INVALID_PRINCIPAL_AMOUNT", "El monto a capital debe ser mayor a 0.");
+
+        if (debt.LinkedSavingsGoalId.HasValue)
+        {
+            await _savingsGoalService.DepositAsync(
+                debt.LinkedSavingsGoalId.Value, userId,
+                new DepositDto { Amount = dto.PrincipalAmount, Notes = $"Auto: abono deuda '{debt.Name}'" },
+                cancellationToken);
+        }
 
         var payment = new DebtPayment
         {
@@ -197,13 +201,59 @@ public class DebtService : IDebtService
         };
 
         debt.Payments.Add(payment);
-
-        // REGLA: el saldo nunca baja de 0, igual que SavingsGoal con su tope
         debt.CurrentBalance = Math.Max(0, debt.CurrentBalance - dto.PrincipalAmount);
 
         await _debtRepository.UpdateAsync(debt, cancellationToken);
-
         return MapPaymentToResponseDto(payment);
+    }
+
+    public async Task<DebtWithdrawalResponseDto> AddWithdrawalAsync(
+        Guid debtId, Guid userId, DebtWithdrawalCreateDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var debt = await _debtRepository.GetByIdAsync(debtId, cancellationToken);
+        if (debt == null || debt.UserId != userId || debt.IsDeleted)
+            throw new NotFoundException("Deuda", debtId);
+        if (dto.Amount <= 0)
+            throw new DomainException("INVALID_WITHDRAWAL_AMOUNT", "El monto debe ser mayor a 0.");
+
+        if (debt.LinkedSavingsGoalId.HasValue)
+        {
+            await _savingsGoalService.WithdrawAsync(
+                debt.LinkedSavingsGoalId.Value, userId,
+                new SavingsGoalWithdrawalCreateDto
+                {
+                    Amount = dto.Amount,
+                    WithdrawalDate = dto.WithdrawalDate,
+                    Reason = SavingsWithdrawalReason.ReallocatedToLiquid,
+                    Notes = $"Auto: préstamo contra fondo, deuda '{debt.Name}'"
+                },
+                cancellationToken);
+        }
+
+        debt.OriginalAmount += dto.Amount;
+        debt.CurrentBalance += dto.Amount;
+
+        var withdrawal = new DebtWithdrawal
+        {
+            DebtId = debtId,
+            WithdrawalDate = dto.WithdrawalDate ?? DateOnly.FromDateTime(DateTime.UtcNow),
+            Amount = dto.Amount,
+            Notes = dto.Notes?.Trim()
+        };
+        debt.Withdrawals.Add(withdrawal);
+
+        await _debtRepository.UpdateAsync(debt, cancellationToken);
+
+        return new DebtWithdrawalResponseDto
+        {
+            Id = withdrawal.Id,
+            WithdrawalDate = withdrawal.WithdrawalDate,
+            Amount = withdrawal.Amount,
+            Notes = withdrawal.Notes,
+            CreatedAt = withdrawal.CreatedAt,
+            DebtCurrentBalanceAfter = debt.CurrentBalance
+        };
     }
 
     private static DebtResponseDto MapToResponseDto(Debt debt) => new()

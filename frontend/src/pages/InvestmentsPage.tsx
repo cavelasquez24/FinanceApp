@@ -1,6 +1,7 @@
 // src/pages/InvestmentsPage.tsx
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, TrendingUp, DollarSign, PieChart, Activity } from 'lucide-react';
+import { Plus, Edit2, Trash2, TrendingUp, DollarSign, PieChart, Activity, PlusCircle } from 'lucide-react';
+import { AddInvestmentContributionForm } from '../features/investments/components/AddInvestmentContributionForm';
 import { useInvestments, useInvestmentSummary, useDeleteInvestment } from '../features/investments/hooks/useInvestments';
 import { CreateInvestmentForm } from '../features/investments/components/CreateInvestmentForm';
 import { EditInvestmentForm } from '../features/investments/components/EditInvestmentForm';
@@ -19,6 +20,7 @@ export default function InvestmentsPage() {
   const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
   const [deletingInvestment, setDeletingInvestment] = useState<Investment | null>(null);
   const [addingRecordInvestment, setAddingRecordInvestment] = useState<Investment | null>(null);
+  const [addingContributionInvestment, setAddingContributionInvestment] = useState<Investment | null>(null);
 
   if (loadingSummary || loadingInvestments) {
     return (
@@ -169,7 +171,14 @@ export default function InvestmentsPage() {
                       >
                         <TrendingUp className="h-4 w-4" />
                       </button>
-                      <button 
+                      <button
+                        onClick={() => setAddingContributionInvestment(inv)}
+                        title="Registrar aporte"
+                        className="p-2 text-[#7C756E] hover:text-[#5C7A99] hover:bg-[#5C7A99]/10 rounded-xl transition-all"
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                      </button>
+                      <button
                         onClick={() => setEditingInvestment(inv)} 
                         title="Editar" 
                         className="p-2 text-[#7C756E] hover:text-[#2C2A29] hover:bg-[#EFEAE2] rounded-xl transition-all"
@@ -223,6 +232,16 @@ export default function InvestmentsPage() {
             investment={addingRecordInvestment} 
             onSuccess={() => setAddingRecordInvestment(null)} 
             onCancel={() => setAddingRecordInvestment(null)} 
+          />
+        )}
+      </Modal>
+
+      <Modal isOpen={!!addingContributionInvestment} onClose={() => setAddingContributionInvestment(null)} title="Registrar Aporte">
+        {addingContributionInvestment && (
+          <AddInvestmentContributionForm
+            investment={addingContributionInvestment}
+            onSuccess={() => setAddingContributionInvestment(null)}
+            onCancel={() => setAddingContributionInvestment(null)}
           />
         )}
       </Modal>

@@ -1,7 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { savingsApi } from '../../../api/savings.api';
 import toast from 'react-hot-toast';
-import type { CreateSavingsGoalDto, DepositDto } from '../../../types/savings.types';
+import type { CreateSavingsGoalDto, DepositDto, WithdrawDto } from '../../../types/savings.types';
+
+
+interface ApiError {
+  response?: {
+    data?: {
+      error?: { code?: string };
+    };
+  };
+}
+
 
 export function useSavingsGoals() {
   return useQuery({
@@ -60,13 +70,37 @@ export function useDepositSavings() {
       queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       // Manejar el error 400 "GOAL_ALREADY_COMPLETED" u otros
       const errorCode = error.response?.data?.error?.code;
       if (errorCode === 'GOAL_ALREADY_COMPLETED') {
         toast.error('No se puede depositar en una meta completada');
       } else {
         toast.error('Error al registrar el depósito');
+      }
+    },
+  });
+}
+
+export function useWithdrawSavings() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: WithdrawDto }) =>
+      savingsApi.withdraw(id, data),
+    onSuccess: () => {
+      toast.success('Retiro registrado exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: (error: ApiError) => {
+      const errorCode = error.response?.data?.error?.code;
+      if (errorCode === 'INVALID_LINKED_EXPENSE') {
+        toast.error('El gasto vinculado solo aplica cuando el motivo es "Consumido"');
+      } else if (errorCode === 'INSUFFICIENT_SAVINGS_BALANCE') {
+        toast.error('El retiro supera el saldo disponible');
+      } else {
+        toast.error('Error al registrar el retiro');
       }
     },
   });

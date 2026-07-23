@@ -11,6 +11,13 @@ public class DebtRepository : BaseRepository<Debt>, IDebtRepository
     {
     }
 
+    public async Task AddWithdrawalAsync(
+    DebtWithdrawal withdrawal, CancellationToken cancellationToken = default)
+    {
+        await _context.DebtWithdrawals.AddAsync(withdrawal, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<Debt>> GetByUserIdAsync(
         Guid userId, CancellationToken cancellationToken = default)
     {

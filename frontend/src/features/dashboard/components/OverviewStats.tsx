@@ -83,9 +83,8 @@ export function OverviewStats({ data }: Props) {
           accent="#C97B63"
         />
         <Kpi
-          label="Ahorro neto"
-          value={currency(data.netSavings)}
-          change={data.changes.savingsChange}
+          label="Ahorro en metas"
+          value={currency(data.totalSavingsGoals)}
           icon={<PiggyBank className="h-5 w-5" strokeWidth={2} />}
           accent="#8FA888"
         />
@@ -100,7 +99,7 @@ export function OverviewStats({ data }: Props) {
       {/* Ratios y contexto */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="!rounded-[28px]">
-          <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Tasa de ahorro</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Disponible / ingreso</p>
           <p className="mt-2 font-serif text-xl font-medium text-[#2C2A29]">
             {data.savingsRate.toFixed(1)}%
           </p>

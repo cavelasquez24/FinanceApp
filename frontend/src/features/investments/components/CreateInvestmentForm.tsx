@@ -1,5 +1,5 @@
 // src/features/investments/components/CreateInvestmentForm.tsx
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createInvestmentSchema, type CreateInvestmentFormValues } from '../schemas/investment.schema';
 import { useCreateInvestment } from '../hooks/useInvestments';
@@ -13,13 +13,16 @@ interface Props {
 export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
   const { mutate: createInvestment, isPending } = useCreateInvestment();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CreateInvestmentFormValues>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<CreateInvestmentFormValues>({
     resolver: zodResolver(createInvestmentSchema),
     defaultValues: {
       type: 'etf',
-      purchaseDate: new Date().toISOString().split('T')[0] // Contrato: "YYYY-MM-DD"
+      purchaseDate: new Date().toISOString().split('T')[0],
+      isHistoricalImport: false,
     }
   });
+
+  const isHistoricalImport = useWatch({ control, name: 'isHistoricalImport' });
 
   const onSubmit = (data: CreateInvestmentFormValues) => {
     const payload = {
@@ -80,6 +83,21 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#EFEAE2] bg-white/60 p-4 md:col-span-2">
+          <input
+            type="checkbox"
+            className="mt-1 rounded border-[#D8D1C7] text-[#2C2A29] focus:ring-[#7C756E]"
+            {...register('isHistoricalImport')}
+          />
+          <span>
+            <span className="block text-sm font-medium text-[#2C2A29]">Importar inversión histórica</span>
+            <span className="mt-1 block text-xs leading-relaxed text-[#7C756E]">
+              Actívalo si la compra ocurrió antes de usar FinanceApp. La importación establece el portafolio,
+              pero no consume el disponible del ciclo.
+            </span>
+          </span>
+        </label>
+
         <Input 
           label="Monto Inicial Invertido"
           type="number"
@@ -95,6 +113,17 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
           {...register('purchaseDate')}
         />
       </div>
+      {isHistoricalImport && (
+        <Input
+          label="Valor Actual"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="Si se omite, usa el capital base"
+          error={errors.currentValue?.message}
+          {...register('currentValue', { setValueAs: (value) => value === '' ? undefined : Number(value) })}
+        />
+      )}
 
       <Input 
         label="Notas Adicionales (Opcional)"

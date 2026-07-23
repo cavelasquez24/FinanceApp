@@ -23,12 +23,12 @@ export function DashboardHeroRow({ netWorth, cashFlowResidual }: Props) {
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">
-              Patrimonio neto
+              Patrimonio registrado
             </p>
             <p className="mt-2 font-serif text-4xl font-medium text-[#2C2A29]">
               {currency(netWorth)}
             </p>
-            <p className="mt-2 text-xs text-[#7C756E]">Activos menos pasivos, a hoy.</p>
+            <p className="mt-2 text-xs text-[#7C756E]">Inversiones y metas menos deuda; no presume efectivo no registrado.</p>
             {/* TODO: sparkline cuando exista GET /dashboard/net-worth-trend
                 (MonthlySnapshot.NetWorthAtClose, pendiente en backend —
                 resumen técnico sección 3.5). No se simula con mock data. */}
@@ -47,7 +47,7 @@ export function DashboardHeroRow({ netWorth, cashFlowResidual }: Props) {
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">
-              Flujo residual del mes
+              Disponible del ciclo
             </p>
             <p
               className={`mt-2 font-serif text-4xl font-medium ${
@@ -59,7 +59,7 @@ export function DashboardHeroRow({ netWorth, cashFlowResidual }: Props) {
             <p className={`mt-2 text-xs ${isResidualNegative ? 'text-[#C97B63]' : 'text-[#7C756E]'}`}>
               {isResidualNegative
                 ? 'Gastando/asignando más de lo que ingresa este mes.'
-                : 'Caja disponible después de ingresos y gastos.'}
+                : 'Caja tras gastos, aportes, inversión y capital de deuda.'}
             </p>
           </div>
           <div

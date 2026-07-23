@@ -3,9 +3,10 @@ import { Plus, AlertCircle } from 'lucide-react';
 import { useSavingsGoals } from '../features/savings/hooks/useSavings';
 import SavingsGoalCard from '../features/savings/components/SavingsGoalCard';
 import DepositModal from '../features/savings/components/DepositModal';
+import WithdrawModal from '../features/savings/components/WithdrawModal'; // ← NUEVO import
 import EditGoalModal from '../features/savings/components/EditGoalModal';
 import DeleteConfirmModal from '../features/savings/components/DeleteConfirmModal';
-import CreateGoalModal from '../features/savings/components/CreateGoalModal'; // Asumido que existe
+import CreateGoalModal from '../features/savings/components/CreateGoalModal';
 import { type SavingsGoal } from '../types/savings.types';
 import { Button, Spinner } from '../components/ui';
 
@@ -15,6 +16,7 @@ export default function SavingsPage() {
   // Estados para modales
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedGoalForDeposit, setSelectedGoalForDeposit] = useState<SavingsGoal | null>(null);
+  const [selectedGoalForWithdraw, setSelectedGoalForWithdraw] = useState<SavingsGoal | null>(null);
   const [selectedGoalForEdit, setSelectedGoalForEdit] = useState<SavingsGoal | null>(null);
   const [selectedGoalForDelete, setSelectedGoalForDelete] = useState<SavingsGoal | null>(null);
 
@@ -53,12 +55,13 @@ export default function SavingsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-max">
+     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-max">
         {goals?.map((goal) => (
           <SavingsGoalCard 
             key={goal.id} 
             goal={goal} 
             onDeposit={() => setSelectedGoalForDeposit(goal)}
+            onWithdraw={() => setSelectedGoalForWithdraw(goal)}
             onEdit={() => setSelectedGoalForEdit(goal)}
             onDelete={() => setSelectedGoalForDelete(goal)}
           />
@@ -75,7 +78,6 @@ export default function SavingsPage() {
           </div>
         )}
       </div>
-
       {/* Renderizado de Modales */}
       {isCreateModalOpen && (
         <CreateGoalModal onClose={() => setIsCreateModalOpen(false)} />
@@ -85,6 +87,13 @@ export default function SavingsPage() {
         <DepositModal
           goal={selectedGoalForDeposit}
           onClose={() => setSelectedGoalForDeposit(null)}
+        />
+      )}
+
+      {selectedGoalForWithdraw && (
+        <WithdrawModal
+          goal={selectedGoalForWithdraw}
+          onClose={() => setSelectedGoalForWithdraw(null)}
         />
       )}
 

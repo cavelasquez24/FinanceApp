@@ -38,4 +38,8 @@ public interface IDebtRepository : IBaseRepository<Debt>
         DateOnly start,
         DateOnly end,
         CancellationToken cancellationToken = default);
+
+    Task AddWithdrawalAsync(
+        DebtWithdrawal withdrawal,
+        CancellationToken cancellationToken = default);
 }

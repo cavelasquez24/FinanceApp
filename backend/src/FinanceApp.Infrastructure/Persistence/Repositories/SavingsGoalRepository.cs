@@ -26,7 +26,6 @@ public class SavingsGoalRepository : BaseRepository<SavingsGoal>, ISavingsGoalRe
     {
         return await _context.SavingsGoals
             .Where(s => s.UserId == userId
-                     && !s.IsCompleted
                      && s.DeletedAt == null)
             .SumAsync(s => s.CurrentAmount, cancellationToken);
     }
@@ -83,6 +82,19 @@ public class SavingsGoalRepository : BaseRepository<SavingsGoal>, ISavingsGoalRe
                 && c.ContributionDate >= start && c.ContributionDate <= end
                 && c.DeletedAt == null)
             .SumAsync(c => c.Amount, cancellationToken);
+    }
+
+    public async Task<decimal> GetTotalCashFlowWithdrawalsByDateRangeAsync(
+        Guid userId, DateOnly start, DateOnly end,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.SavingsGoalWithdrawals
+            .Where(w => w.SavingsGoal.UserId == userId
+                && w.SavingsGoal.DeletedAt == null
+                && w.Reason != SavingsWithdrawalReason.Correction
+                && w.WithdrawalDate >= start && w.WithdrawalDate <= end
+                && w.DeletedAt == null)
+            .SumAsync(w => w.Amount, cancellationToken);
     }
 
     public async Task<decimal> GetTotalConsumedWithdrawalsByDateRangeAsync(

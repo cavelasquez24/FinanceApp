@@ -21,6 +21,10 @@ export const createInvestmentSchema = z.object({
     .number({ message: 'El monto inicial debe ser numérico' })
     .positive('El monto debe ser mayor a cero'),
   // El frontend envía YYYY-MM-DD[cite: 1]
+  currentValue: z.number({ message: 'El valor actual debe ser numérico' })
+    .nonnegative('El valor actual no puede ser negativo')
+    .optional(),
+  isHistoricalImport: z.boolean(),
   purchaseDate: z.string().min(1, 'La fecha de compra es obligatoria'),
 });
 
