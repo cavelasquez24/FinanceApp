@@ -27,6 +27,8 @@ const navItems = [
   { to: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
   { to: '/incomes',     label: 'Ingresos',    icon: TrendingUp      },
   { to: '/expenses',    label: 'Gastos',      icon: TrendingDown    },
+  { to: '/analysis',    label: 'An\u00e1lisis', icon: BarChart3     },
+  { to: '/accounts',    label: 'Cuentas',     icon: Wallet          },
   { to: '/budget',      label: 'Presupuesto', icon: Target          },
   { to: '/investments', label: 'Inversiones', icon: BarChart3       },
   { to: '/debts',     label: 'Deudas',       icon: BoneFracture       },

@@ -12,11 +12,13 @@ public class DebtService : IDebtService
 {
     private readonly IDebtRepository _debtRepository;
     private readonly ISavingsGoalService _savingsGoalService;
+    private readonly IFinancialAccountService _accountService;
 
-    public DebtService(IDebtRepository debtRepository, ISavingsGoalService savingsGoalService)
+    public DebtService(IDebtRepository debtRepository, ISavingsGoalService savingsGoalService, IFinancialAccountService accountService)
     {
         _debtRepository = debtRepository;
         _savingsGoalService = savingsGoalService;
+        _accountService = accountService;
     }
 
     public async Task<IEnumerable<DebtResponseDto>> GetAllAsync(
@@ -204,6 +206,11 @@ public class DebtService : IDebtService
         debt.CurrentBalance = Math.Max(0, debt.CurrentBalance - dto.PrincipalAmount);
 
         await _debtRepository.UpdateAsync(debt, cancellationToken);
+        if (!debt.LinkedSavingsGoalId.HasValue)
+            await _accountService.SyncMovementAsync(
+                userId, null, FinancialAccountType.Cash, -payment.Amount,
+                payment.PaymentDate, "debt-payment", payment.Id,
+                $"Pago: {debt.Name}", cancellationToken);
         return MapPaymentToResponseDto(payment);
     }
 
@@ -244,6 +251,11 @@ public class DebtService : IDebtService
         debt.Withdrawals.Add(withdrawal);
 
         await _debtRepository.UpdateAsync(debt, cancellationToken);
+        if (!debt.LinkedSavingsGoalId.HasValue)
+            await _accountService.SyncMovementAsync(
+                userId, null, FinancialAccountType.Cash, withdrawal.Amount,
+                withdrawal.WithdrawalDate, "debt-withdrawal", withdrawal.Id,
+                $"Desembolso: {debt.Name}", cancellationToken);
 
         return new DebtWithdrawalResponseDto
         {

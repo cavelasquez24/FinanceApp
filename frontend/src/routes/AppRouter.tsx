@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { CurrentDashboardPage } from '../pages/CurrentDashboardPage';
+import { AccountsPage } from '../pages/AccountsPage';
 import { IncomesPage } from '../pages/IncomesPage';
 import { ExpensesPage } from '../pages/ExpensesPage';
 import { BudgetPage } from '../pages/BudgetPage';
@@ -58,7 +60,9 @@ export function AppRouter() {
           <ProtectedRoute><AppLayout /></ProtectedRoute>
         }>
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="analysis" element={<DashboardPage />} />
+          <Route path="accounts" element={<AccountsPage />} />
+          <Route path="dashboard" element={<CurrentDashboardPage />} />
           <Route path="incomes" element={<IncomesPage />} />
           <Route path="expenses" element={<ExpensesPage />} />
           <Route path="budget" element={<BudgetPage />} />

@@ -24,6 +24,10 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .HasColumnName("category_id")
             .IsRequired();
 
+        builder.Property(e => e.AccountId)
+            .HasColumnName("account_id")
+            .IsRequired(false);
+
         builder.Property(e => e.Amount)
             .HasColumnName("amount")
             .HasColumnType("numeric(15,2)")
@@ -86,5 +90,11 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .WithMany(c => c.Expenses)
             .HasForeignKey(e => e.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.Account)
+            .WithMany()
+            .HasForeignKey(e => e.AccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }

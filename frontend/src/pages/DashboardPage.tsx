@@ -56,8 +56,8 @@ export function DashboardPage() {
     <div className="space-y-6 bg-[#FBF9F4] p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-medium text-[#2C2A29]">Dashboard</h1>
-          <p className="text-sm text-[#7C756E]">Resumen financiero de tu mes.</p>
+          <h1 className="font-serif text-2xl font-medium text-[#2C2A29]">An?lisis financiero</h1>
+          <p className="text-sm text-[#7C756E]">Reportes y tendencias por ciclo.</p>
           {cycleLabel && (
             <span className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full border border-[#EFEAE2] bg-white/70 px-3 py-1 text-xs font-medium text-[#2C2A29] backdrop-blur-sm">
               <CalendarClock className="h-3.5 w-3.5 text-[#5C7A99]" strokeWidth={2} aria-hidden="true" />

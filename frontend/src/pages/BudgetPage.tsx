@@ -4,15 +4,26 @@ import { CreateBudgetForm } from '../features/budget/components/CreateBudgetForm
 import { EditBudgetForm } from '../features/budget/components/EditBudgetForm';
 import { Card } from '../components/ui';
 import { Pencil } from 'lucide-react';
+import { useProfile } from '../features/profile/hooks/useProfile';
 
 export function BudgetPage() {
-  const currentMonth = new Date().getMonth() + 1;
-  const currentYear = new Date().getFullYear();
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  const today = new Date();
+  let currentMonth = today.getMonth() + 1;
+  let currentYear = today.getFullYear();
+  if (profile?.paydayDay != null && today.getDate() < profile.paydayDay) {
+    currentMonth -= 1;
+    if (currentMonth === 0) {
+      currentMonth = 12;
+      currentYear -= 1;
+    }
+  }
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: periodResponse, isLoading: isLoadingPeriod } = useBudgetByPeriod(
     currentYear,
-    currentMonth
+    currentMonth,
+    !isLoadingProfile
   );
 
   // Leemos data correctamente — el backend retorna data: null si no existe
@@ -22,7 +33,7 @@ export function BudgetPage() {
   const { data: statusResponse, isLoading: isLoadingStatus } = useBudgetStatus(budgetId);
 
   // --- CARGA ---
-  if (isLoadingPeriod || (budgetId && isLoadingStatus)) {
+  if (isLoadingProfile || isLoadingPeriod || (budgetId && isLoadingStatus)) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="animate-pulse text-sm font-medium text-[#7C756E]">

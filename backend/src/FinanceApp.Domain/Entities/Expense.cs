@@ -6,6 +6,7 @@ public class Expense : BaseEntity
 {
     public Guid UserId { get; set; }
     public Guid CategoryId { get; set; }
+    public Guid? AccountId { get; set; }
     public decimal Amount { get; set; }
     public string? Description { get; set; }
     public DateOnly Date { get; set; }
@@ -22,4 +23,5 @@ public class Expense : BaseEntity
     // Propiedades de navegación
     public User User { get; set; } = null!;
     public Category Category { get; set; } = null!;
+    public FinancialAccount? Account { get; set; }
 }

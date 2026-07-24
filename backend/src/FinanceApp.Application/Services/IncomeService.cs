@@ -1,7 +1,8 @@
-﻿using FinanceApp.Application.DTOs.Common;
+using FinanceApp.Application.DTOs.Common;
 using FinanceApp.Application.DTOs.Income;
 using FinanceApp.Application.Interfaces;
 using FinanceApp.Domain.Entities;
+using FinanceApp.Domain.Enums;
 using FinanceApp.Domain.Exceptions;
 using FinanceApp.Domain.Interfaces.Repositories;
 
@@ -10,25 +11,26 @@ namespace FinanceApp.Application.Services;
 public class IncomeService : IIncomeService
 {
     private readonly IIncomeRepository _incomeRepository;
+    private readonly IFinancialAccountService _accountService;
+    private readonly IUserRepository _userRepository;
 
-    public IncomeService(IIncomeRepository incomeRepository)
+    public IncomeService(
+        IIncomeRepository incomeRepository,
+        IFinancialAccountService accountService,
+        IUserRepository userRepository)
     {
         _incomeRepository = incomeRepository;
+        _accountService = accountService;
+        _userRepository = userRepository;
     }
 
     public async Task<PagedResponse<IncomeResponseDto>> GetAllAsync(
-        Guid userId,
-        IncomeFilterDto filter,
+        Guid userId, IncomeFilterDto filter,
         CancellationToken cancellationToken = default)
     {
         var (items, totalCount) = await _incomeRepository.GetByUserIdAsync(
-            userId,
-            filter.Page,
-            filter.PageSize,
-            filter.CategoryId,
-            filter.StartDate,
-            filter.EndDate,
-            cancellationToken);
+            userId, filter.Page, filter.PageSize, filter.CategoryId,
+            filter.StartDate, filter.EndDate, cancellationToken);
 
         return new PagedResponse<IncomeResponseDto>
         {
@@ -40,105 +42,98 @@ public class IncomeService : IIncomeService
     }
 
     public async Task<IncomeResponseDto> GetByIdAsync(
-        Guid id,
-        Guid userId,
-        CancellationToken cancellationToken = default)
+        Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
         var income = await _incomeRepository.GetByIdAsync(id, cancellationToken);
-
-        // Si no existe O no pertenece al usuario → 404
-        // Nunca revelamos si el recurso existe pero pertenece a otro usuario
         if (income == null || income.UserId != userId || income.IsDeleted)
             throw new NotFoundException("Ingreso", id);
-
         return MapToResponseDto(income);
     }
 
     public async Task<IncomeResponseDto> CreateAsync(
-        Guid userId,
-        IncomeCreateDto dto,
+        Guid userId, IncomeCreateDto dto,
         CancellationToken cancellationToken = default)
     {
+        var assignedCycleStart = await ResolveAssignedCycleStartAsync(
+            userId, dto.Date, dto.AssignedCycleStart, cancellationToken);
         var income = new Income
         {
             UserId = userId,
             CategoryId = dto.CategoryId,
+            AccountId = dto.AccountId,
             Amount = dto.Amount,
             Description = dto.Description?.Trim(),
             Date = dto.Date,
+            AssignedCycleStart = assignedCycleStart,
             Source = dto.Source?.Trim()
         };
 
         await _incomeRepository.CreateAsync(income, cancellationToken);
+        await _accountService.SyncMovementAsync(
+            userId, dto.AccountId, FinancialAccountType.Cash, dto.Amount,
+            dto.Date, "income", income.Id,
+            dto.Description?.Trim() ?? dto.Source?.Trim() ?? "Ingreso",
+            cancellationToken);
 
-        // Recargamos con la categoría incluida para el response
         return await GetByIdAsync(income.Id, userId, cancellationToken);
     }
 
     public async Task<IncomeResponseDto> UpdateAsync(
-        Guid id,
-        Guid userId,
-        IncomeUpdateDto dto,
+        Guid id, Guid userId, IncomeUpdateDto dto,
         CancellationToken cancellationToken = default)
     {
         var income = await _incomeRepository.GetByIdAsync(id, cancellationToken);
-
         if (income == null || income.UserId != userId || income.IsDeleted)
             throw new NotFoundException("Ingreso", id);
 
-        // Actualizamos solo los campos del DTO
         income.CategoryId = dto.CategoryId;
+        income.AccountId = dto.AccountId;
         income.Amount = dto.Amount;
         income.Description = dto.Description?.Trim();
         income.Date = dto.Date;
+        income.AssignedCycleStart = await ResolveAssignedCycleStartAsync(
+            userId, dto.Date, dto.AssignedCycleStart, cancellationToken);
         income.Source = dto.Source?.Trim();
 
         await _incomeRepository.UpdateAsync(income, cancellationToken);
+        await _accountService.SyncMovementAsync(
+            userId, dto.AccountId, FinancialAccountType.Cash, dto.Amount,
+            dto.Date, "income", income.Id,
+            dto.Description?.Trim() ?? dto.Source?.Trim() ?? "Ingreso",
+            cancellationToken);
 
         return await GetByIdAsync(income.Id, userId, cancellationToken);
     }
 
     public async Task DeleteAsync(
-        Guid id,
-        Guid userId,
-        CancellationToken cancellationToken = default)
+        Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
         var income = await _incomeRepository.GetByIdAsync(id, cancellationToken);
-
         if (income == null || income.UserId != userId || income.IsDeleted)
             throw new NotFoundException("Ingreso", id);
 
-        // Soft delete: marcamos como eliminado, no borramos el registro
         income.DeletedAt = DateTimeOffset.UtcNow;
         await _incomeRepository.UpdateAsync(income, cancellationToken);
+        await _accountService.SyncMovementAsync(
+            userId, income.AccountId, FinancialAccountType.Cash, 0,
+            income.Date, "income", income.Id, "Ingreso eliminado",
+            cancellationToken);
     }
 
     public async Task<IncomeSummaryDto> GetSummaryAsync(
-        Guid userId,
-        int month,
-        int year,
+        Guid userId, int month, int year,
         CancellationToken cancellationToken = default)
     {
         var (items, totalCount) = await _incomeRepository.GetByUserIdAsync(
-            userId,
-            page: 1,
-            pageSize: int.MaxValue, // todos para calcular el resumen
+            userId, 1, int.MaxValue,
             startDate: new DateOnly(year, month, 1),
-            endDate: new DateOnly(year, month,
-                DateTime.DaysInMonth(year, month)),
+            endDate: new DateOnly(year, month, DateTime.DaysInMonth(year, month)),
             cancellationToken: cancellationToken);
 
         var incomeList = items.ToList();
         var totalAmount = incomeList.Sum(i => i.Amount);
-
-        // por categoría para  gráfico
         var byCategory = incomeList
-            .GroupBy(i => new
-            {
-                i.CategoryId,
-                i.Category.Name,
-                i.Category.Color
-            })
+            .GroupBy(i => new { i.CategoryId, i.Category.Name, i.Category.Color })
             .Select(g => new IncomeByCategoryDto
             {
                 CategoryName = g.Key.Name,
@@ -159,10 +154,22 @@ public class IncomeService : IIncomeService
         };
     }
 
-    /// <summary>
-    /// Convierte una entidad Income a su DTO de respuesta.
-    /// Método privado reutilizado en todos los métodos del servicio.
-    /// </summary>
+    private async Task<DateOnly?> ResolveAssignedCycleStartAsync(
+        Guid userId, DateOnly incomeDate, DateOnly? requested,
+        CancellationToken cancellationToken)
+    {
+        if (requested.HasValue) return requested;
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user?.PaydayDay is null) return null;
+
+        var payday = Math.Min(
+            user.PaydayDay.Value,
+            DateTime.DaysInMonth(incomeDate.Year, incomeDate.Month));
+        var upcomingStart = new DateOnly(incomeDate.Year, incomeDate.Month, payday);
+        var daysBeforePayday = upcomingStart.DayNumber - incomeDate.DayNumber;
+        return daysBeforePayday is >= 0 and <= 7 ? upcomingStart : null;
+    }
+
     private static IncomeResponseDto MapToResponseDto(Income income) => new()
     {
         Id = income.Id,
@@ -170,9 +177,12 @@ public class IncomeService : IIncomeService
         CategoryName = income.Category?.Name ?? string.Empty,
         CategoryColor = income.Category?.Color ?? string.Empty,
         CategoryIcon = income.Category?.Icon,
+        AccountId = income.AccountId,
+        AccountName = income.Account?.Name,
         Amount = income.Amount,
         Description = income.Description,
         Date = income.Date,
+        AssignedCycleStart = income.AssignedCycleStart,
         Source = income.Source,
         CreatedAt = income.CreatedAt
     };

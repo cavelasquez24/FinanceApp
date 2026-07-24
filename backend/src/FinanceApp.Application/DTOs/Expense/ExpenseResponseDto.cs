@@ -4,6 +4,8 @@ public class ExpenseResponseDto
 {
     public Guid Id { get; set; }
     public Guid CategoryId { get; set; }
+    public Guid? AccountId { get; set; }
+    public string? AccountName { get; set; }
     public string CategoryName { get; set; } = string.Empty;
     public string CategoryColor { get; set; } = string.Empty;
     public string? CategoryIcon { get; set; }

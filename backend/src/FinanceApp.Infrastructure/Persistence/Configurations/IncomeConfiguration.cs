@@ -23,6 +23,10 @@ public class IncomeConfiguration : IEntityTypeConfiguration<Income>
             .HasColumnName("category_id")
             .IsRequired();
 
+        builder.Property(i => i.AccountId)
+            .HasColumnName("account_id")
+            .IsRequired(false);
+
         // NUMERIC(15,2) en PostgreSQL = precisión exacta para dinero
         builder.Property(i => i.Amount)
             .HasColumnName("amount")
@@ -33,6 +37,10 @@ public class IncomeConfiguration : IEntityTypeConfiguration<Income>
             .HasColumnName("description")
             .HasMaxLength(500)
             .IsRequired(false);
+        builder.Property(i => i.AssignedCycleStart)
+            .HasColumnName("assigned_cycle_start")
+            .IsRequired(false);
+
 
         builder.Property(i => i.Date)
             .HasColumnName("date")
@@ -72,5 +80,11 @@ public class IncomeConfiguration : IEntityTypeConfiguration<Income>
             .WithMany(c => c.Incomes)
             .HasForeignKey(i => i.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(i => i.Account)
+            .WithMany()
+            .HasForeignKey(i => i.AccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }

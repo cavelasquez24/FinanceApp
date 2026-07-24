@@ -30,4 +30,8 @@ public interface IIncomeRepository : IBaseRepository<Income>
     Task<decimal> GetTotalByDateRangeAsync(
     Guid userId, DateOnly startDate, DateOnly endDate,
     CancellationToken cancellationToken = default);
+
+    Task<decimal> GetTotalByCycleAsync(
+        Guid userId, DateOnly cycleStart, DateOnly cycleEnd,
+        CancellationToken cancellationToken = default);
 }

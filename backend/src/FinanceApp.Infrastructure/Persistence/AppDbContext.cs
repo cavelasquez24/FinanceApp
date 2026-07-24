@@ -30,6 +30,8 @@ public class AppDbContext : DbContext
     public DbSet<SavingsGoal> SavingsGoals => Set<SavingsGoal>();
     public DbSet<SavingsGoalContribution> SavingsGoalContributions => Set<SavingsGoalContribution>();
     public DbSet<SavingsGoalWithdrawal> SavingsGoalWithdrawals => Set<SavingsGoalWithdrawal>();
+    public DbSet<FinancialAccount> FinancialAccounts => Set<FinancialAccount>();
+    public DbSet<AccountTransaction> AccountTransactions => Set<AccountTransaction>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<DebtWithdrawal> DebtWithdrawals => Set<DebtWithdrawal>();
 

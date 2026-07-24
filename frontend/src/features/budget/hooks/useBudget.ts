@@ -4,10 +4,11 @@ import { budgetApi } from '../../../api/budget.api';
 import toast from 'react-hot-toast';
 import { type CreateBudgetDto, type BudgetUpdateDto } from '../../../types/budget.types';
 
-export function useBudgetByPeriod(year: number, month: number) {
+export function useBudgetByPeriod(year: number, month: number, enabled = true) {
   return useQuery({
     queryKey: ['budget', year, month],
     queryFn: () => budgetApi.getByPeriod(year, month),
+    enabled,
   });
 }
 

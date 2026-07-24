@@ -48,9 +48,9 @@ public class DashboardService : IDashboardService
         var (start, end) = GetCycleRange(month, year, paydayDay);
         var (prevStart, prevEnd) = GetCycleRange(prevMonth, prevYear, paydayDay);
 
-        var totalIncome = await _incomeRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var totalIncome = await _incomeRepository.GetTotalByCycleAsync(userId, start, end, cancellationToken);
         var totalExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
-        var prevIncome = await _incomeRepository.GetTotalByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+        var prevIncome = await _incomeRepository.GetTotalByCycleAsync(userId, prevStart, prevEnd, cancellationToken);
         var prevExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
 
         var totalInvestments = await _investmentRepository.GetTotalCurrentValueAsync(userId, cancellationToken);
@@ -141,7 +141,7 @@ public class DashboardService : IDashboardService
 
             var (start, end) = GetCycleRange(month, year, paydayDay);
 
-            var income = await _incomeRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+            var income = await _incomeRepository.GetTotalByCycleAsync(userId, start, end, cancellationToken);
             var expenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
             var savings = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
             var withdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);
@@ -197,7 +197,7 @@ public class DashboardService : IDashboardService
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         var (start, end) = GetCycleRange(month, year, user?.PaydayDay);
 
-        var income = await _incomeRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var income = await _incomeRepository.GetTotalByCycleAsync(userId, start, end, cancellationToken);
         var consumptionExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
         var savingsContributions = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
         var savingsWithdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);

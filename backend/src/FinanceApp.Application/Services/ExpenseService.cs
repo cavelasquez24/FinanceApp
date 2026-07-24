@@ -11,10 +11,12 @@ namespace FinanceApp.Application.Services;
 public class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
+    private readonly IFinancialAccountService _accountService;
 
-    public ExpenseService(IExpenseRepository expenseRepository)
+    public ExpenseService(IExpenseRepository expenseRepository, IFinancialAccountService accountService)
     {
         _expenseRepository = expenseRepository;
+        _accountService = accountService;
     }
 
     public async Task<PagedResponse<ExpenseResponseDto>> GetAllAsync(
@@ -73,6 +75,7 @@ public class ExpenseService : IExpenseService
         {
             UserId = userId,
             CategoryId = dto.CategoryId,
+            AccountId = dto.AccountId,
             Amount = dto.Amount,
             Description = dto.Description?.Trim(),
             Date = dto.Date,
@@ -83,6 +86,11 @@ public class ExpenseService : IExpenseService
         };
 
         await _expenseRepository.CreateAsync(expense, cancellationToken);
+        await _accountService.SyncMovementAsync(
+            userId, dto.AccountId, FinancialAccountType.Cash, -dto.Amount,
+            dto.Date, "expense", expense.Id,
+            dto.Description?.Trim() ?? "Gasto",
+            cancellationToken);
         return await GetByIdAsync(expense.Id, userId, cancellationToken);
     }
 
@@ -98,12 +106,14 @@ public class ExpenseService : IExpenseService
             throw new NotFoundException("Gasto", id);
 
         expense.CategoryId = dto.CategoryId;
+        expense.AccountId = dto.AccountId;
         expense.Amount = dto.Amount;
         expense.Description = dto.Description?.Trim();
         expense.Date = dto.Date;
         var paymentMethod = Enum.Parse<PaymentMethod>(
                    dto.PaymentMethod.Replace("_", ""),
                    ignoreCase: true);
+        expense.PaymentMethod = paymentMethod;
         expense.IsRecurring = dto.IsRecurring;
         RecurrenceType? recurrenceType = dto.RecurrenceType != null
             ? Enum.Parse<RecurrenceType>(
@@ -113,6 +123,11 @@ public class ExpenseService : IExpenseService
         expense.Notes = dto.Notes?.Trim();
 
         await _expenseRepository.UpdateAsync(expense, cancellationToken);
+        await _accountService.SyncMovementAsync(
+            userId, dto.AccountId, FinancialAccountType.Cash, -dto.Amount,
+            dto.Date, "expense", expense.Id,
+            dto.Description?.Trim() ?? "Gasto",
+            cancellationToken);
         return await GetByIdAsync(expense.Id, userId, cancellationToken);
     }
 
@@ -128,6 +143,10 @@ public class ExpenseService : IExpenseService
 
         expense.DeletedAt = DateTimeOffset.UtcNow;
         await _expenseRepository.UpdateAsync(expense, cancellationToken);
+        await _accountService.SyncMovementAsync(
+            userId, expense.AccountId, FinancialAccountType.Cash, 0,
+            expense.Date, "expense", expense.Id, "Gasto eliminado",
+            cancellationToken);
     }
 
     public async Task<ExpenseSummaryDto> GetSummaryAsync(
@@ -193,6 +212,8 @@ public class ExpenseService : IExpenseService
     {
         Id = expense.Id,
         CategoryId = expense.CategoryId,
+        AccountId = expense.AccountId,
+        AccountName = expense.Account?.Name,
         CategoryName = expense.Category?.Name ?? string.Empty,
         CategoryColor = expense.Category?.Color ?? string.Empty,
         CategoryIcon = expense.Category?.Icon,

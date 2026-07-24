@@ -10,39 +10,40 @@ namespace FinanceApp.Application.Services;
 public class SavingsGoalService : ISavingsGoalService
 {
     private readonly ISavingsGoalRepository _savingsGoalRepository;
+    private readonly IFinancialAccountService _accountService;
 
-    public SavingsGoalService(ISavingsGoalRepository savingsGoalRepository)
+    public SavingsGoalService(
+        ISavingsGoalRepository savingsGoalRepository,
+        IFinancialAccountService accountService)
     {
         _savingsGoalRepository = savingsGoalRepository;
+        _accountService = accountService;
     }
 
     public async Task<IEnumerable<SavingsGoalResponseDto>> GetAllAsync(
-        Guid userId,
-        CancellationToken cancellationToken = default)
+        Guid userId, CancellationToken cancellationToken = default)
     {
-        var goals = await _savingsGoalRepository
-            .GetByUserIdAsync(userId, cancellationToken);
+        var goals = await _savingsGoalRepository.GetByUserIdAsync(
+            userId, cancellationToken);
         return goals.Select(MapToResponseDto);
     }
 
     public async Task<SavingsGoalResponseDto> GetByIdAsync(
-        Guid id,
-        Guid userId,
-        CancellationToken cancellationToken = default)
+        Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
         var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
-
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
-
         return MapToResponseDto(goal);
     }
 
     public async Task<SavingsGoalResponseDto> CreateAsync(
-        Guid userId,
-        SavingsGoalCreateDto dto,
+        Guid userId, SavingsGoalCreateDto dto,
         CancellationToken cancellationToken = default)
     {
+        await _accountService.GetOrCreateDefaultAsync(
+            userId, FinancialAccountType.Savings, cancellationToken);
+
         var goal = new SavingsGoal
         {
             UserId = userId,
@@ -56,17 +57,22 @@ public class SavingsGoalService : ISavingsGoalService
         };
 
         await _savingsGoalRepository.CreateAsync(goal, cancellationToken);
+        if (dto.InitialAmount != 0)
+        {
+            await _accountService.SyncMovementAsync(
+                userId, null, FinancialAccountType.Savings, dto.InitialAmount,
+                DateOnly.FromDateTime(DateTime.Today), "savings-opening", goal.Id,
+                $"Saldo inicial: {goal.Name}", cancellationToken);
+        }
+
         return MapToResponseDto(goal);
     }
 
     public async Task<SavingsGoalResponseDto> UpdateAsync(
-        Guid id,
-        Guid userId,
-        SavingsGoalUpdateDto dto,
+        Guid id, Guid userId, SavingsGoalUpdateDto dto,
         CancellationToken cancellationToken = default)
     {
         var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
-
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
 
@@ -75,8 +81,6 @@ public class SavingsGoalService : ISavingsGoalService
         goal.TargetAmount = dto.TargetAmount;
         goal.TargetDate = dto.TargetDate;
         goal.Icon = dto.Icon?.Trim();
-
-        // Recalculamos si ya se completó con el nuevo monto objetivo
         goal.IsCompleted = goal.CurrentAmount >= goal.TargetAmount;
 
         await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
@@ -84,52 +88,45 @@ public class SavingsGoalService : ISavingsGoalService
     }
 
     public async Task DeleteAsync(
-        Guid id,
-        Guid userId,
-        CancellationToken cancellationToken = default)
+        Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
         var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
-
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
 
+        // El dinero permanece en el fondo de ahorro aunque se elimine
+        // su etiqueta virtual.
         goal.DeletedAt = DateTimeOffset.UtcNow;
         await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
     }
 
     public async Task<SavingsGoalResponseDto> DepositAsync(
-        Guid id,
-        Guid userId,
-        DepositDto dto,
+        Guid id, Guid userId, DepositDto dto,
         CancellationToken cancellationToken = default)
     {
         var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
-
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
-
         if (goal.IsCompleted)
             throw new DomainException(
-                "GOAL_ALREADY_COMPLETED",
-                "Esta meta de ahorro ya fue completada");
-
+                "GOAL_ALREADY_COMPLETED", "Esta meta de ahorro ya fue completada");
         if (dto.Amount <= 0)
             throw new DomainException(
-                "INVALID_DEPOSIT_AMOUNT",
-                "El monto del depósito debe ser mayor a 0");
+                "INVALID_DEPOSIT_AMOUNT", "El monto del depósito debe ser mayor a 0");
+
+        await _accountService.GetOrCreateDefaultAsync(
+            userId, FinancialAccountType.Cash, cancellationToken);
+        await _accountService.GetOrCreateDefaultAsync(
+            userId, FinancialAccountType.Savings, cancellationToken);
 
         var appliedAmount = Math.Min(dto.Amount, goal.TargetAmount - goal.CurrentAmount);
         goal.CurrentAmount += appliedAmount;
-
-        // Verificamos si se completó la meta con este depósito
         if (goal.CurrentAmount >= goal.TargetAmount)
         {
-            goal.CurrentAmount = goal.TargetAmount; // no superamos el objetivo
+            goal.CurrentAmount = goal.TargetAmount;
             goal.IsCompleted = true;
         }
 
-        // v2.0.1 — registro histórico. El contrato del endpoint /deposit
-        // no cambia; esto solo agrega trazabilidad, no reemplaza CurrentAmount.
         var contribution = new SavingsGoalContribution
         {
             SavingsGoalId = goal.Id,
@@ -137,47 +134,50 @@ public class SavingsGoalService : ISavingsGoalService
             Amount = appliedAmount,
             Notes = dto.Notes
         };
-        await _savingsGoalRepository.AddContributionAsync(contribution, cancellationToken);
+        await _savingsGoalRepository.AddContributionAsync(
+            contribution, cancellationToken);
+        await _accountService.SyncTransferAsync(
+            userId, FinancialAccountType.Cash, FinancialAccountType.Savings,
+            appliedAmount, contribution.ContributionDate, "savings-contribution",
+            contribution.Id, $"Aporte: {goal.Name}", cancellationToken);
 
         return MapToResponseDto(goal);
     }
 
     public async Task<SavingsGoalWithdrawalResponseDto> WithdrawAsync(
-        Guid id,
-        Guid userId,
-        SavingsGoalWithdrawalCreateDto dto,
+        Guid id, Guid userId, SavingsGoalWithdrawalCreateDto dto,
         CancellationToken cancellationToken = default)
     {
         var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
-
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
-
         if (dto.Amount <= 0)
             throw new DomainException(
-                "INVALID_WITHDRAWAL_AMOUNT",
-                "El monto del retiro debe ser mayor a 0");
-
+                "INVALID_WITHDRAWAL_AMOUNT", "El monto del retiro debe ser mayor a 0");
         if (dto.Amount > goal.CurrentAmount)
             throw new DomainException(
                 "INSUFFICIENT_SAVINGS_BALANCE",
                 "El retiro no puede superar el saldo disponible");
-
-        // Regla del spec 3.2: LinkedExpenseId solo tiene sentido si Reason = Consumed
-        if (dto.LinkedExpenseId.HasValue && dto.Reason != SavingsWithdrawalReason.Consumed)
+        if (dto.LinkedExpenseId.HasValue
+            && dto.Reason != SavingsWithdrawalReason.Consumed)
             throw new DomainException(
                 "INVALID_LINKED_EXPENSE",
                 "LinkedExpenseId solo es válido cuando Reason es Consumed");
 
-        goal.CurrentAmount -= dto.Amount;
+        await _accountService.GetOrCreateDefaultAsync(
+            userId, FinancialAccountType.Cash, cancellationToken);
+        await _accountService.GetOrCreateDefaultAsync(
+            userId, FinancialAccountType.Savings, cancellationToken);
 
-        // Un retiro puede sacar la meta de "completada" si ya lo estaba
-        goal.IsCompleted = goal.CurrentAmount >= goal.TargetAmount && goal.TargetAmount > 0;
+        goal.CurrentAmount -= dto.Amount;
+        goal.IsCompleted = goal.CurrentAmount >= goal.TargetAmount
+            && goal.TargetAmount > 0;
 
         var withdrawal = new SavingsGoalWithdrawal
         {
             SavingsGoalId = goal.Id,
-            WithdrawalDate = dto.WithdrawalDate ?? DateOnly.FromDateTime(DateTime.UtcNow),
+            WithdrawalDate = dto.WithdrawalDate
+                ?? DateOnly.FromDateTime(DateTime.UtcNow),
             Amount = dto.Amount,
             LinkedExpenseId = dto.Reason == SavingsWithdrawalReason.Consumed
                 ? dto.LinkedExpenseId
@@ -185,7 +185,23 @@ public class SavingsGoalService : ISavingsGoalService
             Reason = dto.Reason,
             Notes = dto.Notes
         };
-        await _savingsGoalRepository.AddWithdrawalAsync(withdrawal, cancellationToken);
+        await _savingsGoalRepository.AddWithdrawalAsync(
+            withdrawal, cancellationToken);
+
+        if (dto.Reason == SavingsWithdrawalReason.Correction)
+        {
+            await _accountService.SyncMovementAsync(
+                userId, null, FinancialAccountType.Savings, -dto.Amount,
+                withdrawal.WithdrawalDate, "savings-correction", withdrawal.Id,
+                $"Corrección: {goal.Name}", cancellationToken);
+        }
+        else
+        {
+            await _accountService.SyncTransferAsync(
+                userId, FinancialAccountType.Savings, FinancialAccountType.Cash,
+                dto.Amount, withdrawal.WithdrawalDate, "savings-withdrawal",
+                withdrawal.Id, $"Retiro: {goal.Name}", cancellationToken);
+        }
 
         return new SavingsGoalWithdrawalResponseDto
         {
