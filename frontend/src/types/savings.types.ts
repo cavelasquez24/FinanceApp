@@ -17,6 +17,7 @@ export interface CreateSavingsGoalDto {
   name: string;
   description?: string;
   targetAmount: number;
+  initialAmount?: number;
   targetDate?: string; // Formato "YYYY-MM-DD"
   icon?: string;
 }

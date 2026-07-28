@@ -8,6 +8,7 @@ interface Props {
 export default function CreateGoalModal({ onClose }: Props) {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState<number | ''>('');
+  const [initialAmount, setInitialAmount] = useState<number | ''>('');
   const [targetDate, setTargetDate] = useState('');
   const [description, setDescription] = useState('');
   
@@ -15,12 +16,20 @@ export default function CreateGoalModal({ onClose }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !targetAmount || targetAmount <= 0) return;
+    const normalizedInitialAmount = initialAmount === '' ? 0 : initialAmount;
+    if (
+      !name ||
+      !targetAmount ||
+      targetAmount <= 0 ||
+      normalizedInitialAmount < 0 ||
+      normalizedInitialAmount > targetAmount
+    ) return;
 
     createGoal(
       { 
         name, 
-        targetAmount: Number(targetAmount), 
+        targetAmount: Number(targetAmount),
+        initialAmount: normalizedInitialAmount,
         targetDate: targetDate || undefined,
         description: description || undefined 
       },
@@ -61,6 +70,32 @@ export default function CreateGoalModal({ onClose }: Props) {
           </div>
 
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Monto inicial (Opcional)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max={targetAmount || undefined}
+              value={initialAmount}
+              onChange={(e) =>
+                setInitialAmount(e.target.value === '' ? '' : Number(e.target.value))
+              }
+              placeholder="0.00"
+              className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              &Uacute;salo para ahorros que ya ten&iacute;as. Se registra como saldo hist&oacute;rico y no como aporte del mes.
+            </p>
+            {initialAmount !== '' && targetAmount !== '' && initialAmount > targetAmount && (
+              <p className="mt-1 text-xs text-red-500">
+                El monto inicial no puede superar el objetivo.
+              </p>
+            )}
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Objetivo (Opcional)</label>
             {/* Fechas siempre en formato ISO: "YYYY-MM-DD" */}
             <input
@@ -92,7 +127,15 @@ export default function CreateGoalModal({ onClose }: Props) {
             </button>
             <button
               type="submit"
-              disabled={isPending || !name || !targetAmount}
+              disabled={
+                isPending ||
+                !name ||
+                !targetAmount ||
+                (initialAmount !== '' && (
+                  initialAmount < 0 ||
+                  initialAmount > Number(targetAmount)
+                ))
+              }
               className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
               {isPending ? 'Creando...' : 'Crear Meta'}
