@@ -172,6 +172,7 @@ interface TablePaginationProps {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
   onPageChange: (page: number) => void;
+  disabled?: boolean;
 }
 
 export function TablePagination({
@@ -182,14 +183,15 @@ export function TablePagination({
   hasNextPage,
   hasPreviousPage,
   onPageChange,
+  disabled = false,
 }: TablePaginationProps) {
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, totalCount);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 bg-white">
+    <div className="flex flex-col gap-3 border-t border-[#EFEAE2] bg-[#FBF9F4] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       {/* Count */}
-      <span className="text-xs text-slate-500">
+      <span className="text-xs text-[#7C756E]">
         {totalCount === 0
           ? 'Sin resultados'
           : `Mostrando ${from}–${to} de ${totalCount}`}
@@ -201,7 +203,7 @@ export function TablePagination({
           variant="ghost"
           size="sm"
           onClick={() => onPageChange(1)}
-          disabled={!hasPreviousPage}
+          disabled={disabled || !hasPreviousPage}
           aria-label="Primera página"
         >
           «
@@ -210,21 +212,21 @@ export function TablePagination({
           variant="ghost"
           size="sm"
           onClick={() => onPageChange(page - 1)}
-          disabled={!hasPreviousPage}
+          disabled={disabled || !hasPreviousPage}
           aria-label="Página anterior"
         >
           ‹
         </Button>
 
-        <span className="px-3 py-1 text-xs text-slate-700 font-medium">
-          {page} / {totalPages || 1}
+        <span className="px-3 py-1 text-xs font-medium text-[#2C2A29]" aria-live="polite">
+          P&aacute;gina {page} de {totalPages || 1}
         </span>
 
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onPageChange(page + 1)}
-          disabled={!hasNextPage}
+          disabled={disabled || !hasNextPage}
           aria-label="Página siguiente"
         >
           ›
@@ -233,7 +235,7 @@ export function TablePagination({
           variant="ghost"
           size="sm"
           onClick={() => onPageChange(totalPages)}
-          disabled={!hasNextPage}
+          disabled={disabled || !hasNextPage}
           aria-label="Última página"
         >
           »

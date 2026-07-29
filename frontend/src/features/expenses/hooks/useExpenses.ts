@@ -1,5 +1,10 @@
 // src/features/expenses/hooks/useExpenses.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { expensesApi } from '../../../api/expenses.api';
 import type { ExpenseCreateDto, ExpenseFilter, ExpenseUpdateDto } from '../../../types/expense.types';
 import toast from 'react-hot-toast';
@@ -8,6 +13,7 @@ export function useExpenses(filters?: ExpenseFilter) {
   return useQuery({
     queryKey: ['expenses', filters],
     queryFn: () => expensesApi.getAll(filters),
+    placeholderData: keepPreviousData,
   });
 }
 

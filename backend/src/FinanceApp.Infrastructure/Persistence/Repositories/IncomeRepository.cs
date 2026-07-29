@@ -29,6 +29,7 @@ public class IncomeRepository : BaseRepository<Income>, IIncomeRepository
         var items = await query
             .OrderByDescending(i => i.Date)
             .ThenByDescending(i => i.CreatedAt)
+            .ThenByDescending(i => i.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);

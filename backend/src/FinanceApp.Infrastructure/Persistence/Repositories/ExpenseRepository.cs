@@ -44,6 +44,7 @@ public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
         var items = await query
             .OrderByDescending(e => e.Date)
             .ThenByDescending(e => e.CreatedAt)
+            .ThenByDescending(e => e.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);

@@ -1,20 +1,59 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { useIncomes, useDeleteIncome } from '../features/incomes/hooks/useIncomes';
 import { IncomeForm } from '../features/incomes/components/IncomeForm';
-import { Button, Card, CardHeader, Spinner, ConfirmDialog } from '../components/ui';
+import {
+  Button,
+  Card,
+  CardHeader,
+  Spinner,
+  ConfirmDialog,
+  TablePagination,
+} from '../components/ui';
 import { Plus as PlusIcon, AlertCircle, Inbox, Pencil, Trash2 } from 'lucide-react';
 import type { Income } from '../types/income.types';
 
 export function IncomesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingIncome, setEditingIncome] = useState<Income | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const parsedPage = Number.parseInt(searchParams.get('page') ?? '1', 10);
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const pageSize = 20;
+
   const [deletingIncome, setDeletingIncome] = useState<Income | null>(null);
 
-  const { data: response, isLoading, isError } = useIncomes({ page: 1, pageSize: 20 });
+  const { data: response, isLoading, isError, isFetching } = useIncomes({ page, pageSize });
   const { mutate: deleteIncome, isPending: isDeleting } = useDeleteIncome();
 
-  const incomes = response?.data?.data?.items || [];
+  const pagedData = response?.data?.data;
+  const incomes = pagedData?.items || [];
+
+  const changePage = (nextPage: number) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (nextPage <= 1) {
+      nextParams.delete('page');
+    } else {
+      nextParams.set('page', String(nextPage));
+    }
+    setSearchParams(nextParams);
+  };
+
+  useEffect(() => {
+    if (pagedData?.totalPages === undefined) return;
+
+    const lastPage = Math.max(pagedData.totalPages, 1);
+    if (page > lastPage) {
+      const nextParams = new URLSearchParams(searchParams);
+      if (lastPage === 1) {
+        nextParams.delete('page');
+      } else {
+        nextParams.set('page', String(lastPage));
+      }
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [page, pagedData?.totalPages, searchParams, setSearchParams]);
 
   const handleOpenCreate = () => {
     setEditingIncome(null);
@@ -83,7 +122,8 @@ export function IncomesPage() {
             <span className="text-sm">Aún no tienes ingresos registrados.</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-[#2C2A29]">
               <thead className="bg-[#F3F1EC] text-xs uppercase tracking-wide text-[#7C756E]">
                 <tr>
@@ -135,7 +175,20 @@ export function IncomesPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+            {pagedData && (
+              <TablePagination
+                page={pagedData.page}
+                totalPages={pagedData.totalPages}
+                totalCount={pagedData.totalCount}
+                pageSize={pagedData.pageSize}
+                hasNextPage={pagedData.hasNextPage}
+                hasPreviousPage={pagedData.hasPreviousPage}
+                onPageChange={changePage}
+                disabled={isFetching}
+              />
+            )}
+          </>
         )}
       </Card>
 

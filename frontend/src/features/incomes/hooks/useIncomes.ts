@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { incomesApi } from '../../../api/incomes.api';
 import type {
   IncomeCreateDto,
@@ -13,6 +18,7 @@ export function useIncomes(filters?: IncomeFilter) {
   return useQuery({
     queryKey: ['incomes', filters],
     queryFn: () => incomesApi.getAll(filters),
+    placeholderData: keepPreviousData,
   });
 }
 
