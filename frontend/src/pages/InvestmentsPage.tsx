@@ -53,8 +53,8 @@ export default function InvestmentsPage() {
         <Button 
           onClick={() => setIsCreateOpen(true)} 
           className="flex items-center gap-2 bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#2C2A29]/90 rounded-2xl px-5 py-2.5 transition-all shadow-md"
+          leftIcon={<Plus className="h-4 w-4" />}
         >
-          <Plus className="h-4 w-4" />
           Nueva Inversión
         </Button>
       </div>

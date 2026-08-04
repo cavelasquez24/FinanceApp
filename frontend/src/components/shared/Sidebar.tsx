@@ -9,9 +9,11 @@ import {
   BarChart3,
   User,
   X,
+  Skull,
   Wallet,
   LogOut,
-  TagsIcon,
+  Folder,
+  Tags,
   BoneFracture,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -33,7 +35,8 @@ const navItems = [
   { to: '/investments', label: 'Inversiones', icon: BarChart3       },
   { to: '/debts',     label: 'Deudas',       icon: BoneFracture       },
   { to: '/savings',     label: 'Metas',       icon: PiggyBank       },
-  { to: '/categories',  label: 'Categorías',  icon: TagsIcon            },
+  { to: '/categories',  label: 'Categorías',  icon: Folder          },
+  { to: '/tags',        label: 'Etiquetas',   icon: Tags            },
   { to: '/profile',     label: 'Perfil',      icon: User            },
 ];
 
@@ -61,10 +64,10 @@ export function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
         <div className="flex items-center justify-between border-b border-[#EFEAE2]/70 p-6">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2C2A29]">
-              <Wallet className="h-4 w-4 text-[#FBF9F4]" strokeWidth={2} />
+              <Skull className="h-4 w-4 text-[#FBF9F4]" strokeWidth={2} aria-hidden="true" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-[#2C2A29]">
-              FinanceApp
+              FinFlow
             </span>
           </div>
           <button
@@ -109,7 +112,7 @@ export function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
               Cerrar sesión
             </button>
           )}
-          <p className="mt-2 text-center text-xs text-[#7C756E]/60">FinanceApp v1.0</p>
+          <p className="mt-2 text-center text-xs text-[#7C756E]/60">FinFlow v1.0</p>
         </div>
       </aside>
     </>

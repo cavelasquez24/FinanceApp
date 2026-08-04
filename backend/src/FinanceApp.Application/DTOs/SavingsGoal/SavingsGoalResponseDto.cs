@@ -13,5 +13,10 @@ public class SavingsGoalResponseDto
     public bool IsCompleted { get; set; }
     public string? Icon { get; set; }
     public int? EstimatedMonthsToComplete { get; set; }
+    public string Purpose { get; set; } = "general";
+    public decimal? MinimumProtectedAmount { get; set; }
+    public decimal PendingRestorationAmount { get; set; }
+    public int OpenRestorationsCount { get; set; }
+    public DateOnly? NextRestorationDate { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 }

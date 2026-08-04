@@ -92,7 +92,7 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
           <span>
             <span className="block text-sm font-medium text-[#2C2A29]">Importar inversión histórica</span>
             <span className="mt-1 block text-xs leading-relaxed text-[#7C756E]">
-              Actívalo si la compra ocurrió antes de usar FinanceApp. La importación establece el portafolio,
+              Actívalo si la compra ocurrió antes de usar FinFlow. La importación establece el portafolio,
               pero no consume el disponible del ciclo.
             </span>
           </span>

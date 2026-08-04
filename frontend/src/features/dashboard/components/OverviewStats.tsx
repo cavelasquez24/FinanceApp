@@ -95,6 +95,12 @@ export function OverviewStats({ data }: Props) {
           accent="#D9A46B"
         />
       </div>
+      {data.pendingEmergencyFundRestoration > 0 && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Fondo de emergencia pendiente por restaurar: <strong>{currency(data.pendingEmergencyFundRestoration)}</strong>
+          <span className="ml-2 text-xs text-amber-700">No es deuda externa ni reduce nuevamente el patrimonio.</span>
+        </div>
+      )}
 
       {/* Ratios y contexto */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

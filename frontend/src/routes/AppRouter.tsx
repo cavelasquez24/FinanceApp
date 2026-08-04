@@ -15,6 +15,7 @@ import  SavingsPage  from '../pages/SavingsPage';
 import  ProfilePage  from '../pages/ProfilePage';
 import  CategoriesPage  from '../pages/CategoriesPage';
 import  DebtsPage  from '../pages/DebtsPage';
+import TagsPage from '../pages/TagsPage';
 
 // Layout
 import { AppLayout } from '../components/shared/AppLayout';
@@ -70,6 +71,7 @@ export function AppRouter() {
           <Route path="savings" element={<SavingsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="categories" element={<CategoriesPage />} />
+          <Route path="tags" element={<TagsPage />} />
           <Route path="debts" element={<DebtsPage />} />
         </Route>
 

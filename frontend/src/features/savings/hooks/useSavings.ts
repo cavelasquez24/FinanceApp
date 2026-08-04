@@ -1,7 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { savingsApi } from '../../../api/savings.api';
 import toast from 'react-hot-toast';
 import type { CreateSavingsGoalDto, DepositDto, WithdrawDto } from '../../../types/savings.types';
+import { getApiErrorMessage } from '../../../utils/getApiError';
 
 
 interface ApiError {
@@ -17,6 +18,7 @@ export function useSavingsGoals() {
   return useQuery({
     queryKey: ['savings-goals'],
     queryFn: () => savingsApi.getAll(),
+    refetchOnMount: 'always',
   });
 }
 
@@ -31,7 +33,7 @@ export function useCreateSavingsGoal() {
       // Invalida el dashboard si las metas se reflejan allí
       queryClient.invalidateQueries({ queryKey: ['dashboard'] }); 
     },
-    onError: () => toast.error('Error al crear la meta de ahorro'),
+    onError: (error) => toast.error(getApiErrorMessage(error, 'Error al crear la meta de ahorro')),
   });
 }
 
@@ -41,10 +43,8 @@ export function useUpdateSavingsGoal() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<CreateSavingsGoalDto> }) => 
       savingsApi.update(id, data),
-    onSuccess: () => {
-      // Invalidar la caché para refrescar la lista automáticamente
-      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['savings-goals'] }); },
+    onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo actualizar la meta')),
   });
 }
 
@@ -53,9 +53,8 @@ export function useDeleteSavingsGoal() {
   
   return useMutation({
     mutationFn: (id: string) => savingsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['savings-goals'] });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['savings-goals'] }); },
+    onError: (error) => toast.error(getApiErrorMessage(error, 'No se pudo archivar la meta')),
   });
 }
 
@@ -76,7 +75,7 @@ export function useDepositSavings() {
       if (errorCode === 'GOAL_ALREADY_COMPLETED') {
         toast.error('No se puede depositar en una meta completada');
       } else {
-        toast.error('Error al registrar el depósito');
+        toast.error(getApiErrorMessage(error, 'Error al registrar el depósito'));
       }
     },
   });
@@ -100,7 +99,7 @@ export function useWithdrawSavings() {
       } else if (errorCode === 'INSUFFICIENT_SAVINGS_BALANCE') {
         toast.error('El retiro supera el saldo disponible');
       } else {
-        toast.error('Error al registrar el retiro');
+        toast.error(getApiErrorMessage(error, 'Error al registrar el retiro'));
       }
     },
   });

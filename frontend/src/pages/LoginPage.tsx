@@ -9,6 +9,7 @@ import {
   Eye,
   EyeOff,
   Wallet,
+  Skull,
   ArrowUpRight,
   ArrowDownRight,
   PiggyBank,
@@ -98,10 +99,10 @@ export function LoginPage() {
         <div className="mx-auto w-full max-w-sm">
           <div className="mb-10 flex items-center gap-2.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#2C2A29]">
-              <Wallet className="h-5 w-5 text-[#FBF9F4]" strokeWidth={2} />
+              <Skull className="h-5 w-5 text-[#FBF9F4]" strokeWidth={2} aria-hidden="true" />
             </div>
             <span className="text-xl font-semibold tracking-tight text-[#2C2A29]">
-              FinanceApp
+              FinFlow
             </span>
           </div>
 

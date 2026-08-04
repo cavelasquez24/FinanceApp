@@ -32,6 +32,10 @@ public class SavingsGoalContributionConfiguration : IEntityTypeConfiguration<Sav
             .HasColumnName("notes")
             .IsRequired(false);
 
+        builder.Property(c => c.EmergencyFundRestorationId)
+            .HasColumnName("emergency_fund_restoration_id")
+            .IsRequired(false);
+
         builder.Property(c => c.CreatedAt)
             .HasColumnName("created_at")
             .HasDefaultValueSql("NOW()");
@@ -54,5 +58,11 @@ public class SavingsGoalContributionConfiguration : IEntityTypeConfiguration<Sav
             .WithMany(s => s.Contributions)
             .HasForeignKey(c => c.SavingsGoalId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(c => c.EmergencyFundRestoration)
+            .WithMany(r => r.Contributions)
+            .HasForeignKey(c => c.EmergencyFundRestorationId)
+            .OnDelete(DeleteBehavior.SetNull);
+        builder.HasIndex(c => c.EmergencyFundRestorationId);
     }
 }

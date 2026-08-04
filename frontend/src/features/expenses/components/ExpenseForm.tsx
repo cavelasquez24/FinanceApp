@@ -7,6 +7,7 @@ import { useCreateExpense, useUpdateExpense } from '../hooks/useExpenses';
 import type { Expense } from '../../../types/expense.types';
 import { useCategories } from '../../categories/hooks/useCategories';
 import { Spinner } from '../../../components/ui';
+import { TagSelector } from '../../tags/components/TagSelector';
 
 interface Props {
   expense?: Expense; // si viene, el form entra en modo edición
@@ -38,6 +39,8 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
       ? {
           categoryId: expense.categoryId,
           amount: expense.amount,
+          merchant: expense.merchant ?? '',
+          tagIds: expense.tags.map((tag) => tag.id),
           description: expense.description ?? '',
           date: expense.date,
           paymentMethod: expense.paymentMethod,
@@ -48,11 +51,13 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
       : {
           date: new Date().toISOString().split('T')[0],
           isRecurring: false,
+          tagIds: [],
           paymentMethod: 'debit_card',
         },
   });
 
   const isRecurring = watch('isRecurring');
+  const tagIds = watch('tagIds') ?? [];
 
   const onSubmit = (data: ExpenseFormData) => {
     // Limpieza de datos antes de enviar al backend según contrato
@@ -118,6 +123,13 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
           )}
         </div>
       </div>
+      <Input
+        label="Comercio (Opcional)"
+        placeholder="Ej: Wing House"
+        error={errors.merchant?.message}
+        {...register('merchant')}
+      />
+
 
       <Input
         label="Descripción Breve"
@@ -132,6 +144,8 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
         error={errors.notes?.message}
         {...register('notes')}
       />
+
+      <TagSelector value={tagIds} onChange={(ids) => setValue('tagIds', ids, { shouldValidate: true })} />
 
       <div className="rounded-2xl border border-[#EFEAE2] bg-[#F3F1EC]/60 p-4">
         <div className="flex items-center gap-3">

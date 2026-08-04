@@ -31,6 +31,7 @@ export interface DashboardOverview {
   totalInvestments: number;
   totalSavingsGoals: number;
   netWorth: number;
+  pendingEmergencyFundRestoration: number;
   previousMonth: PreviousMonth;
   changes: DashboardChanges;
 }
@@ -60,6 +61,8 @@ export interface CashFlowStatement {
   income: number;
   consumptionExpenses: number;
   savingsContributions: number;
+  restorationContributions: number;
+  newSavingsContributions: number;
   investmentContributions: number;
   savingsWithdrawals: number;
   debtPrincipalPaid: number;

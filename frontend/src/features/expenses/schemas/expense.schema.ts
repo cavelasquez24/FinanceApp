@@ -7,6 +7,8 @@ export const expenseSchema = z.object({
   .number()
   .positive('El monto debe ser mayor a 0'),
   description: z.string().max(500, 'Máximo 500 caracteres').optional(),
+  merchant: z.string().max(200, 'Máximo 200 caracteres').optional(),
+  tagIds: z.array(z.string()).max(10, 'Máximo 10 etiquetas').default([]),
   date: z.string().min(1, 'La fecha es requerida'),
     paymentMethod: z
   .string()

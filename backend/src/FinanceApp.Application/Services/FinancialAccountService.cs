@@ -141,6 +141,21 @@ public class FinancialAccountService : IFinancialAccountService
         CancellationToken cancellationToken = default) =>
         Map(await GetOrCreateDefaultEntityAsync(userId, type, cancellationToken));
 
+    public async Task<decimal> GetAvailableBalanceAsync(
+        Guid userId, Guid? accountId, FinancialAccountType fallbackType,
+        CancellationToken cancellationToken = default)
+    {
+        var account = accountId.HasValue
+            ? await _accountRepository.GetByIdAsync(accountId.Value, cancellationToken)
+            : await GetOrCreateDefaultEntityAsync(userId, fallbackType, cancellationToken);
+
+        if (account == null || account.UserId != userId || account.Type != fallbackType
+            || !account.IsActive || account.IsDeleted)
+            throw new DomainException("INVALID_ACCOUNT", "La cuenta programada no está disponible.");
+
+        return account.CurrentBalance;
+    }
+
     public async Task SyncMovementAsync(
         Guid userId, Guid? accountId, FinancialAccountType fallbackType,
         decimal signedAmount, DateOnly date, string sourceType, Guid sourceId,
@@ -211,6 +226,20 @@ public class FinancialAccountService : IFinancialAccountService
         await SyncMovementAsync(
             userId, to.Id, toType, amount, date, $"{sourceType}:in",
             sourceId, description, cancellationToken);
+    }
+
+    public async Task SyncTransferBetweenAccountsAsync(
+        Guid userId, Guid? fromAccountId, FinancialAccountType fromFallbackType,
+        Guid? toAccountId, FinancialAccountType toFallbackType,
+        decimal amount, DateOnly date, string sourceType, Guid sourceId,
+        string description, CancellationToken cancellationToken = default)
+    {
+        await SyncMovementAsync(
+            userId, fromAccountId, fromFallbackType, -amount, date,
+            $"{sourceType}:out", sourceId, description, cancellationToken);
+        await SyncMovementAsync(
+            userId, toAccountId, toFallbackType, amount, date,
+            $"{sourceType}:in", sourceId, description, cancellationToken);
     }
 
     private async Task<FinancialAccount> GetOrCreateDefaultEntityAsync(

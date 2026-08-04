@@ -22,9 +22,9 @@ export default function DeleteConfirmModal({ goal, onClose }: Props) {
         <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
           <AlertTriangle className="h-6 w-6 text-red-600" />
         </div>
-        <h2 className="text-xl font-semibold text-[#2C2A29] mb-2">Eliminar Meta</h2>
+        <h2 className="text-xl font-semibold text-[#2C2A29] mb-2">Archivar meta</h2>
         <p className="text-sm text-[#7C756E] mb-6">
-          ¿Estás seguro de que deseas eliminar la meta <strong>"{goal.name}"</strong>? Esta acción no se puede deshacer y se perderá el registro de los aportes.
+          La meta <strong>"{goal.name}"</strong> dejará de aparecer entre las metas activas, pero conservará su historial de aportes.
         </p>
         
         <div className="flex space-x-3 w-full">
@@ -40,7 +40,7 @@ export default function DeleteConfirmModal({ goal, onClose }: Props) {
             disabled={isPending}
             className="flex-1 py-2.5 text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors font-medium disabled:opacity-50"
           >
-            {isPending ? 'Eliminando...' : 'Eliminar'}
+            {isPending ? 'Archivando...' : 'Archivar'}
           </button>
         </div>
       </div>

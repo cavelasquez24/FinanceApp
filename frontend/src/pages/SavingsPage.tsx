@@ -1,114 +1,103 @@
-import { useState } from 'react';
-import { Plus, AlertCircle } from 'lucide-react';
+﻿import { useState } from 'react';
+import { AlertCircle, Plus, ShieldCheck, Target } from 'lucide-react';
 import { useSavingsGoals } from '../features/savings/hooks/useSavings';
 import SavingsGoalCard from '../features/savings/components/SavingsGoalCard';
 import DepositModal from '../features/savings/components/DepositModal';
-import WithdrawModal from '../features/savings/components/WithdrawModal'; // ← NUEVO import
+import WithdrawModal from '../features/savings/components/WithdrawModal';
 import EditGoalModal from '../features/savings/components/EditGoalModal';
 import DeleteConfirmModal from '../features/savings/components/DeleteConfirmModal';
 import CreateGoalModal from '../features/savings/components/CreateGoalModal';
+import EmergencyFundUseModal from '../features/savings/components/EmergencyFundUseModal';
+import EmergencyFundRestorationsModal from '../features/savings/components/EmergencyFundRestorationsModal';
 import { type SavingsGoal } from '../types/savings.types';
 import { Button, Spinner } from '../components/ui';
+import { ModalPortal } from '../components/ui/ModalPortal';
 
 export default function SavingsPage() {
   const { data: goals, isLoading, isError } = useSavingsGoals();
-  
-  // Estados para modales
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedGoalForDeposit, setSelectedGoalForDeposit] = useState<SavingsGoal | null>(null);
   const [selectedGoalForWithdraw, setSelectedGoalForWithdraw] = useState<SavingsGoal | null>(null);
   const [selectedGoalForEdit, setSelectedGoalForEdit] = useState<SavingsGoal | null>(null);
   const [selectedGoalForDelete, setSelectedGoalForDelete] = useState<SavingsGoal | null>(null);
+  const [selectedEmergencyFundForUse, setSelectedEmergencyFundForUse] = useState<SavingsGoal | null>(null);
+  const [selectedEmergencyFundHistory, setSelectedEmergencyFundHistory] = useState<SavingsGoal | null>(null);
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-[#7C756E]">
-          <Spinner />
-          <span className="text-sm">Cargando metas...</span>
-        </div>
-      </div>
-    );
+    return <div className="flex min-h-[40vh] items-center justify-center"><div className="flex flex-col items-center gap-3 text-[#7C756E]"><Spinner /><span className="text-sm">Cargando metas...</span></div></div>;
   }
 
   if (isError) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-2 text-center text-red-500">
-          <AlertCircle className="h-6 w-6" strokeWidth={2} />
-          <span className="text-sm font-medium">Error al cargar las metas de ahorro.</span>
-        </div>
-      </div>
-    );
+    return <div className="flex min-h-[40vh] items-center justify-center"><div className="flex flex-col items-center gap-2 text-center text-red-500"><AlertCircle className="h-6 w-6" /><span className="text-sm font-medium">Error al cargar las metas de ahorro.</span></div></div>;
   }
 
-  return (
-    <div className="space-y-8 bg-[#FBF9F4] min-h-screen">
-      <div className="flex items-center justify-between">
-        <h1 className="font-serif text-3xl font-semibold text-[#2C2A29]">Metas de Ahorro</h1>
-        <Button 
-          className="flex items-center gap-2 bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#1A1918] rounded-xl px-5 py-2.5 transition-colors"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          <Plus className="h-5 w-5" />
-          Nueva Meta
-        </Button>
-      </div>
+  const emergencyFunds = goals?.filter((goal) => goal.purpose === 'emergency_fund') ?? [];
+  const personalGoals = goals?.filter((goal) => goal.purpose !== 'emergency_fund') ?? [];
+  const renderCard = (goal: SavingsGoal) => (
+    <SavingsGoalCard
+      key={goal.id}
+      goal={goal}
+      onDeposit={() => setSelectedGoalForDeposit(goal)}
+      onWithdraw={() => setSelectedGoalForWithdraw(goal)}
+      onEdit={() => setSelectedGoalForEdit(goal)}
+      onUseEmergencyFund={() => setSelectedEmergencyFundForUse(goal)}
+      onViewRestorations={() => setSelectedEmergencyFundHistory(goal)}
+      onDelete={() => setSelectedGoalForDelete(goal)}
+    />
+  );
 
-     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-max">
-        {goals?.map((goal) => (
-          <SavingsGoalCard 
-            key={goal.id} 
-            goal={goal} 
-            onDeposit={() => setSelectedGoalForDeposit(goal)}
-            onWithdraw={() => setSelectedGoalForWithdraw(goal)}
-            onEdit={() => setSelectedGoalForEdit(goal)}
-            onDelete={() => setSelectedGoalForDelete(goal)}
-          />
-        ))}
-        {(!goals || goals.length === 0) && (
-          <div className="col-span-full py-16 flex flex-col items-center justify-center text-center bg-[#FBF9F4] border border-dashed border-[#EFEAE2] rounded-[28px]">
-            <p className="text-[#7C756E] mb-4">No tienes metas de ahorro configuradas.</p>
-            <button 
-              onClick={() => setIsCreateModalOpen(true)}
-              className="text-[#9EAB98] font-medium hover:underline"
-            >
-              Crea tu primera meta
-            </button>
+  return (
+    <div className="min-h-screen space-y-10 bg-[#FBF9F4]">
+      <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7FA083]">Planificación</p>
+          <h1 className="mt-1 font-serif text-3xl font-semibold text-[#2C2A29] sm:text-4xl">Metas de ahorro</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#7C756E]">Separa tu protección financiera de tus objetivos personales y da seguimiento a cada propósito sin confundirlo con el saldo físico de tus cuentas.</p>
+        </div>
+        <Button className="flex items-center gap-2 rounded-xl bg-[#2C2A29] px-5 py-2.5 text-[#FBF9F4] transition-colors hover:bg-[#1A1918]" onClick={() => setIsCreateModalOpen(true)} leftIcon={<Plus className="h-5 w-5" />}>Nueva meta</Button>
+      </header>
+
+      <section>
+        <div className="mb-4 flex items-start gap-3">
+          <span className="rounded-xl bg-[#E6EDE2] p-2 text-[#52664D]"><ShieldCheck className="h-5 w-5" /></span>
+          <div><h2 className="text-lg font-semibold text-[#2C2A29]">Protección financiera</h2><p className="text-sm text-[#7C756E]">Tu fondo de emergencia, su mínimo protegido y cualquier restauración pendiente.</p></div>
+        </div>
+        {emergencyFunds.length > 0 ? (
+          <div className="grid max-w-3xl grid-cols-1 gap-6 md:grid-cols-2">{emergencyFunds.map(renderCard)}</div>
+        ) : (
+          <div className="rounded-[28px] border border-dashed border-[#CAD7C4] bg-[#F3F7F0] p-7">
+            <h3 className="font-medium text-[#304B38]">Aún no tienes un fondo de emergencia</h3>
+            <p className="mt-1 max-w-xl text-sm text-[#5E7162]">Crea una meta con propósito “Fondo de emergencia” para definir un mínimo protegido y habilitar usos con restauración programada.</p>
+            <button type="button" onClick={() => setIsCreateModalOpen(true)} className="mt-4 text-sm font-semibold text-[#52664D] hover:underline">Configurar fondo</button>
           </div>
         )}
-      </div>
-      {/* Renderizado de Modales */}
-      {isCreateModalOpen && (
-        <CreateGoalModal onClose={() => setIsCreateModalOpen(false)} />
-      )}
+      </section>
 
-      {selectedGoalForDeposit && (
-        <DepositModal
-          goal={selectedGoalForDeposit}
-          onClose={() => setSelectedGoalForDeposit(null)}
-        />
-      )}
+      <section>
+        <div className="mb-4 flex items-start gap-3">
+          <span className="rounded-xl bg-[#F0ECE6] p-2 text-[#6D665F]"><Target className="h-5 w-5" /></span>
+          <div><h2 className="text-lg font-semibold text-[#2C2A29]">Metas personales</h2><p className="text-sm text-[#7C756E]">Objetivos que completas de uno en uno, sin obligación de restaurarlos después de usarlos.</p></div>
+        </div>
+        {personalGoals.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">{personalGoals.map(renderCard)}</div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-[28px] border border-dashed border-[#DED6CC] py-12 text-center">
+            <p className="text-[#7C756E]">No tienes metas personales configuradas.</p>
+            <button type="button" onClick={() => setIsCreateModalOpen(true)} className="mt-3 font-medium text-[#7FA083] hover:underline">Crear una meta</button>
+          </div>
+        )}
+      </section>
 
-      {selectedGoalForWithdraw && (
-        <WithdrawModal
-          goal={selectedGoalForWithdraw}
-          onClose={() => setSelectedGoalForWithdraw(null)}
-        />
-      )}
-
-      {selectedGoalForEdit && (
-        <EditGoalModal
-          goal={selectedGoalForEdit}
-          onClose={() => setSelectedGoalForEdit(null)}
-        />
-      )}
-
-      {selectedGoalForDelete && (
-        <DeleteConfirmModal
-          goal={selectedGoalForDelete}
-          onClose={() => setSelectedGoalForDelete(null)}
-        />
+      {(isCreateModalOpen || selectedGoalForDeposit || selectedGoalForWithdraw || selectedGoalForEdit || selectedGoalForDelete || selectedEmergencyFundForUse || selectedEmergencyFundHistory) && (
+        <ModalPortal>
+        {isCreateModalOpen && <CreateGoalModal onClose={() => setIsCreateModalOpen(false)} />}
+        {selectedGoalForDeposit && <DepositModal goal={selectedGoalForDeposit} onClose={() => setSelectedGoalForDeposit(null)} />}
+        {selectedGoalForWithdraw && <WithdrawModal goal={selectedGoalForWithdraw} onClose={() => setSelectedGoalForWithdraw(null)} />}
+        {selectedGoalForEdit && <EditGoalModal goal={selectedGoalForEdit} onClose={() => setSelectedGoalForEdit(null)} />}
+        {selectedGoalForDelete && <DeleteConfirmModal goal={selectedGoalForDelete} onClose={() => setSelectedGoalForDelete(null)} />}
+        {selectedEmergencyFundForUse && <EmergencyFundUseModal goal={selectedEmergencyFundForUse} onClose={() => setSelectedEmergencyFundForUse(null)} />}
+        {selectedEmergencyFundHistory && <EmergencyFundRestorationsModal goal={selectedEmergencyFundHistory} onClose={() => setSelectedEmergencyFundHistory(null)} />}
+        </ModalPortal>
       )}
     </div>
   );

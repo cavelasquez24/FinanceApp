@@ -12,6 +12,11 @@ public class ExpenseFilterDto
     public string? Search { get; set; }
     public string? PaymentMethod { get; set; }
     public bool? IsRecurring { get; set; }
+    public List<Guid> TagIds { get; set; } = new();
+    public string TagMatch { get; set; } = "any";
+    public bool Untagged { get; set; }
+    public string? Merchant { get; set; }
+
     public string SortBy { get; set; } = "date";
     public string SortDirection { get; set; } = "desc";
 }

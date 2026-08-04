@@ -53,5 +53,13 @@ public class ExpenseCreateValidator : AbstractValidator<ExpenseCreateDto>
             .MaximumLength(1000)
             .WithMessage("Las notas no pueden superar 1000 caracteres")
             .When(x => x.Notes != null);
+
+        RuleFor(x => x.Merchant)
+            .MaximumLength(200)
+            .When(x => x.Merchant != null);
+
+        RuleFor(x => x.TagIds)
+            .Must(ids => ids.Distinct().Count() <= 10)
+            .WithMessage("Un gasto puede tener como máximo 10 etiquetas");
     }
 }

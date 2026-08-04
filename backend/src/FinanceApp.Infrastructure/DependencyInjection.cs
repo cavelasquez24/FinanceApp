@@ -37,7 +37,9 @@ public static class DependencyInjection
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IBudgetRepository, BudgetRepository>();
         services.AddScoped<IDebtRepository, DebtRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IFinancialAccountRepository, FinancialAccountRepository>();
+        services.AddScoped<IEmergencyFundRestorationRepository, EmergencyFundRestorationRepository>();
         services.AddScoped<IDebtService, DebtService>();
 
 
@@ -56,6 +58,9 @@ public static class DependencyInjection
         services.AddScoped<IBudgetService, BudgetService>();
         services.AddScoped<IFinancialAccountService, FinancialAccountService>();
         services.AddScoped<ICurrentDashboardService, CurrentDashboardService>();
+        services.AddScoped<ITagService, TagService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IEmergencyFundRestorationService, EmergencyFundRestorationService>();
 
         return services;
     }

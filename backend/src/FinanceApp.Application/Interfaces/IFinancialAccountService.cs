@@ -18,12 +18,20 @@ public interface IFinancialAccountService
     Task<FinancialAccountResponseDto> GetOrCreateDefaultAsync(
         Guid userId, FinancialAccountType type,
         CancellationToken cancellationToken = default);
+    Task<decimal> GetAvailableBalanceAsync(
+        Guid userId, Guid? accountId, FinancialAccountType fallbackType,
+        CancellationToken cancellationToken = default);
     Task SyncMovementAsync(
         Guid userId, Guid? accountId, FinancialAccountType fallbackType,
         decimal signedAmount, DateOnly date, string sourceType, Guid sourceId,
         string description, CancellationToken cancellationToken = default);
     Task SyncTransferAsync(
         Guid userId, FinancialAccountType fromType, FinancialAccountType toType,
+        decimal amount, DateOnly date, string sourceType, Guid sourceId,
+        string description, CancellationToken cancellationToken = default);
+    Task SyncTransferBetweenAccountsAsync(
+        Guid userId, Guid? fromAccountId, FinancialAccountType fromFallbackType,
+        Guid? toAccountId, FinancialAccountType toFallbackType,
         decimal amount, DateOnly date, string sourceType, Guid sourceId,
         string description, CancellationToken cancellationToken = default);
 }

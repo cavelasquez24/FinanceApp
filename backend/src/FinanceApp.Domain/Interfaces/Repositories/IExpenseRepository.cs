@@ -1,4 +1,5 @@
 ﻿using FinanceApp.Domain.Entities;
+using FinanceApp.Domain.Models;
 
 namespace FinanceApp.Domain.Interfaces.Repositories;
 
@@ -12,6 +13,10 @@ public interface IExpenseRepository : IBaseRepository<Expense>
         DateOnly? startDate = null,
         DateOnly? endDate = null,
         CancellationToken cancellationToken = default);
+    Task<(IEnumerable<Expense> Items, int TotalCount)> GetFilteredAsync(
+        Guid userId, ExpenseQueryOptions options,
+        CancellationToken cancellationToken = default);
+
 
     Task<decimal> GetTotalByUserAndPeriodAsync(
         Guid userId,

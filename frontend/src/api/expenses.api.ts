@@ -11,6 +11,7 @@ export const expensesApi = {
   getAll: (filters?: ExpenseFilter) =>
     apiClient.get<ApiResponse<PagedResponse<Expense>>>('/expenses', {
       params: filters,
+      paramsSerializer: { indexes: null },
     }),
 
   getById: (id: string) =>

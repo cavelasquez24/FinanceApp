@@ -37,6 +37,11 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .HasColumnName("description")
             .HasMaxLength(500)
             .IsRequired(false);
+        builder.Property(e => e.Merchant)
+            .HasColumnName("merchant")
+            .HasMaxLength(200)
+            .IsRequired(false);
+
 
         builder.Property(e => e.Date)
             .HasColumnName("date")
@@ -85,6 +90,10 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.HasIndex(e => e.CategoryId)
             .HasDatabaseName("idx_expenses_category_id")
             .HasFilter("deleted_at IS NULL");
+        builder.HasIndex(e => new { e.UserId, e.Merchant })
+            .HasDatabaseName("idx_expenses_user_merchant")
+            .HasFilter("deleted_at IS NULL AND merchant IS NOT NULL");
+
 
         builder.HasOne(e => e.Category)
             .WithMany(c => c.Expenses)

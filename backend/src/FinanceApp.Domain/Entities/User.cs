@@ -33,6 +33,7 @@ public class User : BaseEntity
     public ICollection<BudgetPeriod> BudgetPeriods { get; set; } = new List<BudgetPeriod>();
     public ICollection<Investment> Investments { get; set; } = new List<Investment>();
     public ICollection<SavingsGoal> SavingsGoals { get; set; } = new List<SavingsGoal>();
+    public ICollection<EmergencyFundRestoration> EmergencyFundRestorations { get; set; } = new List<EmergencyFundRestoration>();
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
     /// <summary>

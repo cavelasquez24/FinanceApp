@@ -9,6 +9,8 @@ public class CashFlowStatementDto
     public decimal Income { get; set; }
     public decimal ConsumptionExpenses { get; set; }       // = Expenses reales, sin contaminar
     public decimal SavingsContributions { get; set; }
+    public decimal RestorationContributions { get; set; }
+    public decimal NewSavingsContributions { get; set; }
     public decimal InvestmentContributions { get; set; }
     public decimal SavingsWithdrawals { get; set; }
     public decimal DebtPrincipalPaid { get; set; }

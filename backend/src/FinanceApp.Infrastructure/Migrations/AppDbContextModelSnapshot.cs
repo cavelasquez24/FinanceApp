@@ -274,7 +274,7 @@ namespace FinanceApp.Infrastructure.Migrations
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Icon = "home",
                             IsDefault = true,
-                            Name = "Vivienda",
+                            Name = "Hogar y servicios",
                             Type = "Expense",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         },
@@ -285,7 +285,7 @@ namespace FinanceApp.Infrastructure.Migrations
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Icon = "heart-pulse",
                             IsDefault = true,
-                            Name = "Salud",
+                            Name = "Salud y bienestar",
                             Type = "Expense",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         },
@@ -294,9 +294,9 @@ namespace FinanceApp.Infrastructure.Migrations
                             Id = new Guid("10000000-0000-0000-0000-000000000005"),
                             Color = "#3B82F6",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            Icon = "tv",
+                            Icon = "ticket",
                             IsDefault = true,
-                            Name = "Entretenimiento",
+                            Name = "Ocio y vida social",
                             Type = "Expense",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         },
@@ -305,9 +305,9 @@ namespace FinanceApp.Infrastructure.Migrations
                             Id = new Guid("10000000-0000-0000-0000-000000000006"),
                             Color = "#8B5CF6",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            Icon = "book",
+                            Icon = "book-open",
                             IsDefault = true,
-                            Name = "Educación",
+                            Name = "Educación y desarrollo",
                             Type = "Expense",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         },
@@ -316,9 +316,9 @@ namespace FinanceApp.Infrastructure.Migrations
                             Id = new Guid("10000000-0000-0000-0000-000000000007"),
                             Color = "#14B8A6",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            Icon = "zap",
+                            Icon = "landmark",
                             IsDefault = true,
-                            Name = "Servicios",
+                            Name = "Obligaciones financieras",
                             Type = "Expense",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         },
@@ -330,6 +330,42 @@ namespace FinanceApp.Infrastructure.Migrations
                             Icon = "circle-ellipsis",
                             IsDefault = true,
                             Name = "Otros gastos",
+                            Type = "Expense",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000013"),
+                            Color = "#EC4899",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DeletedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Icon = "shopping-bag",
+                            IsDefault = true,
+                            Name = "Compras personales",
+                            Type = "Expense",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000014"),
+                            Color = "#A855F7",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DeletedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Icon = "sparkles",
+                            IsDefault = true,
+                            Name = "Cuidado personal",
+                            Type = "Expense",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000015"),
+                            Color = "#64748B",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            DeletedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Icon = "receipt-text",
+                            IsDefault = true,
+                            Name = "Impuestos y comisiones",
                             Type = "Expense",
                             UpdatedAt = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0))
                         },
@@ -587,6 +623,109 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.ToTable("debt_withdrawals", (string)null);
                 });
 
+            modelBuilder.Entity("FinanceApp.Domain.Entities.EmergencyFundRestoration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly>("AcquisitionDate")
+                        .HasColumnType("date")
+                        .HasColumnName("acquisition_date");
+
+                    b.Property<DateOnly?>("CompletedDate")
+                        .HasColumnType("date")
+                        .HasColumnName("completed_date");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("LinkedExpenseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_expense_id");
+
+                    b.Property<DateOnly>("NextScheduledDate")
+                        .HasColumnType("date")
+                        .HasColumnName("next_scheduled_date");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasColumnType("numeric(15,2)")
+                        .HasColumnName("original_amount");
+
+                    b.Property<decimal>("RestoredAmount")
+                        .HasColumnType("numeric(15,2)")
+                        .HasColumnName("restored_amount");
+
+                    b.Property<Guid>("SavingsGoalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("savings_goal_id");
+
+                    b.Property<decimal>("ScheduledContributionAmount")
+                        .HasColumnType("numeric(15,2)")
+                        .HasColumnName("scheduled_contribution_amount");
+
+                    b.Property<Guid?>("ScheduledSourceAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("scheduled_source_account_id");
+
+                    b.Property<Guid>("SourceWithdrawalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_withdrawal_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateOnly>("TargetRestorationDate")
+                        .HasColumnType("date")
+                        .HasColumnName("target_restoration_date");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LinkedExpenseId")
+                        .IsUnique();
+
+                    b.HasIndex("SavingsGoalId");
+
+                    b.HasIndex("SourceWithdrawalId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "Status", "NextScheduledDate");
+
+                    b.ToTable("emergency_fund_restorations", (string)null);
+                });
+
             modelBuilder.Entity("FinanceApp.Domain.Entities.Expense", b =>
                 {
                     b.Property<Guid>("Id")
@@ -632,6 +771,11 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("is_recurring");
 
+                    b.Property<string>("Merchant")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("merchant");
+
                     b.Property<string>("Notes")
                         .HasColumnType("text")
                         .HasColumnName("notes");
@@ -671,7 +815,35 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasDatabaseName("idx_expenses_user_id_date")
                         .HasFilter("deleted_at IS NULL");
 
+                    b.HasIndex("UserId", "Merchant")
+                        .HasDatabaseName("idx_expenses_user_merchant")
+                        .HasFilter("deleted_at IS NULL AND merchant IS NOT NULL");
+
                     b.ToTable("expenses", (string)null);
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.ExpenseTag", b =>
+                {
+                    b.Property<Guid>("ExpenseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("expense_id");
+
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tag_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.HasKey("ExpenseId", "TagId");
+
+                    b.HasIndex("TagId", "ExpenseId")
+                        .HasDatabaseName("idx_expense_tags_tag_expense");
+
+                    b.ToTable("expense_tags", (string)null);
                 });
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.FinancialAccount", b =>
@@ -1024,9 +1196,15 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("boolean");
 
+                    b.Property<decimal?>("MinimumProtectedAmount")
+                        .HasColumnType("numeric(15,2)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("TargetAmount")
                         .HasColumnType("numeric");
@@ -1041,6 +1219,11 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Purpose")
+                        .IsUnique()
+                        .HasDatabaseName("ux_savings_goals_single_emergency_fund")
+                        .HasFilter("\"Purpose\" = 1 AND \"DeletedAt\" IS NULL");
 
                     b.HasIndex("UserId");
 
@@ -1073,6 +1256,10 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
+                    b.Property<Guid?>("EmergencyFundRestorationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("emergency_fund_restoration_id");
+
                     b.Property<string>("Notes")
                         .HasColumnType("text")
                         .HasColumnName("notes");
@@ -1088,6 +1275,8 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasDefaultValueSql("NOW()");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmergencyFundRestorationId");
 
                     b.HasIndex("SavingsGoalId")
                         .HasDatabaseName("idx_savings_goal_contributions_goal_id")
@@ -1157,6 +1346,75 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasFilter("deleted_at IS NULL");
 
                     b.ToTable("savings_goal_withdrawals", (string)null);
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("color");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<DateTimeOffset?>("LastUsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_used_at");
+
+                    b.Property<Guid?>("MergedIntoTagId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("merged_into_tag_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("normalized_name");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MergedIntoTagId");
+
+                    b.HasIndex("UserId", "LastUsedAt")
+                        .HasDatabaseName("idx_tags_user_last_used")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("UserId", "NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("idx_tags_user_normalized_name")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.ToTable("tags", (string)null);
                 });
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.User", b =>
@@ -1324,6 +1582,41 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Navigation("Debt");
                 });
 
+            modelBuilder.Entity("FinanceApp.Domain.Entities.EmergencyFundRestoration", b =>
+                {
+                    b.HasOne("FinanceApp.Domain.Entities.Expense", "LinkedExpense")
+                        .WithOne()
+                        .HasForeignKey("FinanceApp.Domain.Entities.EmergencyFundRestoration", "LinkedExpenseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FinanceApp.Domain.Entities.SavingsGoal", "SavingsGoal")
+                        .WithMany("Restorations")
+                        .HasForeignKey("SavingsGoalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FinanceApp.Domain.Entities.SavingsGoalWithdrawal", "SourceWithdrawal")
+                        .WithOne()
+                        .HasForeignKey("FinanceApp.Domain.Entities.EmergencyFundRestoration", "SourceWithdrawalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FinanceApp.Domain.Entities.User", "User")
+                        .WithMany("EmergencyFundRestorations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LinkedExpense");
+
+                    b.Navigation("SavingsGoal");
+
+                    b.Navigation("SourceWithdrawal");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("FinanceApp.Domain.Entities.Expense", b =>
                 {
                     b.HasOne("FinanceApp.Domain.Entities.FinancialAccount", "Account")
@@ -1348,6 +1641,25 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.ExpenseTag", b =>
+                {
+                    b.HasOne("FinanceApp.Domain.Entities.Expense", "Expense")
+                        .WithMany("ExpenseTags")
+                        .HasForeignKey("ExpenseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinanceApp.Domain.Entities.Tag", "Tag")
+                        .WithMany("ExpenseTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Expense");
+
+                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.FinancialAccount", b =>
@@ -1444,11 +1756,18 @@ namespace FinanceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.SavingsGoalContribution", b =>
                 {
+                    b.HasOne("FinanceApp.Domain.Entities.EmergencyFundRestoration", "EmergencyFundRestoration")
+                        .WithMany("Contributions")
+                        .HasForeignKey("EmergencyFundRestorationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("FinanceApp.Domain.Entities.SavingsGoal", "SavingsGoal")
                         .WithMany("Contributions")
                         .HasForeignKey("SavingsGoalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("EmergencyFundRestoration");
 
                     b.Navigation("SavingsGoal");
                 });
@@ -1462,6 +1781,24 @@ namespace FinanceApp.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("SavingsGoal");
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.Tag", b =>
+                {
+                    b.HasOne("FinanceApp.Domain.Entities.Tag", "MergedIntoTag")
+                        .WithMany()
+                        .HasForeignKey("MergedIntoTagId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FinanceApp.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MergedIntoTag");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.BudgetPeriod", b =>
@@ -1483,6 +1820,16 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Navigation("Withdrawals");
                 });
 
+            modelBuilder.Entity("FinanceApp.Domain.Entities.EmergencyFundRestoration", b =>
+                {
+                    b.Navigation("Contributions");
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.Expense", b =>
+                {
+                    b.Navigation("ExpenseTags");
+                });
+
             modelBuilder.Entity("FinanceApp.Domain.Entities.FinancialAccount", b =>
                 {
                     b.Navigation("Transactions");
@@ -1499,7 +1846,14 @@ namespace FinanceApp.Infrastructure.Migrations
                 {
                     b.Navigation("Contributions");
 
+                    b.Navigation("Restorations");
+
                     b.Navigation("Withdrawals");
+                });
+
+            modelBuilder.Entity("FinanceApp.Domain.Entities.Tag", b =>
+                {
+                    b.Navigation("ExpenseTags");
                 });
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.User", b =>
@@ -1507,6 +1861,8 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Navigation("BudgetPeriods");
 
                     b.Navigation("Categories");
+
+                    b.Navigation("EmergencyFundRestorations");
 
                     b.Navigation("Expenses");
 

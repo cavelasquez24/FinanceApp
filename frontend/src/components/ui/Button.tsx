@@ -95,12 +95,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {isLoading ? (
           <>
             <Spinner />
-            <span>{children}</span>
+            <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap">{children}</span>
           </>
         ) : (
           <>
             {leftIcon && <span className="shrink-0">{leftIcon}</span>}
-            <span>{children}</span>
+            <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap">{children}</span>
             {rightIcon && <span className="shrink-0">{rightIcon}</span>}
           </>
         )}

@@ -1,3 +1,5 @@
+import type { Tag } from './tag.types';
+
 export interface Expense {
   id: string;
   categoryId: string;
@@ -6,6 +8,8 @@ export interface Expense {
   categoryIcon: string | null;
   amount: number;
   description: string | null;
+  merchant: string | null;
+  tags: Tag[];
   date: string;
   paymentMethod: string;
   isRecurring: boolean;
@@ -18,6 +22,8 @@ export interface ExpenseCreateDto {
   categoryId: string;
   amount: number;
   description?: string;
+  merchant?: string;
+  tagIds: string[];
   date: string;
   paymentMethod: string;
   isRecurring: boolean;
@@ -25,7 +31,7 @@ export interface ExpenseCreateDto {
   notes?: string;
 }
 
-export interface ExpenseUpdateDto extends ExpenseCreateDto {}
+export type ExpenseUpdateDto = ExpenseCreateDto;
 
 export interface ExpenseFilter {
   page?: number;
@@ -34,6 +40,13 @@ export interface ExpenseFilter {
   startDate?: string;
   endDate?: string;
   paymentMethod?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  search?: string;
+  merchant?: string;
+  tagIds?: string[];
+  tagMatch?: 'any' | 'all';
+  untagged?: boolean;
   isRecurring?: boolean;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';

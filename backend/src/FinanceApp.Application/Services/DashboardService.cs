@@ -12,6 +12,8 @@ public class DashboardService : IDashboardService
     private readonly ISavingsGoalRepository _savingsGoalRepository;
     private readonly IDebtRepository _debtRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IFinancialAccountService _financialAccountService;
+    private readonly IEmergencyFundRestorationRepository _restorationRepository;
 
     private static readonly string[] MonthNames =
     {
@@ -25,7 +27,9 @@ public class DashboardService : IDashboardService
         IInvestmentRepository investmentRepository,
         ISavingsGoalRepository savingsGoalRepository,
         IDebtRepository debtRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IFinancialAccountService financialAccountService,
+        IEmergencyFundRestorationRepository restorationRepository)
     {
         _incomeRepository = incomeRepository;
         _expenseRepository = expenseRepository;
@@ -33,6 +37,8 @@ public class DashboardService : IDashboardService
         _savingsGoalRepository = savingsGoalRepository;
         _debtRepository = debtRepository;
         _userRepository = userRepository;
+        _financialAccountService = financialAccountService;
+        _restorationRepository = restorationRepository;
     }
 
     public async Task<DashboardOverviewDto> GetOverviewAsync(
@@ -56,6 +62,9 @@ public class DashboardService : IDashboardService
         var totalInvestments = await _investmentRepository.GetTotalCurrentValueAsync(userId, cancellationToken);
         var totalSavings = await _savingsGoalRepository.GetTotalSavedAsync(userId, cancellationToken);
 
+        var financialAccounts = await _financialAccountService.GetAllAsync(userId, cancellationToken);
+        var totalFinancialAssets = financialAccounts.Where(a => a.IsActive && a.Type != "investment").Sum(a => a.CurrentBalance) + totalInvestments;
+        var pendingRestoration = await _restorationRepository.GetTotalOutstandingAsync(userId, cancellationToken);
         // Deuda: saldo pendiente total, foto actual (no depende del rango de fechas)
         var totalDebt = await _debtRepository.GetTotalCurrentBalanceAsync(userId, cancellationToken);
 
@@ -87,8 +96,8 @@ public class DashboardService : IDashboardService
             prevDebtPrincipalPaid);
         var savingsRate = totalIncome > 0 ? Math.Round(netSavings / totalIncome * 100, 2) : 0;
 
-        // Patrimonio registrado: stocks conocidos, sin presumir caja acumulada.
-        var netWorth = totalInvestments + totalSavings - totalDebt;
+        // Las metas son asignaciones; el patrimonio se basa en cuentas f?sicas para no duplicarlas.
+        var netWorth = totalFinancialAssets - totalDebt;
 
         return new DashboardOverviewDto
         {
@@ -107,6 +116,7 @@ public class DashboardService : IDashboardService
             TotalInvestments = totalInvestments,
             TotalSavingsGoals = totalSavings,
             NetWorth = netWorth,
+            PendingEmergencyFundRestoration = pendingRestoration,
             PreviousMonth = new PreviousMonthDto
             {
                 TotalIncome = prevIncome,
@@ -203,6 +213,8 @@ public class DashboardService : IDashboardService
         var savingsWithdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);
         var investmentContributions = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
         var debtPrincipalPaid = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken);
+        var restorationContributions = await _restorationRepository.GetRestoredByDateRangeAsync(userId, start, end, cancellationToken);
+        var newSavingsContributions = Math.Max(savingsContributions - restorationContributions, 0);
 
         var cashFlowResidual = CashFlowCalculator.CalculateResidual(
             income,
@@ -212,7 +224,7 @@ public class DashboardService : IDashboardService
             investmentContributions,
             debtPrincipalPaid);
 
-        var wealthBuilding = savingsContributions - savingsWithdrawals + investmentContributions + debtPrincipalPaid;
+        var wealthBuilding = newSavingsContributions - savingsWithdrawals + investmentContributions + debtPrincipalPaid;
 
         return new CashFlowStatementDto
         {
@@ -222,6 +234,8 @@ public class DashboardService : IDashboardService
             InvestmentContributions = investmentContributions,
             SavingsWithdrawals = savingsWithdrawals,
             DebtPrincipalPaid = debtPrincipalPaid,
+            RestorationContributions = restorationContributions,
+            NewSavingsContributions = newSavingsContributions,
             CashFlowResidual = cashFlowResidual,
             ConsumptionRate = income > 0 ? Math.Round(consumptionExpenses / income * 100, 2) : 0,
             WealthBuildingRate = income > 0 ? Math.Round(wealthBuilding / income * 100, 2) : 0

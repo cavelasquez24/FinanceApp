@@ -6,6 +6,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .input-restoration {
+    @apply w-full rounded-xl border border-[#DED8CF] bg-white p-2.5 text-[#2C2A29] outline-none transition focus:border-transparent focus:ring-2 focus:ring-[#9EAB98];
+  }
+}
+
 /* 3. Variables CSS globales */
 :root {
   --color-income:  #22c55e;

@@ -63,8 +63,9 @@ export default function CategoriesPage() {
           <Button 
             onClick={handleOpenCreate}
             className="flex items-center justify-center gap-2 rounded-xl bg-[#2C2A29] px-5 py-2.5 text-sm font-medium text-[#FBF9F4] shadow-sm transition-all hover:bg-[#1F1E1D]"
+            leftIcon={<Plus className="h-4 w-4" />}
           >
-            <Plus className="h-4 w-4" /> Nueva Categoría
+            Nueva Categoría
           </Button>
         </div>
 

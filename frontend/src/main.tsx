@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+﻿import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -12,9 +12,9 @@ const queryClient = new QueryClient({
     queries: {
       // Reintenta 1 vez si falla
       retry: 1,
-      // Considera los datos frescos por 5 minutos
-      staleTime: 5 * 60 * 1000,
-      // Refetch cuando el usuario vuelve a la pestaña
+      // Ventana breve: evita tormentas al navegar, pero refresca pronto al volver o recuperar foco
+      staleTime: 30 * 1000,
+      // Solo las consultas vencidas se refrescan al volver a la pestaña
       refetchOnWindowFocus: true,
     },
   },

@@ -51,7 +51,7 @@ function ContributionRow({ label, value, total, color, icon }: RowProps) {
 // como KPI protagonista — mostrarla dos veces era la redundancia
 // principal detectada en el análisis UX.
 export function CashFlowStatementCard({ data }: Props) {
-  const netSavings = data.savingsContributions - data.savingsWithdrawals;
+  const netNewSavings = data.newSavingsContributions - data.savingsWithdrawals;
 
   return (
     <div className="space-y-4">
@@ -73,12 +73,22 @@ export function CashFlowStatementCard({ data }: Props) {
           icon={<Receipt className="h-4 w-4" strokeWidth={2} />}
         />
         <ContributionRow
-          label="Ahorro neto"
-          value={netSavings}
+          label="Ahorro nuevo neto"
+          value={netNewSavings}
           total={data.income}
           color="#8FA888"
           icon={<PiggyBank className="h-4 w-4" strokeWidth={2} />}
         />
+        {data.restorationContributions > 0 && (
+          <ContributionRow
+            label="Restauración del fondo"
+            value={data.restorationContributions}
+            total={data.income}
+            color="#B78348"
+            icon={<PiggyBank className="h-4 w-4" strokeWidth={2} />}
+          />
+        )}
+
         <ContributionRow
           label="Inversión"
           value={data.investmentContributions}

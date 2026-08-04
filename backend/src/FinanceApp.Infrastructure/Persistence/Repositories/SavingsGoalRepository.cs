@@ -15,6 +15,7 @@ public class SavingsGoalRepository : BaseRepository<SavingsGoal>, ISavingsGoalRe
         CancellationToken cancellationToken = default)
     {
         return await _context.SavingsGoals
+            .Include(s => s.Restorations.Where(r => r.DeletedAt == null))
             .Where(s => s.UserId == userId && s.DeletedAt == null)
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync(cancellationToken);
@@ -52,6 +53,7 @@ public class SavingsGoalRepository : BaseRepository<SavingsGoal>, ISavingsGoalRe
         return await _context.SavingsGoals
             .Include(s => s.Contributions.Where(c => c.DeletedAt == null))
             .Include(s => s.Withdrawals.Where(w => w.DeletedAt == null))
+            .Include(s => s.Restorations.Where(r => r.DeletedAt == null))
             .FirstOrDefaultAsync(
                 s => s.Id == id && s.UserId == userId && s.DeletedAt == null,
                 cancellationToken);

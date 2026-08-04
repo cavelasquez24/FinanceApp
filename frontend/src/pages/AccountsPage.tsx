@@ -51,8 +51,11 @@ export function AccountsPage() {
             Tus módulos usan la cuenta predeterminada automáticamente.
           </p>
         </div>
-        <Button onClick={() => setShowCreate((value) => !value)}>
-          <Plus className="mr-2 h-4 w-4" /> Nueva cuenta
+        <Button
+          onClick={() => setShowCreate((value) => !value)}
+          leftIcon={<Plus className="h-4 w-4" />}
+        >
+          Nueva cuenta
         </Button>
       </div>
 

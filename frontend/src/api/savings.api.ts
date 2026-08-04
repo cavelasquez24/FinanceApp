@@ -1,5 +1,15 @@
 import { apiClient } from './client';
-import type { SavingsGoal, CreateSavingsGoalDto, DepositDto, SavingsGoalWithdrawal, WithdrawDto } from '../types/savings.types';
+import type {
+  SavingsGoal,
+  CreateSavingsGoalDto,
+  DepositDto,
+  SavingsGoalWithdrawal,
+  WithdrawDto,
+  EmergencyFundRestoration,
+  EmergencyFundRestorationPaymentDto,
+  EmergencyFundUseDto,
+  DueRestorationProcessingResult,
+} from '../types/savings.types';
 import type { ApiResponse } from '../types/api.types';
 
 export const savingsApi = {
@@ -42,6 +52,32 @@ export const savingsApi = {
   // POST /api/v1/savings-goals/{id}/withdrawals  ← NUEVO, agregado aquí
   withdraw: async (id: string, data: WithdrawDto) => {
     const response = await apiClient.post<ApiResponse<SavingsGoalWithdrawal>>(`/savings-goals/${id}/withdrawals`, data);
+    return response.data.data;
+  },
+
+  getRestorations: async (goalId: string) => {
+    const response = await apiClient.get<ApiResponse<EmergencyFundRestoration[]>>(`/savings-goals/${goalId}/restorations`);
+    return response.data.data;
+  },
+
+  createEmergencyFundUse: async (goalId: string, data: EmergencyFundUseDto) => {
+    const response = await apiClient.post<ApiResponse<EmergencyFundRestoration>>(`/savings-goals/${goalId}/emergency-fund-uses`, data);
+    return response.data.data;
+  },
+
+  registerRestorationPayment: async (restorationId: string, data: EmergencyFundRestorationPaymentDto) => {
+    const response = await apiClient.post<ApiResponse<EmergencyFundRestoration>>(`/emergency-fund-restorations/${restorationId}/payments`, data);
+    return response.data.data;
+  },
+  processDueRestorations: async (asOfDate: string) => {
+    const response = await apiClient.post<ApiResponse<DueRestorationProcessingResult>>(
+      `/emergency-fund-restorations/process-due?asOfDate=${asOfDate}`);
+    return response.data.data;
+  },
+
+
+  cancelRestoration: async (restorationId: string) => {
+    const response = await apiClient.post<ApiResponse<EmergencyFundRestoration>>(`/emergency-fund-restorations/${restorationId}/cancel`);
     return response.data.data;
   }
 };

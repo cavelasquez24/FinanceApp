@@ -12,6 +12,8 @@ export default function EditGoalModal({ goal, onClose }: Props) {
   const [targetAmount, setTargetAmount] = useState<number | ''>(goal.targetAmount);
   const [targetDate, setTargetDate] = useState(goal.targetDate || '');
   const [description, setDescription] = useState(goal.description || '');
+  const [purpose, setPurpose] = useState<'general' | 'emergency_fund'>(goal.purpose);
+  const [minimumProtectedAmount, setMinimumProtectedAmount] = useState<number | ''>(goal.minimumProtectedAmount ?? '');
   
   const { mutate: updateGoal, isPending } = useUpdateSavingsGoal();
 
@@ -26,7 +28,9 @@ export default function EditGoalModal({ goal, onClose }: Props) {
           name, 
           targetAmount: Number(targetAmount), 
           targetDate: targetDate || undefined,
-          description: description || undefined 
+          description: description || undefined,
+          purpose,
+          minimumProtectedAmount: purpose === 'emergency_fund' && minimumProtectedAmount !== '' ? Number(minimumProtectedAmount) : undefined,
         }
       },
       { onSuccess: () => onClose() }
@@ -49,6 +53,39 @@ export default function EditGoalModal({ goal, onClose }: Props) {
               className="w-full bg-white border border-[#EFEAE2] text-[#2C2A29] rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#9EAB98] focus:border-transparent transition-all"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-[#7C756E] mb-1.5">Propósito</label>
+            <select
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value as 'general' | 'emergency_fund')}
+              disabled={goal.openRestorationsCount > 0}
+              className="w-full bg-white border border-[#EFEAE2] text-[#2C2A29] rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#9EAB98] disabled:opacity-60"
+            >
+              <option value="general">Meta de ahorro</option>
+              <option value="emergency_fund">Fondo de emergencia</option>
+            </select>
+            {goal.openRestorationsCount > 0 && (
+              <p className="mt-1 text-xs text-amber-700">
+                No se puede cambiar el propósito mientras existan restauraciones abiertas.
+              </p>
+            )}
+          </div>
+
+
+          {purpose === 'emergency_fund' && (
+            <div>
+              <label className="block text-sm font-medium text-[#7C756E] mb-1.5">Mínimo protegido</label>
+              <input
+                type="number"
+                min="0"
+                max={targetAmount || undefined}
+                step="0.01"
+                value={minimumProtectedAmount}
+                onChange={(e) => setMinimumProtectedAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                className="w-full bg-white border border-[#EFEAE2] text-[#2C2A29] rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#9EAB98]"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-[#7C756E] mb-1.5">Monto Objetivo</label>

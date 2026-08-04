@@ -1,5 +1,6 @@
 ﻿using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Interfaces.Repositories;
+using FinanceApp.Domain.Models;
 using FinanceApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,8 @@ public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
     {
         return await _context.Expenses
             .Include(e => e.Category)
+            .Include(e => e.ExpenseTags)
+                .ThenInclude(et => et.Tag)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
@@ -49,6 +52,77 @@ public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
+        return (items, totalCount);
+    }
+
+    public async Task<(IEnumerable<Expense> Items, int TotalCount)> GetFilteredAsync(
+        Guid userId, ExpenseQueryOptions options, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Expenses
+            .Where(e => e.UserId == userId && e.DeletedAt == null);
+
+        if (options.CategoryId.HasValue)
+            query = query.Where(e => e.CategoryId == options.CategoryId.Value);
+        if (options.StartDate.HasValue)
+            query = query.Where(e => e.Date >= options.StartDate.Value);
+        if (options.EndDate.HasValue)
+            query = query.Where(e => e.Date <= options.EndDate.Value);
+        if (options.MinAmount.HasValue)
+            query = query.Where(e => e.Amount >= options.MinAmount.Value);
+        if (options.MaxAmount.HasValue)
+            query = query.Where(e => e.Amount <= options.MaxAmount.Value);
+        if (options.PaymentMethod.HasValue)
+            query = query.Where(e => e.PaymentMethod == options.PaymentMethod.Value);
+        if (options.IsRecurring.HasValue)
+            query = query.Where(e => e.IsRecurring == options.IsRecurring.Value);
+        if (!string.IsNullOrWhiteSpace(options.Merchant))
+        {
+            var merchant = options.Merchant.Trim().ToLower();
+            query = query.Where(e => e.Merchant != null && e.Merchant.ToLower().Contains(merchant));
+        }
+        if (!string.IsNullOrWhiteSpace(options.Search))
+        {
+            var search = options.Search.Trim().ToLower();
+            query = query.Where(e =>
+                (e.Description != null && e.Description.ToLower().Contains(search))
+                || (e.Notes != null && e.Notes.ToLower().Contains(search))
+                || (e.Merchant != null && e.Merchant.ToLower().Contains(search))
+                || e.ExpenseTags.Any(et => et.Tag.DeletedAt == null
+                    && et.Tag.Name.ToLower().Contains(search)));
+        }
+
+        var tagIds = options.TagIds.Distinct().ToArray();
+        if (options.Untagged)
+            query = query.Where(e => !e.ExpenseTags.Any(et => et.Tag.DeletedAt == null));
+        else if (tagIds.Length > 0 && options.MatchAllTags)
+            query = query.Where(e => e.ExpenseTags.Count(et =>
+                tagIds.Contains(et.TagId) && et.Tag.DeletedAt == null) == tagIds.Length);
+        else if (tagIds.Length > 0)
+            query = query.Where(e => e.ExpenseTags.Any(et =>
+                tagIds.Contains(et.TagId) && et.Tag.DeletedAt == null));
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var ordered = (options.SortBy.ToLowerInvariant(), options.SortDescending) switch
+        {
+            ("amount", false) => query.OrderBy(e => e.Amount),
+            ("amount", true) => query.OrderByDescending(e => e.Amount),
+            ("merchant", false) => query.OrderBy(e => e.Merchant),
+            ("merchant", true) => query.OrderByDescending(e => e.Merchant),
+            ("description", false) => query.OrderBy(e => e.Description),
+            ("description", true) => query.OrderByDescending(e => e.Description),
+            ("date", false) => query.OrderBy(e => e.Date),
+            _ => query.OrderByDescending(e => e.Date)
+        };
+
+        var items = await ordered
+            .ThenByDescending(e => e.CreatedAt)
+            .ThenByDescending(e => e.Id)
+            .Skip((options.Page - 1) * options.PageSize)
+            .Take(options.PageSize)
+            .Include(e => e.Category)
+            .Include(e => e.ExpenseTags)
+                .ThenInclude(et => et.Tag)
+            .ToListAsync(cancellationToken);
         return (items, totalCount);
     }
 

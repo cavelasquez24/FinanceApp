@@ -68,7 +68,7 @@ public class SavingsGoalsController : ControllerBase
         Guid id, CancellationToken cancellationToken)
     {
         await _savingsGoalService.DeleteAsync(id, GetUserId(), cancellationToken);
-        return Ok(ApiResponse<object>.Ok(null!, "Meta eliminada exitosamente"));
+        return Ok(ApiResponse<object>.Ok(null!, "Meta archivada exitosamente"));
     }
 
     [HttpPatch("{id:guid}/deposit")]

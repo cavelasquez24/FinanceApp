@@ -9,6 +9,7 @@ public class Expense : BaseEntity
     public Guid? AccountId { get; set; }
     public decimal Amount { get; set; }
     public string? Description { get; set; }
+    public string? Merchant { get; set; }
     public DateOnly Date { get; set; }
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
     public bool IsRecurring { get; set; } = false;
@@ -24,4 +25,5 @@ public class Expense : BaseEntity
     public User User { get; set; } = null!;
     public Category Category { get; set; } = null!;
     public FinancialAccount? Account { get; set; }
+    public ICollection<ExpenseTag> ExpenseTags { get; set; } = new List<ExpenseTag>();
 }

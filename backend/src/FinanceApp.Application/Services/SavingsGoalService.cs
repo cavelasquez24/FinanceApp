@@ -31,7 +31,7 @@ public class SavingsGoalService : ISavingsGoalService
     public async Task<SavingsGoalResponseDto> GetByIdAsync(
         Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
+        var goal = await _savingsGoalRepository.GetByIdWithHistoryAsync(id, userId, cancellationToken);
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
         return MapToResponseDto(goal);
@@ -41,6 +41,18 @@ public class SavingsGoalService : ISavingsGoalService
         Guid userId, SavingsGoalCreateDto dto,
         CancellationToken cancellationToken = default)
     {
+        if (!Enum.TryParse<SavingsGoalPurpose>(dto.Purpose.Replace("_", ""), true, out var purpose))
+            throw new DomainException("INVALID_GOAL_PURPOSE", "El prop?sito de la meta no es v?lido.");
+        if (dto.MinimumProtectedAmount is < 0 || dto.MinimumProtectedAmount > dto.TargetAmount)
+            throw new DomainException("INVALID_PROTECTED_AMOUNT", "El m?nimo protegido debe estar entre cero y el objetivo.");
+        if (purpose == SavingsGoalPurpose.EmergencyFund)
+        {
+            var goals = await _savingsGoalRepository.GetByUserIdAsync(userId, cancellationToken);
+            if (goals.Any(g => g.Purpose == SavingsGoalPurpose.EmergencyFund))
+                throw new DomainException("EMERGENCY_FUND_ALREADY_EXISTS", "Solo puede existir un fondo de emergencia activo.");
+        }
+
+
         await _accountService.GetOrCreateDefaultAsync(
             userId, FinancialAccountType.Savings, cancellationToken);
 
@@ -53,6 +65,8 @@ public class SavingsGoalService : ISavingsGoalService
             CurrentAmount = dto.InitialAmount,
             TargetDate = dto.TargetDate,
             Icon = dto.Icon?.Trim(),
+            Purpose = purpose,
+            MinimumProtectedAmount = purpose == SavingsGoalPurpose.EmergencyFund ? dto.MinimumProtectedAmount : null,
             IsCompleted = dto.InitialAmount >= dto.TargetAmount
         };
 
@@ -72,9 +86,23 @@ public class SavingsGoalService : ISavingsGoalService
         Guid id, Guid userId, SavingsGoalUpdateDto dto,
         CancellationToken cancellationToken = default)
     {
-        var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
+        var goal = await _savingsGoalRepository.GetByIdWithHistoryAsync(id, userId, cancellationToken);
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
+
+        if (!Enum.TryParse<SavingsGoalPurpose>(dto.Purpose.Replace("_", ""), true, out var purpose))
+            throw new DomainException("INVALID_GOAL_PURPOSE", "El prop?sito de la meta no es v?lido.");
+        if (dto.MinimumProtectedAmount is < 0 || dto.MinimumProtectedAmount > dto.TargetAmount)
+            throw new DomainException("INVALID_PROTECTED_AMOUNT", "El m?nimo protegido debe estar entre cero y el objetivo.");
+        if (purpose == SavingsGoalPurpose.EmergencyFund && goal.Purpose != SavingsGoalPurpose.EmergencyFund)
+        {
+            var goals = await _savingsGoalRepository.GetByUserIdAsync(userId, cancellationToken);
+            if (goals.Any(g => g.Id != id && g.Purpose == SavingsGoalPurpose.EmergencyFund))
+                throw new DomainException("EMERGENCY_FUND_ALREADY_EXISTS", "Solo puede existir un fondo de emergencia activo.");
+        }
+        if (goal.Purpose == SavingsGoalPurpose.EmergencyFund && purpose != SavingsGoalPurpose.EmergencyFund
+            && goal.Restorations.Any(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted))
+            throw new DomainException("OPEN_RESTORATIONS", "No se puede cambiar el prop?sito mientras existan restauraciones abiertas.");
 
         goal.Name = dto.Name.Trim();
         goal.Description = dto.Description?.Trim();
@@ -82,6 +110,8 @@ public class SavingsGoalService : ISavingsGoalService
         goal.TargetDate = dto.TargetDate;
         goal.Icon = dto.Icon?.Trim();
         goal.IsCompleted = goal.CurrentAmount >= goal.TargetAmount;
+        goal.Purpose = purpose;
+        goal.MinimumProtectedAmount = purpose == SavingsGoalPurpose.EmergencyFund ? dto.MinimumProtectedAmount : null;
 
         await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
         return MapToResponseDto(goal);
@@ -90,12 +120,15 @@ public class SavingsGoalService : ISavingsGoalService
     public async Task DeleteAsync(
         Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
+        var goal = await _savingsGoalRepository.GetByIdWithHistoryAsync(id, userId, cancellationToken);
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
 
         // El dinero permanece en el fondo de ahorro aunque se elimine
         // su etiqueta virtual.
+        if (goal.Restorations.Any(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted))
+            throw new DomainException("OPEN_RESTORATIONS", "No se puede archivar un fondo con restauraciones abiertas.");
+
         goal.DeletedAt = DateTimeOffset.UtcNow;
         await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
     }
@@ -104,9 +137,12 @@ public class SavingsGoalService : ISavingsGoalService
         Guid id, Guid userId, DepositDto dto,
         CancellationToken cancellationToken = default)
     {
-        var goal = await _savingsGoalRepository.GetByIdAsync(id, cancellationToken);
+        var goal = await _savingsGoalRepository.GetByIdWithHistoryAsync(id, userId, cancellationToken);
         if (goal == null || goal.UserId != userId || goal.IsDeleted)
             throw new NotFoundException("Meta de ahorro", id);
+        if (goal.Restorations.Any(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted))
+            throw new DomainException("USE_RESTORATION_PAYMENT", "Registra el aporte contra una restauraci?n abierta.");
+
         if (goal.IsCompleted)
             throw new DomainException(
                 "GOAL_ALREADY_COMPLETED", "Esta meta de ahorro ya fue completada");
@@ -229,6 +265,11 @@ public class SavingsGoalService : ISavingsGoalService
         IsCompleted = goal.IsCompleted,
         Icon = goal.Icon,
         EstimatedMonthsToComplete = null,
-        CreatedAt = goal.CreatedAt
+        CreatedAt = goal.CreatedAt,
+        Purpose = goal.Purpose == SavingsGoalPurpose.EmergencyFund ? "emergency_fund" : "general",
+        MinimumProtectedAmount = goal.MinimumProtectedAmount,
+        PendingRestorationAmount = goal.Restorations.Where(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted).Sum(r => r.OutstandingAmount),
+        OpenRestorationsCount = goal.Restorations.Count(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted),
+        NextRestorationDate = goal.Restorations.Where(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted).Select(r => (DateOnly?)r.NextScheduledDate).Min(),
     };
 }

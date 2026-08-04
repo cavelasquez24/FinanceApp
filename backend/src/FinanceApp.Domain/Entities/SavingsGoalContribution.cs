@@ -11,7 +11,9 @@ public class SavingsGoalContribution : BaseEntity
     public DateOnly ContributionDate { get; set; }
     public decimal Amount { get; set; }
     public string? Notes { get; set; }
+    public Guid? EmergencyFundRestorationId { get; set; }
 
     // Propiedad de navegación
     public SavingsGoal SavingsGoal { get; set; } = null!;
+    public EmergencyFundRestoration? EmergencyFundRestoration { get; set; }
 }

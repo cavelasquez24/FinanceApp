@@ -16,6 +16,7 @@ public class DashboardOverviewDto
     public decimal TotalInvestments { get; set; }
     public decimal TotalSavingsGoals { get; set; }
     public decimal NetWorth { get; set; }
+    public decimal PendingEmergencyFundRestoration { get; set; }
     public PreviousMonthDto PreviousMonth { get; set; } = null!;
     public ChangesDto Changes { get; set; } = null!;
 }

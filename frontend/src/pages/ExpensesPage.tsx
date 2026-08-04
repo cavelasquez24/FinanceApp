@@ -17,6 +17,9 @@ import {
   TablePagination,
 } from '../components/ui';
 import type { Expense } from '../types/expense.types';
+import { TagManager } from '../features/tags/components/TagManager';
+import { TagExpenseReport } from '../features/tags/components/TagExpenseReport';
+import { useTags } from '../features/tags/hooks/useTags';
 
 // v2.1 — donut movido acá desde el Dashboard (vista de análisis, no de
 // resumen ejecutivo). Reutiliza hook/endpoint existentes, cero endpoint
@@ -33,10 +36,19 @@ export function ExpensesPage() {
   const [categoryYear, setCategoryYear] = useState(today.getFullYear());
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { data: availableTags = [] } = useTags();
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
 
-  const { data: response, isLoading, isError, isFetching } = useExpenses({ page, pageSize });
+  const { data: response, isLoading, isError, isFetching } = useExpenses({
+    page,
+    pageSize,
+    search: searchParams.get('q') || undefined,
+    merchant: searchParams.get('merchant') || undefined,
+    tagIds: (searchParams.get('tags') ?? '').split(',').filter(Boolean),
+    tagMatch: (searchParams.get('tagMatch') as 'any' | 'all') || 'any',
+    untagged: searchParams.get('untagged') === 'true',
+  });
   const { mutate: deleteExpense, isPending: isDeleting } = useDeleteExpense();
   const {
     data: categoryData,
@@ -46,6 +58,15 @@ export function ExpensesPage() {
 
   const pagedData = response?.data?.data;
   const expenses = pagedData?.items || [];
+  const selectedTagIds = (searchParams.get('tags') ?? '').split(',').filter(Boolean);
+  const updateFilter = (key: string, value?: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set(key, value); else next.delete(key);
+    next.delete('page');
+    setSearchParams(next);
+  };
+  const reportStart = categoryYear + '-' + String(categoryMonth).padStart(2, '0') + '-01';
+  const reportEnd = new Date(categoryYear, categoryMonth, 0).toISOString().split('T')[0];
 
   const changePage = (nextPage: number) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -107,6 +128,7 @@ export function ExpensesPage() {
         </div>
         <Button
           onClick={handleOpenCreate}
+
           leftIcon={<PlusIcon className="h-4 w-4" strokeWidth={2.5} />}
           className="!bg-[#2C2A29] !text-[#FBF9F4] hover:!bg-[#1F1E1D]"
         >
@@ -120,6 +142,39 @@ export function ExpensesPage() {
           <ExpenseForm expense={editingExpense ?? undefined} onSuccess={closeForm} onCancel={closeForm} />
         </Card>
       )}
+
+
+      <Card>
+        <CardHeader title="Filtros" subtitle="Combina texto, comercio y etiquetas" />
+        <div className="grid gap-3 md:grid-cols-3">
+          <input value={searchParams.get('q') ?? ''} onChange={(e) => updateFilter('q', e.target.value)}
+            placeholder="Buscar descripción, notas o etiqueta" className="rounded-xl border border-[#EFEAE2] bg-white px-3 py-2 text-sm" />
+          <input value={searchParams.get('merchant') ?? ''} onChange={(e) => updateFilter('merchant', e.target.value)}
+            placeholder="Comercio" className="rounded-xl border border-[#EFEAE2] bg-white px-3 py-2 text-sm" />
+          <select value={searchParams.get('tagMatch') ?? 'any'} onChange={(e) => updateFilter('tagMatch', e.target.value)}
+            className="rounded-xl border border-[#EFEAE2] bg-white px-3 py-2 text-sm">
+            <option value="any">Cualquiera de las etiquetas</option>
+            <option value="all">Todas las etiquetas</option>
+          </select>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {availableTags.map((tag) => {
+            const active = selectedTagIds.includes(tag.id);
+            return <button key={tag.id} type="button"
+              onClick={() => updateFilter('tags', (active ? selectedTagIds.filter((id) => id !== tag.id) : [...selectedTagIds, tag.id]).join(','))}
+              className={`rounded-full border px-3 py-1 text-xs ${active ? 'border-[#5C7A99] bg-[#5C7A99] text-white' : 'border-[#EFEAE2] bg-white'}`}>
+              {tag.name}
+            </button>;
+          })}
+          <label className="flex items-center gap-2 text-sm text-[#7C756E]">
+            <input type="checkbox" checked={searchParams.get('untagged') === 'true'}
+              onChange={(e) => updateFilter('untagged', e.target.checked ? 'true' : undefined)} />Sin etiquetas
+          </label>
+          {(searchParams.get('q') || searchParams.get('merchant') || selectedTagIds.length || searchParams.get('untagged')) && (
+            <button type="button" onClick={() => setSearchParams({})} className="text-xs text-[#C97B63]">Limpiar filtros</button>
+          )}
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card noPadding className="overflow-hidden lg:col-span-2">
@@ -164,6 +219,15 @@ export function ExpensesPage() {
                           style={{ backgroundColor: expense.categoryColor }}
                         />
                         {expense.categoryName}
+                        {expense.tags.length > 0 && (
+                          <div className="ml-2 flex flex-wrap gap-1">
+                            {expense.tags.slice(0, 2).map((tag) => (
+                              <span key={tag.id} className="rounded-full px-2 py-0.5 text-[10px] text-white"
+                                style={{ backgroundColor: tag.color ?? '#5C7A99' }}>{tag.name}</span>
+                            ))}
+                            {expense.tags.length > 2 && <span className="text-xs text-[#7C756E]">+{expense.tags.length - 2}</span>}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 capitalize text-[#7C756E]">
                         {expense.paymentMethod.replace('_', ' ')}
@@ -187,6 +251,7 @@ export function ExpensesPage() {
                             onClick={() => setDeletingExpense(expense)}
                             className="rounded-lg p-2 text-[#7C756E] transition-colors hover:bg-[#EFEAE2] hover:text-[#C97B63]"
                             aria-label="Eliminar gasto"
+
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={2} />
                           </button>
@@ -238,6 +303,17 @@ export function ExpensesPage() {
           ) : categoryData ? (
             <ExpensesByCategoryChart data={categoryData} />
           ) : null}
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader title="Administrar etiquetas" subtitle="Edita, elimina o fusiona duplicados" />
+          <TagManager />
+        </Card>
+        <Card>
+          <CardHeader title="Análisis por etiquetas" subtitle="Totales asociados del mes seleccionado" />
+          <TagExpenseReport startDate={reportStart} endDate={reportEnd} />
         </Card>
       </div>
 

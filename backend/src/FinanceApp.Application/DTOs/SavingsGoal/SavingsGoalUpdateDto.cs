@@ -7,4 +7,6 @@ public class SavingsGoalUpdateDto
     public decimal TargetAmount { get; set; }
     public DateOnly? TargetDate { get; set; }
     public string? Icon { get; set; }
+    public string Purpose { get; set; } = "general";
+    public decimal? MinimumProtectedAmount { get; set; }
 }

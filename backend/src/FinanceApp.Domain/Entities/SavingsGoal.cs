@@ -1,3 +1,5 @@
+using FinanceApp.Domain.Enums;
+
 ﻿namespace FinanceApp.Domain.Entities;
 
 public class SavingsGoal : BaseEntity
@@ -10,6 +12,8 @@ public class SavingsGoal : BaseEntity
     public DateOnly? TargetDate { get; set; }
     public bool IsCompleted { get; set; } = false;
     public string? Icon { get; set; }
+    public SavingsGoalPurpose Purpose { get; set; } = SavingsGoalPurpose.General;
+    public decimal? MinimumProtectedAmount { get; set; }
 
     // Propiedad de navegación
     public User User { get; set; } = null!;
@@ -18,6 +22,7 @@ public class SavingsGoal : BaseEntity
     public ICollection<SavingsGoalContribution> Contributions { get; set; } = new List<SavingsGoalContribution>();
     public ICollection<SavingsGoalWithdrawal> Withdrawals { get; set; } = new List<SavingsGoalWithdrawal>();
 
+    public ICollection<EmergencyFundRestoration> Restorations { get; set; } = new List<EmergencyFundRestoration>();
     // Calculadas en memoria
     public decimal ProgressPercentage => TargetAmount > 0
         ? Math.Min((CurrentAmount / TargetAmount) * 100, 100)

@@ -91,34 +91,49 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
                     CreatedAt = seedDate,   UpdatedAt = seedDate },
 
             new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000003"),
-                    Name = "Vivienda",      Type = CategoryType.Expense,
+                    Name = "Hogar y servicios", Type = CategoryType.Expense,
                     Icon = "home",          Color = "#EAB308", IsDefault = true,
                     CreatedAt = seedDate,   UpdatedAt = seedDate },
 
             new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000004"),
-                    Name = "Salud",         Type = CategoryType.Expense,
+                    Name = "Salud y bienestar", Type = CategoryType.Expense,
                     Icon = "heart-pulse",   Color = "#22C55E", IsDefault = true,
                     CreatedAt = seedDate,   UpdatedAt = seedDate },
 
             new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000005"),
-                    Name = "Entretenimiento", Type = CategoryType.Expense,
-                    Icon = "tv",            Color = "#3B82F6", IsDefault = true,
+                    Name = "Ocio y vida social", Type = CategoryType.Expense,
+                    Icon = "ticket",        Color = "#3B82F6", IsDefault = true,
                     CreatedAt = seedDate,   UpdatedAt = seedDate },
 
             new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000006"),
-                    Name = "Educación",     Type = CategoryType.Expense,
-                    Icon = "book",          Color = "#8B5CF6", IsDefault = true,
+                    Name = "Educación y desarrollo", Type = CategoryType.Expense,
+                    Icon = "book-open",     Color = "#8B5CF6", IsDefault = true,
                     CreatedAt = seedDate,   UpdatedAt = seedDate },
 
             new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000007"),
-                    Name = "Servicios",     Type = CategoryType.Expense,
-                    Icon = "zap",           Color = "#14B8A6", IsDefault = true,
+                    Name = "Obligaciones financieras", Type = CategoryType.Expense,
+                    Icon = "landmark",      Color = "#14B8A6", IsDefault = true,
                     CreatedAt = seedDate,   UpdatedAt = seedDate },
 
             new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000008"),
                     Name = "Otros gastos",  Type = CategoryType.Expense,
                     Icon = "circle-ellipsis", Color = "#6B7280", IsDefault = true,
                     CreatedAt = seedDate,   UpdatedAt = seedDate },
+
+            new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000013"),
+                    Name = "Compras personales", Type = CategoryType.Expense,
+                    Icon = "shopping-bag",  Color = "#EC4899", IsDefault = true,
+                    CreatedAt = seedDate,   UpdatedAt = seedDate, DeletedAt = seedDate },
+
+            new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000014"),
+                    Name = "Cuidado personal", Type = CategoryType.Expense,
+                    Icon = "sparkles",      Color = "#A855F7", IsDefault = true,
+                    CreatedAt = seedDate,   UpdatedAt = seedDate, DeletedAt = seedDate },
+
+            new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000015"),
+                    Name = "Impuestos y comisiones", Type = CategoryType.Expense,
+                    Icon = "receipt-text",  Color = "#64748B", IsDefault = true,
+                    CreatedAt = seedDate,   UpdatedAt = seedDate, DeletedAt = seedDate },
 
             // Ingresos
             new() { Id = Guid.Parse("10000000-0000-0000-0000-000000000009"),
