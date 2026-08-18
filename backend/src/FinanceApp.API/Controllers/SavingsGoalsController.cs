@@ -1,4 +1,4 @@
-﻿using FinanceApp.Application.DTOs.Common;
+using FinanceApp.Application.DTOs.Common;
 using FinanceApp.Application.DTOs.SavingsGoal;
 using FinanceApp.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -65,9 +65,11 @@ public class SavingsGoalsController : ControllerBase
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(
-        Guid id, CancellationToken cancellationToken)
+        Guid id,
+        [FromBody] SavingsGoalArchiveDto? dto,
+        CancellationToken cancellationToken)
     {
-        await _savingsGoalService.DeleteAsync(id, GetUserId(), cancellationToken);
+        await _savingsGoalService.DeleteAsync(id, GetUserId(), dto, cancellationToken);
         return Ok(ApiResponse<object>.Ok(null!, "Meta archivada exitosamente"));
     }
 

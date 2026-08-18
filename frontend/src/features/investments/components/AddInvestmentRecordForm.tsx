@@ -1,3 +1,4 @@
+import { todayDateOnly } from '../../../utils/dateOnly';
 import { useState } from 'react';
 import { useAddInvestmentRecord } from '../hooks/useInvestments';
 import { Button } from '../../../components/ui';
@@ -13,7 +14,7 @@ export function AddInvestmentRecordForm({ investment, onSuccess, onCancel }: Pro
   const { mutate: addRecord, isPending } = useAddInvestmentRecord();
   
   // Estado local para el formulario respetando el DTO CreateInvestmentRecordDto
-  const [recordDate, setRecordDate] = useState(new Date().toISOString().split('T')[0]);
+  const [recordDate, setRecordDate] = useState(todayDateOnly());
   const [value, setValue] = useState(investment.currentValue.toString());
   const [dividends, setDividends] = useState('0');
   const [notes, setNotes] = useState('');

@@ -15,6 +15,8 @@ import {
   Folder,
   Tags,
   BoneFracture,
+  CreditCard,
+  Undo2,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -29,10 +31,12 @@ const navItems = [
   { to: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
   { to: '/incomes',     label: 'Ingresos',    icon: TrendingUp      },
   { to: '/expenses',    label: 'Gastos',      icon: TrendingDown    },
+  { to: '/reimbursements', label: 'Reembolsos', icon: Undo2 },
   { to: '/analysis',    label: 'An\u00e1lisis', icon: BarChart3     },
   { to: '/accounts',    label: 'Cuentas',     icon: Wallet          },
   { to: '/budget',      label: 'Presupuesto', icon: Target          },
   { to: '/investments', label: 'Inversiones', icon: BarChart3       },
+  { to: '/credit-cards', label: 'Tarjetas', icon: CreditCard },
   { to: '/debts',     label: 'Deudas',       icon: BoneFracture       },
   { to: '/savings',     label: 'Metas',       icon: PiggyBank       },
   { to: '/categories',  label: 'Categorías',  icon: Folder          },

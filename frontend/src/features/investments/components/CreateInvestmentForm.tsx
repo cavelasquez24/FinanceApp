@@ -1,3 +1,4 @@
+import { todayDateOnly } from '../../../utils/dateOnly';
 // src/features/investments/components/CreateInvestmentForm.tsx
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,7 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
     resolver: zodResolver(createInvestmentSchema),
     defaultValues: {
       type: 'etf',
-      purchaseDate: new Date().toISOString().split('T')[0],
+      purchaseDate: todayDateOnly(),
       isHistoricalImport: false,
     }
   });

@@ -1,8 +1,10 @@
+import { monthEndDateOnly } from '../utils/dateOnly';
 // src/pages/ExpensesPage.tsx
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { format, parseISO } from 'date-fns';
-import { Plus as PlusIcon, AlertCircle, Inbox, Pencil, Trash2 } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { format } from 'date-fns';
+import { parseDateOnly } from '../utils/dateOnly';
+import { Plus as PlusIcon, AlertCircle, Inbox, Pencil, Trash2, Undo2 } from 'lucide-react';
 import { useExpenses, useDeleteExpense } from '../features/expenses/hooks/useExpenses';
 import { ExpenseForm } from '../features/expenses/components/ExpenseForm';
 import { ExpensesByCategoryChart } from '../components/dashboard/ExpensesByCategoryChart';
@@ -66,7 +68,7 @@ export function ExpensesPage() {
     setSearchParams(next);
   };
   const reportStart = categoryYear + '-' + String(categoryMonth).padStart(2, '0') + '-01';
-  const reportEnd = new Date(categoryYear, categoryMonth, 0).toISOString().split('T')[0];
+  const reportEnd = monthEndDateOnly(categoryYear, categoryMonth);
 
   const changePage = (nextPage: number) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -211,7 +213,7 @@ export function ExpensesPage() {
                   {expenses.map((expense) => (
                     <tr key={expense.id} className="transition-colors hover:bg-[#FBF9F4]">
                       <td className="px-6 py-4 text-[#7C756E]">
-                        {format(parseISO(expense.date), 'dd/MM/yyyy')}
+                        {format(parseDateOnly(expense.date), 'dd/MM/yyyy')}
                       </td>
                       <td className="flex items-center gap-2 px-6 py-4">
                         <div
@@ -238,6 +240,13 @@ export function ExpensesPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
+                          <Link
+                            to={'/reimbursements?expenseId=' + expense.id}
+                            className="rounded-lg p-2 text-[#7C756E] transition-colors hover:bg-[#5C7A99]/10 hover:text-[#5C7A99]"
+                            aria-label="Registrar reembolso de este gasto"
+                          >
+                            <Undo2 className="h-4 w-4" strokeWidth={2} />
+                          </Link>
                           <button
                             type="button"
                             onClick={() => handleEdit(expense)}
@@ -322,7 +331,7 @@ export function ExpensesPage() {
         title="¿Eliminar este gasto?"
         description={
           deletingExpense
-            ? `Se eliminará "${deletingExpense.categoryName}" del ${format(parseISO(deletingExpense.date), 'dd/MM/yyyy')} por ${new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(deletingExpense.amount)}. Esta acción no se puede deshacer.`
+            ? `Se eliminará "${deletingExpense.categoryName}" del ${format(parseDateOnly(deletingExpense.date), 'dd/MM/yyyy')} por ${new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(deletingExpense.amount)}. Esta acción no se puede deshacer.`
             : undefined
         }
         isLoading={isDeleting}

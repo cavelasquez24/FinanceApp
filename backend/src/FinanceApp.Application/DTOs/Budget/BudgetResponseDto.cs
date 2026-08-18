@@ -8,6 +8,9 @@ public class BudgetResponseDto
     public string Period { get; set; } = string.Empty;
     public decimal? TotalLimit { get; set; }
     public string? Notes { get; set; }
+    public decimal BudgetRolloverAmount { get; set; }
+    public DateOnly? BudgetRolloverDate { get; set; }
+    public string? BudgetRolloverNote { get; set; }
     public List<BudgetCategoryResponseDto> Categories { get; set; } = new();
 }
 

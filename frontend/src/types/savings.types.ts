@@ -23,6 +23,9 @@ export interface CreateSavingsGoalDto {
   description?: string;
   targetAmount: number;
   initialAmount?: number;
+  initialSourceAccountId?: string;
+  initialFundingDate?: string;
+  idempotencyKey?: string;
   targetDate?: string; // Formato "YYYY-MM-DD"
   icon?: string;
   purpose?: 'general' | 'emergency_fund';
@@ -31,6 +34,18 @@ export interface CreateSavingsGoalDto {
 
 export interface DepositDto {
   amount: number;
+  sourceAccountId: string;
+  idempotencyKey: string;
+  contributionDate?: string;
+  notes?: string;
+}
+
+export interface ArchiveSavingsGoalDto {
+  resolution: 'release' | 'reassign';
+  destinationAccountId?: string;
+  targetGoalId?: string;
+  date?: string;
+  idempotencyKey: string;
   notes?: string;
 }
 
@@ -55,6 +70,9 @@ export interface WithdrawDto {
   amount: number;
   withdrawalDate?: string; // "YYYY-MM-DD", opcional → hoy
   reason: SavingsWithdrawalReason;
+  destinationAccountId?: string;
+  targetGoalId?: string;
+  idempotencyKey: string;
   linkedExpenseId?: string; // solo si reason = 'Consumed'
   notes?: string;
 }

@@ -1,4 +1,4 @@
-﻿using FinanceApp.Domain.Entities;
+using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Interfaces.Repositories;
 using FinanceApp.Domain.Models;
 using FinanceApp.Infrastructure.Persistence;
@@ -15,10 +15,26 @@ public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
     {
         return await _context.Expenses
             .Include(e => e.Category)
+            .Include(e => e.Account)
             .Include(e => e.ExpenseTags)
                 .ThenInclude(et => et.Tag)
+            .Include(e => e.CreditCard)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
+
+    public Task<Expense?> GetByIdempotencyKeyAsync(
+        Guid userId, Guid idempotencyKey,
+        CancellationToken cancellationToken = default) =>
+        _context.Expenses
+            .Include(e => e.Category)
+            .Include(e => e.Account)
+            .Include(e => e.CreditCard)
+            .Include(e => e.ExpenseTags)
+                .ThenInclude(et => et.Tag)
+            .FirstOrDefaultAsync(
+                e => e.UserId == userId && e.IdempotencyKey == idempotencyKey
+                    && e.DeletedAt == null,
+                cancellationToken);
 
     public async Task<(IEnumerable<Expense> Items, int TotalCount)> GetByUserIdAsync(
         Guid userId,
@@ -31,6 +47,8 @@ public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
     {
         var query = _context.Expenses
             .Include(e => e.Category)
+            .Include(e => e.Account)
+            .Include(e => e.CreditCard)
             .Where(e => e.UserId == userId && e.DeletedAt == null);
 
         if (categoryId.HasValue)
@@ -120,6 +138,9 @@ public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
             .Skip((options.Page - 1) * options.PageSize)
             .Take(options.PageSize)
             .Include(e => e.Category)
+            .Include(e => e.Account)
+            .Include(e => e.CreditCard)
+            .Include(e => e.Reimbursements.Where(r => r.DeletedAt == null))
             .Include(e => e.ExpenseTags)
                 .ThenInclude(et => et.Tag)
             .ToListAsync(cancellationToken);

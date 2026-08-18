@@ -1,3 +1,4 @@
+import { todayDateOnly } from '../../../utils/dateOnly';
 import { useState } from 'react';
 import { useCreateDebt } from '../hooks/useDebts';
 import { Button, Input } from '../../../components/ui';
@@ -19,7 +20,7 @@ export function CreateDebtForm({ onSuccess, onCancel }: Props) {
   const [interestRate, setInterestRate] = useState('');
   const [minimumPayment, setMinimumPayment] = useState('');
   const [dueDay, setDueDay] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(todayDateOnly());
   const [targetPayoffDate, setTargetPayoffDate] = useState('');
   const [notes, setNotes] = useState('');
 

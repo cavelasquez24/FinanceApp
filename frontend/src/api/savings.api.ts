@@ -3,6 +3,7 @@ import type {
   SavingsGoal,
   CreateSavingsGoalDto,
   DepositDto,
+  ArchiveSavingsGoalDto,
   SavingsGoalWithdrawal,
   WithdrawDto,
   EmergencyFundRestoration,
@@ -38,8 +39,8 @@ export const savingsApi = {
   },
 
   // DELETE /api/v1/savings-goals/{id}
-  delete: async (id: string) => {
-    const response = await apiClient.delete<ApiResponse<null>>(`/savings-goals/${id}`);
+  delete: async (id: string, data?: ArchiveSavingsGoalDto) => {
+    const response = await apiClient.delete<ApiResponse<null>>(`/savings-goals/${id}`, { data });
     return response.data.data;
   },
 

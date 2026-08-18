@@ -29,6 +29,12 @@ public interface ISavingsGoalService
         Guid userId,
         CancellationToken cancellationToken = default);
 
+    Task DeleteAsync(
+        Guid id,
+        Guid userId,
+        SavingsGoalArchiveDto? dto,
+        CancellationToken cancellationToken = default);
+
     Task<SavingsGoalResponseDto> DepositAsync(
         Guid id,
         Guid userId,

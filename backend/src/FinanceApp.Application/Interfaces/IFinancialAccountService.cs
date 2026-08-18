@@ -15,6 +15,9 @@ public interface IFinancialAccountService
     Task<FinancialAccountResponseDto> UpdateAsync(
         Guid id, Guid userId, FinancialAccountUpdateDto dto,
         CancellationToken cancellationToken = default);
+    Task<AccountTransferResponseDto> TransferAsync(
+        Guid userId, AccountTransferCreateDto dto,
+        CancellationToken cancellationToken = default);
     Task<FinancialAccountResponseDto> GetOrCreateDefaultAsync(
         Guid userId, FinancialAccountType type,
         CancellationToken cancellationToken = default);

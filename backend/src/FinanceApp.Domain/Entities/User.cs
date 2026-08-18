@@ -34,6 +34,7 @@ public class User : BaseEntity
     public ICollection<Investment> Investments { get; set; } = new List<Investment>();
     public ICollection<SavingsGoal> SavingsGoals { get; set; } = new List<SavingsGoal>();
     public ICollection<EmergencyFundRestoration> EmergencyFundRestorations { get; set; } = new List<EmergencyFundRestoration>();
+    public ICollection<CreditCard> CreditCards { get; set; } = new List<CreditCard>();
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
     /// <summary>

@@ -16,6 +16,22 @@ public class ExpenseCreateValidator : AbstractValidator<ExpenseCreateDto>
         RuleFor(x => x.CategoryId)
             .NotEmpty().WithMessage("La categoría es requerida");
 
+        RuleFor(x => x.AccountId)
+            .NotEmpty().WithMessage("Selecciona explícitamente la cuenta desde la que se pagó el gasto")
+            .When(x => x.PaymentMethod != "credit_card");
+
+        RuleFor(x => x.AccountId)
+            .Empty().WithMessage("Una compra con tarjeta de crédito no debe descontar una cuenta de caja")
+            .When(x => x.PaymentMethod == "credit_card");
+
+        RuleFor(x => x.CreditCardId)
+            .NotEmpty().WithMessage("Selecciona la tarjeta de crédito utilizada")
+            .When(x => x.PaymentMethod == "credit_card");
+
+        RuleFor(x => x.IdempotencyKey)
+            .NotEmpty().WithMessage("La clave de idempotencia es obligatoria para compras con tarjeta")
+            .When(x => x.PaymentMethod == "credit_card");
+
         RuleFor(x => x.Amount)
             .GreaterThan(0).WithMessage("El monto debe ser mayor a 0")
             .LessThanOrEqualTo(9999999999999.99m)
@@ -34,6 +50,7 @@ public class ExpenseCreateValidator : AbstractValidator<ExpenseCreateDto>
         RuleFor(x => x.PaymentMethod)
             .Must(m => ValidPaymentMethods.Contains(m))
             .WithMessage($"Método de pago inválido. Valores permitidos: {string.Join(", ", ValidPaymentMethods)}");
+
 
         // Si es recurrente, debe tener tipo de recurrencia
         RuleFor(x => x.RecurrenceType)

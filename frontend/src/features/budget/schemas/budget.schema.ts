@@ -8,6 +8,9 @@ export const createBudgetSchema = z.object({
   year: z.number().min(2000),
   totalLimit: z.number().optional(),
   notes: z.string().optional(),
+  budgetRolloverAmount: z.number().min(0).optional(),
+  budgetRolloverDate: z.string().optional(),
+  budgetRolloverNote: z.string().max(300).optional(),
   categories: z.array(
     z.object({
       // Cambiamos .uuid() por .regex()

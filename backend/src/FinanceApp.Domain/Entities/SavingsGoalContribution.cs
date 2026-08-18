@@ -13,6 +13,8 @@ public class SavingsGoalContribution : BaseEntity
     public string? Notes { get; set; }
     public Guid? EmergencyFundRestorationId { get; set; }
 
+    /// <summary>Correlaciona un aporte financiado o una reasignación.</summary>
+    public Guid? OperationId { get; set; }
     // Propiedad de navegación
     public SavingsGoal SavingsGoal { get; set; } = null!;
     public EmergencyFundRestoration? EmergencyFundRestoration { get; set; }

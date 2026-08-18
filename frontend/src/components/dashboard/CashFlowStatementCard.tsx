@@ -66,10 +66,24 @@ export function CashFlowStatementCard({ data }: Props) {
 
       <div className="space-y-3">
         <ContributionRow
-          label="Gastos"
+          label="Gasto bruto"
           value={data.consumptionExpenses}
           total={data.income}
           color="#C97B63"
+          icon={<Receipt className="h-4 w-4" strokeWidth={2} />}
+        />
+        <ContributionRow
+          label="Reembolsos recibidos"
+          value={data.reimbursementsReceived}
+          total={data.income}
+          color="#5C7A99"
+          icon={<Wallet className="h-4 w-4" strokeWidth={2} />}
+        />
+        <ContributionRow
+          label="Gasto neto personal"
+          value={data.netPersonalExpenses}
+          total={data.income}
+          color="#2C2A29"
           icon={<Receipt className="h-4 w-4" strokeWidth={2} />}
         />
         <ContributionRow

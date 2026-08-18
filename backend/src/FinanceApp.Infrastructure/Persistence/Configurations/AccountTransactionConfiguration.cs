@@ -19,6 +19,7 @@ public class AccountTransactionConfiguration : IEntityTypeConfiguration<AccountT
         builder.Property(t => t.Description).HasColumnName("description").HasMaxLength(300).IsRequired();
         builder.Property(t => t.SourceType).HasColumnName("source_type").HasMaxLength(80).IsRequired();
         builder.Property(t => t.SourceId).HasColumnName("source_id").IsRequired();
+        builder.Property(t => t.TransferId).HasColumnName("transfer_id");
         builder.Property(t => t.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("NOW()");
         builder.Property(t => t.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("NOW()");
         builder.Property(t => t.DeletedAt).HasColumnName("deleted_at");
@@ -28,6 +29,8 @@ public class AccountTransactionConfiguration : IEntityTypeConfiguration<AccountT
             .IsUnique()
             .HasFilter("deleted_at IS NULL");
         builder.HasIndex(t => new { t.AccountId, t.Date });
+        builder.HasIndex(t => new { t.UserId, t.TransferId })
+            .HasFilter("transfer_id IS NOT NULL AND deleted_at IS NULL");
 
         builder.HasOne(t => t.Account)
             .WithMany(a => a.Transactions)

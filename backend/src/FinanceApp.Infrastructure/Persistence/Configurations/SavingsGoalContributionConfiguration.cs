@@ -36,6 +36,10 @@ public class SavingsGoalContributionConfiguration : IEntityTypeConfiguration<Sav
             .HasColumnName("emergency_fund_restoration_id")
             .IsRequired(false);
 
+        builder.Property(c => c.OperationId)
+            .HasColumnName("operation_id")
+            .IsRequired(false);
+
         builder.Property(c => c.CreatedAt)
             .HasColumnName("created_at")
             .HasDefaultValueSql("NOW()");
@@ -64,5 +68,8 @@ public class SavingsGoalContributionConfiguration : IEntityTypeConfiguration<Sav
             .HasForeignKey(c => c.EmergencyFundRestorationId)
             .OnDelete(DeleteBehavior.SetNull);
         builder.HasIndex(c => c.EmergencyFundRestorationId);
+        builder.HasIndex(c => c.OperationId)
+            .HasDatabaseName("idx_savings_goal_contributions_operation_id")
+            .HasFilter("operation_id IS NOT NULL");
     }
 }

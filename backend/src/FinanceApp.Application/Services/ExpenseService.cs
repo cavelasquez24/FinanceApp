@@ -15,12 +15,21 @@ public class ExpenseService : IExpenseService
     private readonly IExpenseRepository _expenseRepository;
     private readonly IFinancialAccountService _accountService;
     private readonly ITagRepository _tagRepository;
+    private readonly ICreditCardService _creditCardService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ExpenseService(IExpenseRepository expenseRepository, ITagRepository tagRepository, IFinancialAccountService accountService)
+    public ExpenseService(
+        IExpenseRepository expenseRepository,
+        ITagRepository tagRepository,
+        IFinancialAccountService accountService,
+        ICreditCardService creditCardService,
+        IUnitOfWork unitOfWork)
     {
         _expenseRepository = expenseRepository;
         _tagRepository = tagRepository;
         _accountService = accountService;
+        _creditCardService = creditCardService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResponse<ExpenseResponseDto>> GetAllAsync(
@@ -82,41 +91,65 @@ public class ExpenseService : IExpenseService
         ExpenseCreateDto dto,
         CancellationToken cancellationToken = default)
     {
-        var tags = await ResolveTagsAsync(userId, dto.TagIds, cancellationToken);
-        // Convertimos el string del DTO al enum del Domain
-        var paymentMethod = Enum.Parse<PaymentMethod>(
-            dto.PaymentMethod.Replace("_", ""),
-            ignoreCase: true);
-
-        RecurrenceType? recurrenceType = dto.RecurrenceType != null
-            ? Enum.Parse<RecurrenceType>(
-                dto.RecurrenceType.Replace("_", ""),
-                ignoreCase: true)
-            : null;
-
-        var expense = new Expense
+        if (dto.IdempotencyKey.HasValue)
         {
-            UserId = userId,
-            CategoryId = dto.CategoryId,
-            AccountId = dto.AccountId,
-            Amount = dto.Amount,
-            Merchant = dto.Merchant?.Trim(),
-            ExpenseTags = tags.Select(t => new ExpenseTag { TagId = t.Id }).ToList(),
-            Description = dto.Description?.Trim(),
-            Date = dto.Date,
-            PaymentMethod = paymentMethod,
-            IsRecurring = dto.IsRecurring,
-            RecurrenceType = recurrenceType,
-            Notes = dto.Notes?.Trim()
-        };
+            var duplicate = await _expenseRepository.GetByIdempotencyKeyAsync(
+                userId, dto.IdempotencyKey.Value, cancellationToken);
+            if (duplicate != null)
+            {
+                EnsureSameExpense(duplicate, dto);
+                return MapToResponseDto(duplicate);
+            }
+        }
 
-        await _expenseRepository.CreateAsync(expense, cancellationToken);
-        await _accountService.SyncMovementAsync(
-            userId, dto.AccountId, FinancialAccountType.Cash, -dto.Amount,
-            dto.Date, "expense", expense.Id,
-            dto.Description?.Trim() ?? "Gasto",
-            cancellationToken);
-        return await GetByIdAsync(expense.Id, userId, cancellationToken);
+        var paymentMethod = await ValidatePaymentSourceAsync(
+            userId, dto.PaymentMethod, dto.AccountId, dto.CreditCardId, cancellationToken);
+
+        return await _unitOfWork.ExecuteInTransactionAsync(async ct =>
+        {
+            var tags = await ResolveTagsAsync(userId, dto.TagIds, ct);
+            RecurrenceType? recurrenceType = dto.RecurrenceType != null
+                ? Enum.Parse<RecurrenceType>(
+                    dto.RecurrenceType.Replace("_", ""),
+                    ignoreCase: true)
+                : null;
+
+            var expense = new Expense
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                CategoryId = dto.CategoryId,
+                AccountId = paymentMethod == PaymentMethod.CreditCard ? null : dto.AccountId,
+                CreditCardId = paymentMethod == PaymentMethod.CreditCard ? dto.CreditCardId : null,
+                IdempotencyKey = dto.IdempotencyKey,
+                Amount = dto.Amount,
+                Merchant = dto.Merchant?.Trim(),
+                ExpenseTags = tags.Select(t => new ExpenseTag { TagId = t.Id }).ToList(),
+                Description = dto.Description?.Trim(),
+                Date = dto.Date,
+                PaymentMethod = paymentMethod,
+                IsRecurring = dto.IsRecurring,
+                RecurrenceType = recurrenceType,
+                Notes = dto.Notes?.Trim()
+            };
+
+            await _expenseRepository.CreateAsync(expense, ct);
+            var description = dto.Description?.Trim() ?? "Gasto";
+            if (paymentMethod == PaymentMethod.CreditCard)
+            {
+                await _creditCardService.SyncExpenseAsync(
+                    userId, dto.CreditCardId!.Value, expense.Id, dto.Amount,
+                    dto.Date, description, CreditCardTransactionType.Purchase, ct);
+            }
+            else
+            {
+                await _accountService.SyncMovementAsync(
+                    userId, dto.AccountId, FinancialAccountType.Cash, -dto.Amount,
+                    dto.Date, "expense", expense.Id, description, ct);
+            }
+
+            return await GetByIdAsync(expense.Id, userId, ct);
+        }, cancellationToken);
     }
 
     public async Task<ExpenseResponseDto> UpdateAsync(
@@ -125,40 +158,65 @@ public class ExpenseService : IExpenseService
         ExpenseUpdateDto dto,
         CancellationToken cancellationToken = default)
     {
-        var tags = await ResolveTagsAsync(userId, dto.TagIds, cancellationToken);
         var expense = await _expenseRepository.GetByIdAsync(id, cancellationToken);
-
         if (expense == null || expense.UserId != userId || expense.IsDeleted)
             throw new NotFoundException("Gasto", id);
 
-        expense.Merchant = dto.Merchant?.Trim();
-        expense.CategoryId = dto.CategoryId;
-        expense.AccountId = dto.AccountId;
-        expense.Amount = dto.Amount;
-        expense.Description = dto.Description?.Trim();
-        expense.Date = dto.Date;
-        var paymentMethod = Enum.Parse<PaymentMethod>(
-                   dto.PaymentMethod.Replace("_", ""),
-                   ignoreCase: true);
-        expense.PaymentMethod = paymentMethod;
-        expense.IsRecurring = dto.IsRecurring;
-        RecurrenceType? recurrenceType = dto.RecurrenceType != null
-            ? Enum.Parse<RecurrenceType>(
-                dto.RecurrenceType.Replace("_", ""),
-                ignoreCase: true)
-            : null;
-        expense.Notes = dto.Notes?.Trim();
-        expense.ExpenseTags.Clear();
-        foreach (var tag in tags)
-            expense.ExpenseTags.Add(new ExpenseTag { ExpenseId = expense.Id, TagId = tag.Id });
+        var previousCreditCardId = expense.CreditCardId;
+        var previousAccountId = expense.AccountId;
+        var paymentMethod = await ValidatePaymentSourceAsync(
+            userId, dto.PaymentMethod, dto.AccountId, dto.CreditCardId, cancellationToken);
 
-        await _expenseRepository.UpdateAsync(expense, cancellationToken);
-        await _accountService.SyncMovementAsync(
-            userId, dto.AccountId, FinancialAccountType.Cash, -dto.Amount,
-            dto.Date, "expense", expense.Id,
-            dto.Description?.Trim() ?? "Gasto",
-            cancellationToken);
-        return await GetByIdAsync(expense.Id, userId, cancellationToken);
+        return await _unitOfWork.ExecuteInTransactionAsync(async ct =>
+        {
+            var tags = await ResolveTagsAsync(userId, dto.TagIds, ct);
+            expense.Merchant = dto.Merchant?.Trim();
+            expense.CategoryId = dto.CategoryId;
+            expense.AccountId = paymentMethod == PaymentMethod.CreditCard ? null : dto.AccountId;
+            expense.CreditCardId = paymentMethod == PaymentMethod.CreditCard ? dto.CreditCardId : null;
+            expense.Amount = dto.Amount;
+            expense.Description = dto.Description?.Trim();
+            expense.Date = dto.Date;
+            expense.PaymentMethod = paymentMethod;
+            expense.IsRecurring = dto.IsRecurring;
+            expense.RecurrenceType = dto.RecurrenceType != null
+                ? Enum.Parse<RecurrenceType>(
+                    dto.RecurrenceType.Replace("_", ""),
+                    ignoreCase: true)
+                : null;
+            expense.Notes = dto.Notes?.Trim();
+            expense.ExpenseTags.Clear();
+            foreach (var tag in tags)
+                expense.ExpenseTags.Add(new ExpenseTag { ExpenseId = expense.Id, TagId = tag.Id });
+
+            await _expenseRepository.UpdateAsync(expense, ct);
+            var description = dto.Description?.Trim() ?? "Gasto";
+            if (previousCreditCardId.HasValue && paymentMethod != PaymentMethod.CreditCard)
+            {
+                await _creditCardService.RemoveExpenseAsync(userId, expense.Id, ct);
+            }
+            else if (!previousCreditCardId.HasValue && paymentMethod == PaymentMethod.CreditCard)
+            {
+                await _accountService.SyncMovementAsync(
+                    userId, previousAccountId, FinancialAccountType.Cash, 0,
+                    expense.Date, "expense", expense.Id, "Gasto cambiado a crédito", ct);
+            }
+
+            if (paymentMethod == PaymentMethod.CreditCard)
+            {
+                await _creditCardService.SyncExpenseAsync(
+                    userId, dto.CreditCardId!.Value, expense.Id, dto.Amount,
+                    dto.Date, description, CreditCardTransactionType.Purchase, ct);
+            }
+            else
+            {
+                await _accountService.SyncMovementAsync(
+                    userId, dto.AccountId, FinancialAccountType.Cash, -dto.Amount,
+                    dto.Date, "expense", expense.Id, description, ct);
+            }
+
+            return await GetByIdAsync(expense.Id, userId, ct);
+        }, cancellationToken);
     }
 
     public async Task DeleteAsync(
@@ -166,17 +224,26 @@ public class ExpenseService : IExpenseService
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        var expense = await _expenseRepository.GetByIdAsync(id, cancellationToken);
+        await _unitOfWork.ExecuteInTransactionAsync(async ct =>
+        {
+            var expense = await _expenseRepository.GetByIdAsync(id, ct);
+            if (expense == null || expense.UserId != userId || expense.IsDeleted)
+                throw new NotFoundException("Gasto", id);
 
-        if (expense == null || expense.UserId != userId || expense.IsDeleted)
-            throw new NotFoundException("Gasto", id);
-
-        expense.DeletedAt = DateTimeOffset.UtcNow;
-        await _expenseRepository.UpdateAsync(expense, cancellationToken);
-        await _accountService.SyncMovementAsync(
-            userId, expense.AccountId, FinancialAccountType.Cash, 0,
-            expense.Date, "expense", expense.Id, "Gasto eliminado",
-            cancellationToken);
+            expense.DeletedAt = DateTimeOffset.UtcNow;
+            await _expenseRepository.UpdateAsync(expense, ct);
+            if (expense.CreditCardId.HasValue)
+            {
+                await _creditCardService.RemoveExpenseAsync(userId, expense.Id, ct);
+            }
+            else
+            {
+                await _accountService.SyncMovementAsync(
+                    userId, expense.AccountId, FinancialAccountType.Cash, 0,
+                    expense.Date, "expense", expense.Id, "Gasto eliminado", ct);
+            }
+            return true;
+        }, cancellationToken);
     }
 
     public async Task<ExpenseSummaryDto> GetSummaryAsync(
@@ -243,6 +310,59 @@ public class ExpenseService : IExpenseService
     }
 
     /// <summary>
+    /// El método describe el instrumento. Una compra liquidada reduce una cuenta
+    /// Cash; una compra a crédito aumenta únicamente el pasivo seleccionado.
+    /// </summary>
+    private async Task<PaymentMethod> ValidatePaymentSourceAsync(
+        Guid userId,
+        string? paymentMethodValue,
+        Guid? accountId,
+        Guid? creditCardId,
+        CancellationToken cancellationToken)
+    {
+        if (!Enum.TryParse<PaymentMethod>(
+                paymentMethodValue?.Replace("_", ""), true, out var paymentMethod))
+            throw new DomainException("INVALID_PAYMENT_METHOD", "El método de pago no es válido.");
+
+        if (paymentMethod == PaymentMethod.CreditCard)
+        {
+            if (accountId.HasValue)
+                throw new DomainException("CREDIT_CARD_CASH_ACCOUNT_NOT_ALLOWED",
+                    "Una compra con tarjeta de crédito no debe descontar una cuenta de caja.");
+            if (!creditCardId.HasValue)
+                throw new DomainException("CREDIT_CARD_REQUIRED",
+                    "Selecciona la tarjeta de crédito utilizada.");
+            await _creditCardService.GetByIdAsync(creditCardId.Value, userId, cancellationToken);
+            return paymentMethod;
+        }
+
+        if (creditCardId.HasValue)
+            throw new DomainException("CREDIT_CARD_NOT_ALLOWED",
+                "Solo las compras con método tarjeta de crédito pueden indicar una tarjeta.");
+        if (!accountId.HasValue)
+            throw new DomainException("EXPENSE_ACCOUNT_REQUIRED",
+                "Selecciona explícitamente la cuenta desde la que se pagó el gasto.");
+
+        await _accountService.GetAvailableBalanceAsync(
+            userId, accountId, FinancialAccountType.Cash, cancellationToken);
+        return paymentMethod;
+    }
+
+    private static void EnsureSameExpense(Expense expense, ExpenseCreateDto dto)
+    {
+        if (!Enum.TryParse<PaymentMethod>(
+                dto.PaymentMethod.Replace("_", ""), true, out var paymentMethod)
+            || expense.CategoryId != dto.CategoryId
+            || expense.AccountId != dto.AccountId
+            || expense.CreditCardId != dto.CreditCardId
+            || expense.Amount != dto.Amount
+            || expense.Date != dto.Date
+            || expense.PaymentMethod != paymentMethod)
+            throw new DomainException("IDEMPOTENCY_KEY_REUSE",
+                "La clave de idempotencia ya fue usada con datos diferentes.");
+    }
+
+    /// <summary>
     /// Convierte PascalCase a snake_case.
     /// DebitCard   -> debit_card
     /// CreditCard  -> credit_card
@@ -261,6 +381,8 @@ public class ExpenseService : IExpenseService
         CategoryId = expense.CategoryId,
         AccountId = expense.AccountId,
         AccountName = expense.Account?.Name,
+        CreditCardId = expense.CreditCardId,
+        CreditCardName = expense.CreditCard?.Name,
         CategoryName = expense.Category?.Name ?? string.Empty,
         CategoryColor = expense.Category?.Color ?? string.Empty,
         CategoryIcon = expense.Category?.Icon,

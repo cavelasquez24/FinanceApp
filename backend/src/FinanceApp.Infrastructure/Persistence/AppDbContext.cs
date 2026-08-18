@@ -20,6 +20,10 @@ public class AppDbContext : DbContext
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Income> Incomes => Set<Income>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<CreditCard> CreditCards => Set<CreditCard>();
+    public DbSet<CreditCardTransaction> CreditCardTransactions => Set<CreditCardTransaction>();
+    public DbSet<CreditCardPayment> CreditCardPayments => Set<CreditCardPayment>();
+    public DbSet<Reimbursement> Reimbursements => Set<Reimbursement>();
     public DbSet<BudgetPeriod> BudgetPeriods => Set<BudgetPeriod>();
     public DbSet<BudgetCategory> BudgetCategories => Set<BudgetCategory>();
     public DbSet<Debt> Debts => Set<Debt>();

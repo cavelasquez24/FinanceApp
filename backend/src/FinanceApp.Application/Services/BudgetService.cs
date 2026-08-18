@@ -10,6 +10,8 @@ public class BudgetService : IBudgetService
 {
     private readonly IBudgetRepository _budgetRepository;
     private readonly IExpenseRepository _expenseRepository;
+    private readonly IReimbursementRepository _reimbursementRepository;
+    private readonly IBusinessDateProvider _businessDateProvider;
     private readonly IUserRepository _userRepository;
 
     private static readonly string[] MonthNames =
@@ -21,11 +23,15 @@ public class BudgetService : IBudgetService
     public BudgetService(
         IBudgetRepository budgetRepository,
         IExpenseRepository expenseRepository,
-        IUserRepository userRepository)
+        IReimbursementRepository reimbursementRepository,
+        IUserRepository userRepository,
+        IBusinessDateProvider businessDateProvider)
     {
         _budgetRepository = budgetRepository;
         _expenseRepository = expenseRepository;
+        _reimbursementRepository = reimbursementRepository;
         _userRepository = userRepository;
+        _businessDateProvider = businessDateProvider;
     }
 
     public async Task<IEnumerable<BudgetResponseDto>> GetAllAsync(
@@ -39,7 +45,7 @@ public class BudgetService : IBudgetService
     public async Task<BudgetResponseDto?> GetCurrentAsync(
         Guid userId, CancellationToken cancellationToken = default)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = _businessDateProvider.Today;
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         var (month, year) = GetCurrentCycle(today, user?.PaydayDay);
         return await GetByPeriodAsync(userId, month, year, cancellationToken);
@@ -90,9 +96,29 @@ public class BudgetService : IBudgetService
         var existing = await _budgetRepository.GetByUserAndPeriodAsync(
             userId, dto.Month, dto.Year, cancellationToken);
         if (existing != null)
+        {
+            if (dto.BudgetRolloverIdempotencyKey.HasValue
+                && dto.BudgetRolloverIdempotencyKey == existing.BudgetRolloverIdempotencyKey)
+                return MapToResponseDto(existing);
             throw new DomainException(
                 "BUDGET_ALREADY_EXISTS",
                 $"Ya existe un presupuesto para {MonthNames[dto.Month - 1]} {dto.Year}");
+        }
+
+        if (dto.BudgetRolloverAmount != 0 && !dto.BudgetRolloverIdempotencyKey.HasValue)
+            throw new DomainException(
+                "INVALID_ROLLOVER_IDEMPOTENCY_KEY",
+                "El rollover inicial requiere una clave de idempotencia.");
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var (cycleStart, cycleEnd) = GetCycleRange(dto.Month, dto.Year, user?.PaydayDay);
+        DateOnly? rolloverDate = dto.BudgetRolloverAmount == 0
+            ? null
+            : dto.BudgetRolloverDate ?? _businessDateProvider.Today;
+        if (rolloverDate.HasValue && (rolloverDate < cycleStart || rolloverDate > cycleEnd))
+            throw new DomainException(
+                "INVALID_ROLLOVER_DATE",
+                "La fecha del rollover debe pertenecer al ciclo del presupuesto.");
 
         var budget = new BudgetPeriod
         {
@@ -101,6 +127,10 @@ public class BudgetService : IBudgetService
             Year = dto.Year,
             TotalLimit = dto.TotalLimit,
             Notes = dto.Notes?.Trim(),
+            BudgetRolloverAmount = dto.BudgetRolloverAmount,
+            BudgetRolloverDate = rolloverDate,
+            BudgetRolloverNote = dto.BudgetRolloverNote?.Trim(),
+            BudgetRolloverIdempotencyKey = dto.BudgetRolloverIdempotencyKey,
             BudgetCategories = dto.Categories.Select(c => new BudgetCategory
             {
                 CategoryId = c.CategoryId,
@@ -148,13 +178,22 @@ public class BudgetService : IBudgetService
         var (start, end) = GetCycleRange(
             budget.Month, budget.Year, user?.PaydayDay);
         var categoryStatuses = new List<BudgetCategoryStatusDto>();
+        // Se acreditan únicamente los reembolsos recibidos en este ciclo y vinculados a un gasto.
+        // Así un ciclo cerrado no se reescribe cuando el reembolso llega después.
+        var reimbursementsByCategory = (await _reimbursementRepository.GetByUserIdAsync(
+            userId, start, end, cancellationToken))
+            .Where(r => r.Expense is not null)
+            .GroupBy(r => r.Expense!.CategoryId)
+            .ToDictionary(group => group.Key, group => group.Sum(r => r.Amount));
 
         foreach (var category in budget.BudgetCategories)
         {
             var (items, _) = await _expenseRepository.GetByUserIdAsync(
                 userId, 1, int.MaxValue, category.CategoryId,
                 start, end, cancellationToken);
-            var amountSpent = items.Sum(e => e.Amount);
+            var grossAmountSpent = items.Sum(e => e.Amount);
+            var reimbursementAmount = reimbursementsByCategory.GetValueOrDefault(category.CategoryId);
+            var amountSpent = grossAmountSpent - reimbursementAmount;
             var percentageUsed = category.AmountLimit > 0
                 ? Math.Round(amountSpent / category.AmountLimit * 100, 2)
                 : 0;
@@ -180,12 +219,13 @@ public class BudgetService : IBudgetService
         {
             Period = $"{start:dd MMM} – {end:dd MMM}",
             TotalLimit = totalLimit,
+            BudgetRolloverAmount = budget.BudgetRolloverAmount,
             TotalSpent = totalSpent,
-            TotalRemaining = totalLimit - totalSpent,
-            PercentageUsed = totalLimit > 0
-                ? Math.Round(totalSpent / totalLimit * 100, 2)
+            TotalRemaining = totalLimit + budget.BudgetRolloverAmount - totalSpent,
+            PercentageUsed = totalLimit + budget.BudgetRolloverAmount > 0
+                ? Math.Round(totalSpent / (totalLimit + budget.BudgetRolloverAmount) * 100, 2)
                 : 0,
-            IsOverBudget = totalSpent > totalLimit,
+            IsOverBudget = totalSpent > totalLimit + budget.BudgetRolloverAmount,
             Categories = categoryStatuses
         };
     }
@@ -227,6 +267,9 @@ public class BudgetService : IBudgetService
         Period = $"{MonthNames[budget.Month - 1]} {budget.Year}",
         TotalLimit = budget.TotalLimit,
         Notes = budget.Notes,
+        BudgetRolloverAmount = budget.BudgetRolloverAmount,
+        BudgetRolloverDate = budget.BudgetRolloverDate,
+        BudgetRolloverNote = budget.BudgetRolloverNote,
         Categories = budget.BudgetCategories.Select(c =>
             new BudgetCategoryResponseDto
             {

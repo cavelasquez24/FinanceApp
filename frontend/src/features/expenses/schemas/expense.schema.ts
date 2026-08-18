@@ -3,6 +3,8 @@ import { z } from 'zod';
 
 export const expenseSchema = z.object({
   categoryId: z.string().min(1, 'La categoría es requerida'),
+  accountId: z.string().optional(),
+  creditCardId: z.string().optional(),
   amount: z
   .number()
   .positive('El monto debe ser mayor a 0'),
@@ -23,6 +25,29 @@ export const expenseSchema = z.object({
       code: z.ZodIssueCode.custom,
       message: 'Selecciona el tipo de recurrencia',
       path: ['recurrenceType'],
+    });
+  }
+  if (data.paymentMethod === 'credit_card') {
+    if (!data.creditCardId) ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Selecciona la tarjeta usada en la compra.',
+      path: ['creditCardId'],
+    });
+    if (data.accountId) ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Una compra con tarjeta no descuenta una cuenta líquida.',
+      path: ['accountId'],
+    });
+  } else {
+    if (!data.accountId) ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Selecciona la cuenta desde la que se pagó.',
+      path: ['accountId'],
+    });
+    if (data.creditCardId) ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'La tarjeta solo aplica al método tarjeta de crédito.',
+      path: ['creditCardId'],
     });
   }
 });

@@ -14,6 +14,8 @@ public class FinancialAccountConfiguration : IEntityTypeConfiguration<FinancialA
         builder.Property(a => a.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
         builder.Property(a => a.UserId).HasColumnName("user_id").IsRequired();
         builder.Property(a => a.Name).HasColumnName("name").HasMaxLength(120).IsRequired();
+        builder.Property(a => a.OpeningBalance).HasColumnName("opening_balance").HasColumnType("numeric(15,2)");
+        builder.Property(a => a.OpeningDate).HasColumnName("opening_date");
         builder.Property(a => a.Type).HasColumnName("type").HasConversion<string>().HasMaxLength(30).IsRequired();
         builder.Property(a => a.CurrentBalance).HasColumnName("current_balance").HasColumnType("numeric(15,2)").IsRequired();
         builder.Property(a => a.IsDefault).HasColumnName("is_default").IsRequired();

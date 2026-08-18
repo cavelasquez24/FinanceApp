@@ -1,3 +1,4 @@
+import { todayDateOnly } from '../../../utils/dateOnly';
 import { useState } from 'react';
 import { useAddDebtPayment } from '../hooks/useDebts';
 import { Button, Input } from '../../../components/ui';
@@ -12,7 +13,7 @@ interface Props {
 export function AddDebtPaymentForm({ debt, onSuccess, onCancel }: Props) {
   const { mutate: addPayment, isPending } = useAddDebtPayment();
 
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [paymentDate, setPaymentDate] = useState(todayDateOnly());
   const [amount, setAmount] = useState('');
   const [principalAmount, setPrincipalAmount] = useState('');
   const [interestAmount, setInterestAmount] = useState('0');

@@ -27,6 +27,12 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.Property(e => e.AccountId)
             .HasColumnName("account_id")
             .IsRequired(false);
+        builder.Property(e => e.CreditCardId)
+            .HasColumnName("credit_card_id")
+            .IsRequired(false);
+        builder.Property(e => e.IdempotencyKey)
+            .HasColumnName("idempotency_key")
+            .IsRequired(false);
 
         builder.Property(e => e.Amount)
             .HasColumnName("amount")
@@ -93,6 +99,8 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.HasIndex(e => new { e.UserId, e.Merchant })
             .HasDatabaseName("idx_expenses_user_merchant")
             .HasFilter("deleted_at IS NULL AND merchant IS NOT NULL");
+        builder.HasIndex(e => new { e.UserId, e.IdempotencyKey }).IsUnique()
+            .HasFilter("deleted_at IS NULL AND idempotency_key IS NOT NULL");
 
 
         builder.HasOne(e => e.Category)
@@ -103,6 +111,11 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.HasOne(e => e.Account)
             .WithMany()
             .HasForeignKey(e => e.AccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(e => e.CreditCard)
+            .WithMany(c => c.Expenses)
+            .HasForeignKey(e => e.CreditCardId)
             .OnDelete(DeleteBehavior.Restrict);
 
     }

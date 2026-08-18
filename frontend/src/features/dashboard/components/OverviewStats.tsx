@@ -1,7 +1,8 @@
 // src/features/dashboard/components/OverviewStats.tsx
-import { TrendingUp, TrendingDown, Wallet, PiggyBank, LineChart as LineChartIcon, CreditCard } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, PiggyBank, LineChart as LineChartIcon, CreditCard, Undo2 } from 'lucide-react';
 import { Card } from '../../../components/ui';
 import type { DashboardOverview } from '../../../types/dashboard.types';
+import { FinancialPositionSummary } from './FinancialPositionSummary';
 
 interface Props {
   data: DashboardOverview;
@@ -76,11 +77,23 @@ export function OverviewStats({ data }: Props) {
           accent="#5C7A99"
         />
         <Kpi
-          label="Gastos del mes"
+          label="Gasto bruto del mes"
           value={currency(data.totalExpenses)}
           change={data.changes.expensesChange}
           icon={<TrendingDown className="h-5 w-5" strokeWidth={2} />}
           accent="#C97B63"
+        />
+        <Kpi
+          label="Reembolsos recibidos"
+          value={currency(data.reimbursementsReceived)}
+          icon={<Undo2 className="h-5 w-5" strokeWidth={2} />}
+          accent="#5C7A99"
+        />
+        <Kpi
+          label="Gasto neto personal"
+          value={currency(data.netPersonalExpenses)}
+          icon={<TrendingDown className="h-5 w-5" strokeWidth={2} />}
+          accent="#2C2A29"
         />
         <Kpi
           label="Ahorro en metas"
@@ -101,6 +114,8 @@ export function OverviewStats({ data }: Props) {
           <span className="ml-2 text-xs text-amber-700">No es deuda externa ni reduce nuevamente el patrimonio.</span>
         </div>
       )}
+
+      <FinancialPositionSummary position={data.financialPosition} />
 
       {/* Ratios y contexto */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

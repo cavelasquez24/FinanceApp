@@ -1,3 +1,4 @@
+import { todayDateOnly } from '../../../utils/dateOnly';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronDown } from 'lucide-react';
@@ -38,7 +39,7 @@ export function IncomeForm({ income, onSuccess, onCancel }: Props) {
           source: income.source ?? '',
         }
       : {
-          date: new Date().toISOString().split('T')[0],
+          date: todayDateOnly(),
         },
   });
 

@@ -1,3 +1,4 @@
+import { todayDateOnly } from '../../../utils/dateOnly';
 import { useState } from 'react';
 import { useAddInvestmentContribution } from '../hooks/useInvestments';
 import { Button } from '../../../components/ui';
@@ -12,7 +13,7 @@ interface Props {
 export function AddInvestmentContributionForm({ investment, onSuccess, onCancel }: Props) {
   const { mutate: addContribution, isPending } = useAddInvestmentContribution();
 
-  const [contributionDate, setContributionDate] = useState(new Date().toISOString().split('T')[0]);
+  const [contributionDate, setContributionDate] = useState(todayDateOnly());
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
 

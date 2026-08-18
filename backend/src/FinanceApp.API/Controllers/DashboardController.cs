@@ -13,10 +13,14 @@ namespace FinanceApp.API.Controllers;
 public class DashboardController : ControllerBase
 {
     private readonly IDashboardService _dashboardService;
+    private readonly IFinancialPositionService _financialPositionService;
 
-    public DashboardController(IDashboardService dashboardService)
+    public DashboardController(
+        IDashboardService dashboardService,
+        IFinancialPositionService financialPositionService)
     {
         _dashboardService = dashboardService;
+        _financialPositionService = financialPositionService;
     }
 
     private Guid GetUserId() =>
@@ -39,6 +43,19 @@ public class DashboardController : ControllerBase
         var result = await _dashboardService.GetOverviewAsync(
             GetUserId(), targetMonth, targetYear, cancellationToken);
         return Ok(ApiResponse<DashboardOverviewDto>.Ok(result));
+    }
+
+    /// <summary>
+    /// Fuente canónica del patrimonio: activos reales menos pasivos externos.
+    /// Por ahora solo admite el snapshot del día actual.
+    /// </summary>
+    [HttpGet("financial-position")]
+    public async Task<IActionResult> GetFinancialPosition(
+        [FromQuery] DateOnly? asOf,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _financialPositionService.GetAsync(GetUserId(), asOf, cancellationToken);
+        return Ok(ApiResponse<FinancialPositionDto>.Ok(result));
     }
 
     /// <summary>

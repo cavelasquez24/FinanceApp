@@ -49,6 +49,16 @@ public class AccountsController : ControllerBase
             result, "Cuenta creada exitosamente"));
     }
 
+    [HttpPost("transfers")]
+    public async Task<IActionResult> Transfer(
+        [FromBody] AccountTransferCreateDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _accountService.TransferAsync(
+            GetUserId(), dto, cancellationToken);
+        return StatusCode(201, ApiResponse<AccountTransferResponseDto>.Ok(
+            result, "Transferencia registrada exitosamente"));
+    }
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(
         Guid id, [FromBody] FinancialAccountUpdateDto dto,

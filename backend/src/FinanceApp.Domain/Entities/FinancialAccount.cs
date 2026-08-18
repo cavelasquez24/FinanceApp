@@ -8,10 +8,13 @@ public class FinancialAccount : BaseEntity
     public string Name { get; set; } = string.Empty;
     public FinancialAccountType Type { get; set; }
     public decimal CurrentBalance { get; set; }
+    public decimal? OpeningBalance { get; set; }
+    public DateOnly? OpeningDate { get; set; }
     public bool IsDefault { get; set; }
     public bool IsSystem { get; set; }
     public bool IsActive { get; set; } = true;
 
     public User User { get; set; } = null!;
     public ICollection<AccountTransaction> Transactions { get; set; } = new List<AccountTransaction>();
+    public ICollection<Reimbursement> Reimbursements { get; set; } = new List<Reimbursement>();
 }

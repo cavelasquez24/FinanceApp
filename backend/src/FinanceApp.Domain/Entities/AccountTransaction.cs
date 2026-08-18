@@ -14,6 +14,11 @@ public class AccountTransaction : BaseEntity
     public string Description { get; set; } = string.Empty;
     public string SourceType { get; set; } = string.Empty;
     public Guid SourceId { get; set; }
+    /// <summary>
+    /// Identificador compartido por las dos patas de una transferencia entre
+    /// cuentas. Es nulo para movimientos que no representan transferencias.
+    /// </summary>
+    public Guid? TransferId { get; set; }
 
     public User User { get; set; } = null!;
     public FinancialAccount Account { get; set; } = null!;

@@ -1,4 +1,4 @@
-﻿using FinanceApp.Domain.Entities;
+using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
 using FinanceApp.Domain.Interfaces.Repositories;
 using FinanceApp.Infrastructure.Persistence;
@@ -14,11 +14,12 @@ public class SavingsGoalRepository : BaseRepository<SavingsGoal>, ISavingsGoalRe
         Guid userId,
         CancellationToken cancellationToken = default)
     {
-        return await _context.SavingsGoals
+        var goals = await _context.SavingsGoals
+            .Include(s => s.Contributions.Where(c => c.DeletedAt == null))
             .Include(s => s.Restorations.Where(r => r.DeletedAt == null))
             .Where(s => s.UserId == userId && s.DeletedAt == null)
-            .OrderByDescending(s => s.CreatedAt)
             .ToListAsync(cancellationToken);
+        return goals.OrderByDescending(s => s.CreatedAt);
     }
 
     public async Task<decimal> GetTotalSavedAsync(
@@ -92,7 +93,6 @@ public class SavingsGoalRepository : BaseRepository<SavingsGoal>, ISavingsGoalRe
     {
         return await _context.SavingsGoalWithdrawals
             .Where(w => w.SavingsGoal.UserId == userId
-                && w.SavingsGoal.DeletedAt == null
                 && w.Reason != SavingsWithdrawalReason.Correction
                 && w.WithdrawalDate >= start && w.WithdrawalDate <= end
                 && w.DeletedAt == null)

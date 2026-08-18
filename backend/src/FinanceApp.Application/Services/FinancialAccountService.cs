@@ -12,14 +12,20 @@ public class FinancialAccountService : IFinancialAccountService
     private readonly IFinancialAccountRepository _accountRepository;
     private readonly ISavingsGoalRepository _savingsGoalRepository;
     private readonly IInvestmentRepository _investmentRepository;
+    private readonly IBusinessDateProvider _businessDateProvider;
+    private readonly IUnitOfWork _unitOfWork;
 
     public FinancialAccountService(
         IFinancialAccountRepository accountRepository,
         ISavingsGoalRepository savingsGoalRepository,
-        IInvestmentRepository investmentRepository)
+        IInvestmentRepository investmentRepository,
+        IUnitOfWork unitOfWork,
+        IBusinessDateProvider? businessDateProvider = null)
     {
         _accountRepository = accountRepository;
         _savingsGoalRepository = savingsGoalRepository;
+        _unitOfWork = unitOfWork;
+        _businessDateProvider = businessDateProvider ?? new EcuadorBusinessDateProvider(TimeProvider.System);
         _investmentRepository = investmentRepository;
     }
 
@@ -46,6 +52,7 @@ public class FinancialAccountService : IFinancialAccountService
             AccountName = t.Account.Name,
             Amount = t.Amount,
             Date = t.Date,
+            TransferId = t.TransferId,
             Description = t.Description
         }).ToList();
     }
@@ -65,31 +72,37 @@ public class FinancialAccountService : IFinancialAccountService
         if (shouldBeDefault)
             await ClearDefaultAsync(existing.Where(a => a.Type == type), cancellationToken);
 
+        var openingDate = dto.OpeningDate ?? _businessDateProvider.Today;
+        if (openingDate > _businessDateProvider.Today)
+            throw new DomainException(
+                "INVALID_OPENING_DATE",
+                "La fecha de apertura no puede ser futura.");
+
         var account = new FinancialAccount
         {
             UserId = userId,
             Name = dto.Name.Trim(),
             Type = type,
             CurrentBalance = dto.OpeningBalance,
+            OpeningBalance = dto.OpeningBalance,
+            OpeningDate = openingDate,
             IsDefault = shouldBeDefault,
             IsSystem = false,
             IsActive = true
         };
         await _accountRepository.CreateAsync(account, cancellationToken);
 
-        if (dto.OpeningBalance != 0)
+        await _accountRepository.SaveTransactionAsync(new AccountTransaction
         {
-            await _accountRepository.SaveTransactionAsync(new AccountTransaction
-            {
-                UserId = userId,
-                AccountId = account.Id,
-                Amount = dto.OpeningBalance,
-                Date = DateOnly.FromDateTime(DateTime.Today),
-                Description = "Saldo inicial",
-                SourceType = "account-opening",
-                SourceId = account.Id
-            }, cancellationToken);
-        }
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            AccountId = account.Id,
+            Amount = dto.OpeningBalance,
+            Date = openingDate,
+            Description = "Apertura de cuenta (no es un ingreso)",
+            SourceType = "account-opening",
+            SourceId = account.Id
+        }, cancellationToken);
 
         return Map(account);
     }
@@ -123,10 +136,11 @@ public class FinancialAccountService : IFinancialAccountService
         {
             await _accountRepository.SaveTransactionAsync(new AccountTransaction
             {
+                Id = Guid.NewGuid(),
                 UserId = userId,
                 AccountId = account.Id,
                 Amount = balanceDifference,
-                Date = DateOnly.FromDateTime(DateTime.Today),
+                Date = _businessDateProvider.Today,
                 Description = "Ajuste de saldo",
                 SourceType = "account-adjustment",
                 SourceId = Guid.NewGuid()
@@ -136,6 +150,84 @@ public class FinancialAccountService : IFinancialAccountService
         return Map(account);
     }
 
+    public async Task<AccountTransferResponseDto> TransferAsync(
+        Guid userId, AccountTransferCreateDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        if (dto.IdempotencyKey == Guid.Empty)
+            throw new DomainException("INVALID_IDEMPOTENCY_KEY", "La clave de idempotencia es obligatoria.");
+        if (dto.FromAccountId == Guid.Empty || dto.ToAccountId == Guid.Empty)
+            throw new DomainException("INVALID_ACCOUNT", "Debes seleccionar las cuentas de origen y destino.");
+        if (dto.FromAccountId == dto.ToAccountId)
+            throw new DomainException("SAME_TRANSFER_ACCOUNT", "La cuenta de origen debe ser distinta de la cuenta de destino.");
+        if (dto.Amount <= 0)
+            throw new DomainException("INVALID_TRANSFER_AMOUNT", "El monto de la transferencia debe ser mayor que cero.");
+        if (dto.Date == default)
+            throw new DomainException("INVALID_TRANSFER_DATE", "La fecha de la transferencia es obligatoria.");
+        if (dto.Description?.Length > 300)
+            throw new DomainException("INVALID_TRANSFER_DESCRIPTION", "La descripción no puede superar 300 caracteres.");
+
+        return await _unitOfWork.ExecuteInTransactionAsync(async ct =>
+        {
+            var existing = await _accountRepository.GetTransactionsByTransferIdAsync(
+                userId, dto.IdempotencyKey, ct);
+            if (existing.Count != 0)
+                return MapExistingTransfer(existing, dto.IdempotencyKey);
+
+            var from = await GetActiveOwnedAccountAsync(dto.FromAccountId, userId, ct);
+            var to = await GetActiveOwnedAccountAsync(dto.ToAccountId, userId, ct);
+            if (from.CurrentBalance < dto.Amount)
+                throw new DomainException(
+                    "INSUFFICIENT_ACCOUNT_BALANCE",
+                    "La cuenta de origen no tiene saldo suficiente para esta transferencia.");
+
+            var description = string.IsNullOrWhiteSpace(dto.Description)
+                ? $"Transferencia a {to.Name}"
+                : dto.Description.Trim();
+
+            from.CurrentBalance -= dto.Amount;
+            to.CurrentBalance += dto.Amount;
+            await _accountRepository.UpdateAsync(from, ct);
+            await _accountRepository.UpdateAsync(to, ct);
+
+            await _accountRepository.SaveTransactionAsync(new AccountTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                AccountId = from.Id,
+                Amount = -dto.Amount,
+                Date = dto.Date,
+                Description = description,
+                SourceType = "account-transfer:out",
+                SourceId = dto.IdempotencyKey,
+                TransferId = dto.IdempotencyKey
+            }, ct);
+            await _accountRepository.SaveTransactionAsync(new AccountTransaction
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                AccountId = to.Id,
+                Amount = dto.Amount,
+                Date = dto.Date,
+                Description = description,
+                SourceType = "account-transfer:in",
+                SourceId = dto.IdempotencyKey,
+                TransferId = dto.IdempotencyKey
+            }, ct);
+
+            return new AccountTransferResponseDto
+            {
+                TransferId = dto.IdempotencyKey,
+                FromAccountId = from.Id,
+                FromAccountName = from.Name,
+                ToAccountId = to.Id,
+                ToAccountName = to.Name,
+                Amount = dto.Amount,
+                Date = dto.Date,
+                Description = description
+            };
+        }, cancellationToken);
+    }
     public async Task<FinancialAccountResponseDto> GetOrCreateDefaultAsync(
         Guid userId, FinancialAccountType type,
         CancellationToken cancellationToken = default) =>
@@ -161,6 +253,27 @@ public class FinancialAccountService : IFinancialAccountService
         decimal signedAmount, DateOnly date, string sourceType, Guid sourceId,
         string description, CancellationToken cancellationToken = default)
     {
+        var existingTransaction = await _accountRepository.GetTransactionBySourceAsync(
+            userId, sourceType, sourceId, cancellationToken);
+
+        // Eliminar revierte el movimiento histórico aun si su cuenta ya fue inactivada.
+        if (signedAmount == 0)
+        {
+            if (existingTransaction == null)
+                return;
+
+            var previousAccount = await _accountRepository.GetByIdAsync(
+                existingTransaction.AccountId, cancellationToken);
+            if (previousAccount != null && previousAccount.UserId == userId)
+            {
+                previousAccount.CurrentBalance -= existingTransaction.Amount;
+                await _accountRepository.UpdateAsync(previousAccount, cancellationToken);
+            }
+
+            await _accountRepository.DeleteTransactionAsync(existingTransaction, cancellationToken);
+            return;
+        }
+
         var account = accountId.HasValue
             ? await _accountRepository.GetByIdAsync(accountId.Value, cancellationToken)
             : await GetOrCreateDefaultEntityAsync(userId, fallbackType, cancellationToken);
@@ -200,6 +313,7 @@ public class FinancialAccountService : IFinancialAccountService
         {
             existing = new AccountTransaction
             {
+                Id = Guid.NewGuid(),
                 UserId = userId,
                 SourceType = sourceType,
                 SourceId = sourceId
@@ -251,8 +365,7 @@ public class FinancialAccountService : IFinancialAccountService
 
         var initialBalance = type switch
         {
-            FinancialAccountType.Savings =>
-                await _savingsGoalRepository.GetTotalSavedAsync(userId, cancellationToken),
+            FinancialAccountType.Savings => 0,
             FinancialAccountType.Investment =>
                 await _investmentRepository.GetTotalCurrentValueAsync(userId, cancellationToken),
             _ => 0
@@ -277,6 +390,41 @@ public class FinancialAccountService : IFinancialAccountService
         return account;
     }
 
+    private async Task<FinancialAccount> GetActiveOwnedAccountAsync(
+        Guid accountId, Guid userId, CancellationToken cancellationToken)
+    {
+        var account = await _accountRepository.GetByIdAsync(accountId, cancellationToken);
+        if (account == null || account.UserId != userId || account.IsDeleted)
+            throw new NotFoundException("Cuenta", accountId);
+        if (!account.IsActive)
+            throw new DomainException("INACTIVE_ACCOUNT", "La cuenta seleccionada está inactiva.");
+        return account;
+    }
+
+    private static AccountTransferResponseDto MapExistingTransfer(
+        IReadOnlyList<AccountTransaction> transactions, Guid transferId)
+    {
+        var outgoing = transactions.SingleOrDefault(t => t.SourceType == "account-transfer:out");
+        var incoming = transactions.SingleOrDefault(t => t.SourceType == "account-transfer:in");
+        if (transactions.Count != 2 || outgoing == null || incoming == null
+            || outgoing.Amount >= 0 || incoming.Amount <= 0
+            || -outgoing.Amount != incoming.Amount)
+            throw new DomainException(
+                "INCOMPLETE_TRANSFER",
+                "La transferencia existente está incompleta y requiere revisión.");
+
+        return new AccountTransferResponseDto
+        {
+            TransferId = transferId,
+            FromAccountId = outgoing.AccountId,
+            FromAccountName = outgoing.Account.Name,
+            ToAccountId = incoming.AccountId,
+            ToAccountName = incoming.Account.Name,
+            Amount = incoming.Amount,
+            Date = outgoing.Date,
+            Description = outgoing.Description
+        };
+    }
     private async Task ClearDefaultAsync(
         IEnumerable<FinancialAccount> accounts, CancellationToken cancellationToken)
     {
@@ -293,6 +441,8 @@ public class FinancialAccountService : IFinancialAccountService
         Name = account.Name,
         Type = account.Type.ToString().ToLowerInvariant(),
         CurrentBalance = account.CurrentBalance,
+        OpeningBalance = account.OpeningBalance,
+        OpeningDate = account.OpeningDate,
         IsDefault = account.IsDefault,
         IsSystem = account.IsSystem,
         IsActive = account.IsActive

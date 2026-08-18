@@ -16,9 +16,16 @@ public interface IFinancialAccountRepository : IBaseRepository<FinancialAccount>
         Guid userId, string sourceType, Guid sourceId,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<AccountTransaction>> GetTransactionsByTransferIdAsync(
+        Guid userId, Guid transferId,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<AccountTransaction>> GetRecentTransactionsAsync(
         Guid userId, int count,
         CancellationToken cancellationToken = default);
+
+    Task<(decimal OpeningBalances, decimal Adjustments)> GetOpeningAndAdjustmentTotalsAsync(
+        Guid userId, CancellationToken cancellationToken = default);
 
     Task SaveTransactionAsync(
         AccountTransaction transaction,

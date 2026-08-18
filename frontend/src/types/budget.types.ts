@@ -8,6 +8,10 @@ export interface CreateBudgetDto {
   year: number;
   totalLimit?: number;
   notes?: string;
+  budgetRolloverAmount?: number;
+  budgetRolloverDate?: string;
+  budgetRolloverNote?: string;
+  budgetRolloverIdempotencyKey?: string;
   categories: BudgetCategoryInput[];
 }
 
@@ -15,5 +19,9 @@ export interface CreateBudgetDto {
 export interface BudgetUpdateDto {
   totalLimit?: number;
   notes?: string;
+  budgetRolloverAmount?: number;
+  budgetRolloverDate?: string;
+  budgetRolloverNote?: string;
+  budgetRolloverIdempotencyKey?: string;
   categories: BudgetCategoryInput[];
 }

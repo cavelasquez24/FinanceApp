@@ -8,11 +8,13 @@ public class DashboardService : IDashboardService
 {
     private readonly IIncomeRepository _incomeRepository;
     private readonly IExpenseRepository _expenseRepository;
+    private readonly IReimbursementRepository _reimbursementRepository;
     private readonly IInvestmentRepository _investmentRepository;
     private readonly ISavingsGoalRepository _savingsGoalRepository;
     private readonly IDebtRepository _debtRepository;
+    private readonly ICreditCardRepository _creditCardRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IFinancialAccountService _financialAccountService;
+    private readonly IFinancialPositionService _financialPositionService;
     private readonly IEmergencyFundRestorationRepository _restorationRepository;
 
     private static readonly string[] MonthNames =
@@ -24,20 +26,24 @@ public class DashboardService : IDashboardService
     public DashboardService(
         IIncomeRepository incomeRepository,
         IExpenseRepository expenseRepository,
+        IReimbursementRepository reimbursementRepository,
         IInvestmentRepository investmentRepository,
         ISavingsGoalRepository savingsGoalRepository,
         IDebtRepository debtRepository,
+        ICreditCardRepository creditCardRepository,
         IUserRepository userRepository,
-        IFinancialAccountService financialAccountService,
+        IFinancialPositionService financialPositionService,
         IEmergencyFundRestorationRepository restorationRepository)
     {
         _incomeRepository = incomeRepository;
         _expenseRepository = expenseRepository;
+        _reimbursementRepository = reimbursementRepository;
         _investmentRepository = investmentRepository;
         _savingsGoalRepository = savingsGoalRepository;
         _debtRepository = debtRepository;
         _userRepository = userRepository;
-        _financialAccountService = financialAccountService;
+        _creditCardRepository = creditCardRepository;
+        _financialPositionService = financialPositionService;
         _restorationRepository = restorationRepository;
     }
 
@@ -56,48 +62,52 @@ public class DashboardService : IDashboardService
 
         var totalIncome = await _incomeRepository.GetTotalByCycleAsync(userId, start, end, cancellationToken);
         var totalExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var reimbursements = await _reimbursementRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
         var prevIncome = await _incomeRepository.GetTotalByCycleAsync(userId, prevStart, prevEnd, cancellationToken);
         var prevExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+        var prevReimbursements = await _reimbursementRepository.GetTotalByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+        var netPersonalExpenses = totalExpenses - reimbursements;
+        var prevNetPersonalExpenses = prevExpenses - prevReimbursements;
 
-        var totalInvestments = await _investmentRepository.GetTotalCurrentValueAsync(userId, cancellationToken);
         var totalSavings = await _savingsGoalRepository.GetTotalSavedAsync(userId, cancellationToken);
 
-        var financialAccounts = await _financialAccountService.GetAllAsync(userId, cancellationToken);
-        var totalFinancialAssets = financialAccounts.Where(a => a.IsActive && a.Type != "investment").Sum(a => a.CurrentBalance) + totalInvestments;
+        var financialPosition = await _financialPositionService.GetAsync(userId, null, cancellationToken);
         var pendingRestoration = await _restorationRepository.GetTotalOutstandingAsync(userId, cancellationToken);
-        // Deuda: saldo pendiente total, foto actual (no depende del rango de fechas)
-        var totalDebt = await _debtRepository.GetTotalCurrentBalanceAsync(userId, cancellationToken);
 
         // Pagos de deuda dentro del ciclo — métrica de cash flow, separada de Expenses
-        var totalDebtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(userId, start, end, cancellationToken);
-        var prevDebtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+        var cardPrincipalPaid = await _creditCardRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken);
+        var prevCardPrincipalPaid = await _creditCardRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+        var totalDebtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(userId, start, end, cancellationToken)
+            + cardPrincipalPaid;
+        var prevDebtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken)
+            + prevCardPrincipalPaid;
         var savingsContributions = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
         var prevSavingsContributions = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
         var savingsWithdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);
         var prevSavingsWithdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
         var investmentContributions = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
         var prevInvestmentContributions = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
-        var debtPrincipalPaid = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken);
-        var prevDebtPrincipalPaid = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+        var debtPrincipalPaid = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken)
+            + cardPrincipalPaid;
+        var prevDebtPrincipalPaid = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken)
+            + prevCardPrincipalPaid;
 
         var netSavings = CashFlowCalculator.CalculateResidual(
             totalIncome,
-            totalExpenses,
+            netPersonalExpenses,
             savingsContributions,
             savingsWithdrawals,
             investmentContributions,
             debtPrincipalPaid);
         var prevNetSavings = CashFlowCalculator.CalculateResidual(
             prevIncome,
-            prevExpenses,
+            prevNetPersonalExpenses,
             prevSavingsContributions,
             prevSavingsWithdrawals,
             prevInvestmentContributions,
             prevDebtPrincipalPaid);
         var savingsRate = totalIncome > 0 ? Math.Round(netSavings / totalIncome * 100, 2) : 0;
 
-        // Las metas son asignaciones; el patrimonio se basa en cuentas f?sicas para no duplicarlas.
-        var netWorth = totalFinancialAssets - totalDebt;
 
         return new DashboardOverviewDto
         {
@@ -109,13 +119,13 @@ public class DashboardService : IDashboardService
             },
             TotalIncome = totalIncome,
             TotalExpenses = totalExpenses,
+            ReimbursementsReceived = reimbursements,
+            NetPersonalExpenses = netPersonalExpenses,
             NetSavings = netSavings,
             SavingsRate = savingsRate,
-            TotalDebt = totalDebt,
             TotalDebtPayments = totalDebtPayments,
-            TotalInvestments = totalInvestments,
             TotalSavingsGoals = totalSavings,
-            NetWorth = netWorth,
+            FinancialPosition = financialPosition,
             PendingEmergencyFundRestoration = pendingRestoration,
             PreviousMonth = new PreviousMonthDto
             {
@@ -153,13 +163,14 @@ public class DashboardService : IDashboardService
 
             var income = await _incomeRepository.GetTotalByCycleAsync(userId, start, end, cancellationToken);
             var expenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+            var reimbursements = await _reimbursementRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
             var savings = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
             var withdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);
             var investments = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
             var debtPrincipal = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken);
             var residual = CashFlowCalculator.CalculateResidual(
                 income,
-                expenses,
+                expenses - reimbursements,
                 savings,
                 withdrawals,
                 investments,
@@ -209,6 +220,8 @@ public class DashboardService : IDashboardService
 
         var income = await _incomeRepository.GetTotalByCycleAsync(userId, start, end, cancellationToken);
         var consumptionExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var reimbursements = await _reimbursementRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var netPersonalExpenses = consumptionExpenses - reimbursements;
         var savingsContributions = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
         var savingsWithdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);
         var investmentContributions = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
@@ -218,7 +231,7 @@ public class DashboardService : IDashboardService
 
         var cashFlowResidual = CashFlowCalculator.CalculateResidual(
             income,
-            consumptionExpenses,
+            netPersonalExpenses,
             savingsContributions,
             savingsWithdrawals,
             investmentContributions,
@@ -230,6 +243,8 @@ public class DashboardService : IDashboardService
         {
             Income = income,
             ConsumptionExpenses = consumptionExpenses,
+            ReimbursementsReceived = reimbursements,
+            NetPersonalExpenses = netPersonalExpenses,
             SavingsContributions = savingsContributions,
             InvestmentContributions = investmentContributions,
             SavingsWithdrawals = savingsWithdrawals,
@@ -237,7 +252,7 @@ public class DashboardService : IDashboardService
             RestorationContributions = restorationContributions,
             NewSavingsContributions = newSavingsContributions,
             CashFlowResidual = cashFlowResidual,
-            ConsumptionRate = income > 0 ? Math.Round(consumptionExpenses / income * 100, 2) : 0,
+            ConsumptionRate = income > 0 ? Math.Round(netPersonalExpenses / income * 100, 2) : 0,
             WealthBuildingRate = income > 0 ? Math.Round(wealthBuilding / income * 100, 2) : 0
         };
     }

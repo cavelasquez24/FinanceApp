@@ -9,6 +9,8 @@ export interface DashboardPeriod {
 export interface PreviousMonth {
   totalIncome: number;
   totalExpenses: number;
+  reimbursementsReceived: number;
+  netPersonalExpenses: number;
   netSavings: number;
   totalDebtPayments: number;
 }
@@ -20,10 +22,50 @@ export interface DashboardChanges {
   debtPaymentsChange: number;
 }
 
+export interface FinancialPositionWarning {
+  code: string;
+  message: string;
+}
+
+export interface FinancialPositionAssets {
+  cashAccounts: number;
+  savingsAccounts: number;
+  accountOpeningBalances: number;
+  accountAdjustments: number;
+  investmentPositions: number;
+  investmentCostBasis: number;
+  investmentUnrealizedGainLoss: number;
+  investmentAccountBalance: number;
+  uninvestedInvestmentCash: number;
+  investments: number;
+  creditCardCredits: number;
+  total: number;
+}
+
+export interface FinancialPositionLiabilities {
+  debts: number;
+  creditCards: number;
+  total: number;
+}
+
+export interface FinancialPosition {
+  asOf: string;
+  valuationBasis: 'current_snapshot';
+  historicalSnapshotsSupported: boolean;
+  assets: FinancialPositionAssets;
+  liabilities: FinancialPositionLiabilities;
+  savingsGoalAllocations: number;
+  netWorth: number;
+  warnings: FinancialPositionWarning[];
+}
+
 export interface DashboardOverview {
   period: DashboardPeriod;
+  netWorthAsOf: string;
   totalIncome: number;
   totalExpenses: number;
+  reimbursementsReceived: number;
+  netPersonalExpenses: number;
   netSavings: number;
   savingsRate: number;
   totalDebt: number;
@@ -32,6 +74,7 @@ export interface DashboardOverview {
   totalSavingsGoals: number;
   netWorth: number;
   pendingEmergencyFundRestoration: number;
+  financialPosition: FinancialPosition;
   previousMonth: PreviousMonth;
   changes: DashboardChanges;
 }
@@ -60,6 +103,8 @@ export interface ExpensesByCategoryResponse {
 export interface CashFlowStatement {
   income: number;
   consumptionExpenses: number;
+  reimbursementsReceived: number;
+  netPersonalExpenses: number;
   savingsContributions: number;
   restorationContributions: number;
   newSavingsContributions: number;

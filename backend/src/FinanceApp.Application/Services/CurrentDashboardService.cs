@@ -8,50 +8,59 @@ public class CurrentDashboardService : ICurrentDashboardService
 {
     private readonly IIncomeRepository _incomeRepository;
     private readonly IExpenseRepository _expenseRepository;
+    private readonly IReimbursementRepository _reimbursementRepository;
     private readonly IInvestmentRepository _investmentRepository;
     private readonly ISavingsGoalRepository _savingsGoalRepository;
     private readonly IDebtRepository _debtRepository;
+    private readonly ICreditCardRepository _creditCardRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IFinancialAccountService _accountService;
+    private readonly IFinancialPositionService _financialPositionService;
+    private readonly IBudgetService _budgetService;
+    private readonly IBusinessDateProvider _businessDateProvider;
 
     public CurrentDashboardService(
         IIncomeRepository incomeRepository,
         IExpenseRepository expenseRepository,
+        IReimbursementRepository reimbursementRepository,
         IInvestmentRepository investmentRepository,
         ISavingsGoalRepository savingsGoalRepository,
         IDebtRepository debtRepository,
+        ICreditCardRepository creditCardRepository,
         IUserRepository userRepository,
-        IFinancialAccountService accountService)
+        IFinancialPositionService financialPositionService,
+        IBudgetService budgetService,
+        IBusinessDateProvider businessDateProvider)
     {
         _incomeRepository = incomeRepository;
         _expenseRepository = expenseRepository;
+        _reimbursementRepository = reimbursementRepository;
         _investmentRepository = investmentRepository;
         _savingsGoalRepository = savingsGoalRepository;
         _debtRepository = debtRepository;
+        _creditCardRepository = creditCardRepository;
         _userRepository = userRepository;
-        _accountService = accountService;
+        _financialPositionService = financialPositionService;
+        _budgetService = budgetService;
+        _businessDateProvider = businessDateProvider;
     }
 
     public async Task<CurrentDashboardDto> GetAsync(
         Guid userId, CancellationToken cancellationToken = default)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = _businessDateProvider.Today;
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         var (cycleMonth, cycleYear) = GetCurrentCycle(today, user?.PaydayDay);
         var (start, end) = GetCycleRange(cycleMonth, cycleYear, user?.PaydayDay);
 
-        var accounts = await _accountService.GetAllAsync(userId, cancellationToken);
-        var cash = accounts.Where(a => a.IsActive && a.Type == "cash")
-            .Sum(a => a.CurrentBalance);
-        var savingsBalance = accounts.Where(a => a.IsActive && a.Type == "savings")
-            .Sum(a => a.CurrentBalance);
-        var investmentBalance = accounts.Where(a => a.IsActive && a.Type == "investment")
-            .Sum(a => a.CurrentBalance);
+        var financialPosition = await _financialPositionService.GetAsync(
+            userId, today, cancellationToken);
 
         var income = await _incomeRepository.GetTotalByCycleAsync(
             userId, start, end, cancellationToken);
         var expenses = await _expenseRepository.GetTotalByDateRangeAsync(
             userId, start, end, cancellationToken);
+        var reimbursements = await _reimbursementRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
+        var netExpenses = expenses - reimbursements;
         var savings = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(
             userId, start, end, cancellationToken);
         var savingsWithdrawals =
@@ -60,35 +69,41 @@ public class CurrentDashboardService : ICurrentDashboardService
         var investments = await _investmentRepository.GetTotalContributionsByDateRangeAsync(
             userId, start, end, cancellationToken);
         var debtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(
-            userId, start, end, cancellationToken);
-        var debt = await _debtRepository.GetTotalCurrentBalanceAsync(
-            userId, cancellationToken);
+            userId, start, end, cancellationToken)
+            + await _creditCardRepository.GetTotalPrincipalPaidByDateRangeAsync(
+                userId, start, end, cancellationToken);
 
-        var available = income + savingsWithdrawals - expenses
+        // Flujo de caja del ciclo: movimientos reales, no saldos de apertura ni transferencias.
+        // Los reembolsos se mantienen separados de ingresos ganados, aunque restauran el efectivo.
+        var cashFlow = income + reimbursements + savingsWithdrawals - expenses
             - savings - investments - debtPayments;
+        var budget = await _budgetService.GetByPeriodAsync(userId, cycleMonth, cycleYear, cancellationToken);
+        var budgetAvailable = budget is null
+            ? 0m
+            : (await _budgetService.GetStatusAsync(budget.Id, userId, cancellationToken)).TotalRemaining;
         var daysRemaining = Math.Max(0, end.DayNumber - today.DayNumber + 1);
 
         return new CurrentDashboardDto
         {
-            AsOf = today,
             CycleStart = start,
             CycleEnd = end,
             CycleLabel = $"{start:dd MMM} – {end:dd MMM}",
-            CashBalance = cash,
-            SavingsBalance = savingsBalance,
-            InvestmentBalance = investmentBalance,
-            DebtBalance = debt,
-            NetWorth = cash + savingsBalance + investmentBalance - debt,
+            FinancialPosition = financialPosition,
             CycleIncome = income,
             CycleExpenses = expenses,
+            CycleReimbursements = reimbursements,
+            CycleNetExpenses = netExpenses,
             CycleSavings = savings,
             CycleInvestments = investments,
             CycleDebtPayments = debtPayments,
-            CycleAvailable = available,
+            CycleCashFlow = cashFlow,
+            BudgetAvailable = budgetAvailable,
+            // Compatibilidad temporal: ahora significa disponible presupuestario, no saldo físico.
+            CycleAvailable = budgetAvailable,
             DaysRemaining = daysRemaining,
             SuggestedDailyAvailable = daysRemaining > 0
-                ? Math.Round(available / daysRemaining, 2)
-                : available
+                ? Math.Round(budgetAvailable / daysRemaining, 2)
+                : budgetAvailable
         };
     }
 

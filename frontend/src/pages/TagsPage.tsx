@@ -1,3 +1,4 @@
+import { monthEndDateOnly } from '../utils/dateOnly';
 import { useState } from 'react';
 import { Card, CardHeader } from '../components/ui';
 import { MonthYearSelector } from '../features/dashboard/components/MonthYearSelector';
@@ -9,7 +10,7 @@ export default function TagsPage() {
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [year, setYear] = useState(today.getFullYear());
   const reportStart = `${year}-${String(month).padStart(2, '0')}-01`;
-  const reportEnd = new Date(year, month, 0).toISOString().split('T')[0];
+  const reportEnd = monthEndDateOnly(year, month);
 
   return (
     <div className="space-y-6">

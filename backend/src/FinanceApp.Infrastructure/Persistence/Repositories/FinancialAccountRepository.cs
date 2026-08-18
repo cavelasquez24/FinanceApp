@@ -40,6 +40,17 @@ public class FinancialAccountRepository
                 && t.DeletedAt == null,
             cancellationToken);
 
+    public async Task<IReadOnlyList<AccountTransaction>> GetTransactionsByTransferIdAsync(
+        Guid userId, Guid transferId,
+        CancellationToken cancellationToken = default) =>
+        await _context.AccountTransactions
+            .Include(t => t.Account)
+            .Where(t => t.UserId == userId
+                && t.TransferId == transferId
+                && t.DeletedAt == null)
+            .OrderBy(t => t.Amount)
+            .ToListAsync(cancellationToken);
+
     public async Task<IReadOnlyList<AccountTransaction>> GetRecentTransactionsAsync(
         Guid userId, int count,
         CancellationToken cancellationToken = default) =>
@@ -51,6 +62,17 @@ public class FinancialAccountRepository
             .Take(count)
             .ToListAsync(cancellationToken);
 
+    public async Task<(decimal OpeningBalances, decimal Adjustments)> GetOpeningAndAdjustmentTotalsAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        var openingBalances = await _context.AccountTransactions
+            .Where(t => t.UserId == userId && t.DeletedAt == null && t.SourceType == "account-opening")
+            .SumAsync(t => t.Amount, cancellationToken);
+        var adjustments = await _context.AccountTransactions
+            .Where(t => t.UserId == userId && t.DeletedAt == null && t.SourceType == "account-adjustment")
+            .SumAsync(t => t.Amount, cancellationToken);
+        return (openingBalances, adjustments);
+    }
     public async Task SaveTransactionAsync(
         AccountTransaction transaction,
         CancellationToken cancellationToken = default)

@@ -25,6 +25,8 @@ public class SavingsGoalWithdrawal : BaseEntity
     /// </summary>
     public Guid? LinkedExpenseId { get; set; }
 
+    /// <summary>Correlaciona un retiro, liberación o reasignación.</summary>
+    public Guid? OperationId { get; set; }
     public SavingsWithdrawalReason Reason { get; set; }
     public string? Notes { get; set; }
 

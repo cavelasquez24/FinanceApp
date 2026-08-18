@@ -6,7 +6,13 @@ export interface Expense {
   categoryName: string;
   categoryColor: string;
   categoryIcon: string | null;
+  accountId: string | null;
+  accountName: string | null;
+  creditCardId: string | null;
+  creditCardName: string | null;
   amount: number;
+  reimbursedAmount: number;
+  netPersonalAmount: number;
   description: string | null;
   merchant: string | null;
   tags: Tag[];
@@ -20,6 +26,9 @@ export interface Expense {
 
 export interface ExpenseCreateDto {
   categoryId: string;
+  accountId?: string | null;
+  creditCardId?: string | null;
+  idempotencyKey?: string | null;
   amount: number;
   description?: string;
   merchant?: string;
@@ -31,7 +40,7 @@ export interface ExpenseCreateDto {
   notes?: string;
 }
 
-export type ExpenseUpdateDto = ExpenseCreateDto;
+export type ExpenseUpdateDto = Omit<ExpenseCreateDto, 'idempotencyKey'>;
 
 export interface ExpenseFilter {
   page?: number;

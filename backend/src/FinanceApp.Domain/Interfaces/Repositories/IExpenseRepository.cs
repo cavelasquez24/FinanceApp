@@ -5,6 +5,9 @@ namespace FinanceApp.Domain.Interfaces.Repositories;
 
 public interface IExpenseRepository : IBaseRepository<Expense>
 {
+    Task<Expense?> GetByIdempotencyKeyAsync(
+        Guid userId, Guid idempotencyKey,
+        CancellationToken cancellationToken = default);
     Task<(IEnumerable<Expense> Items, int TotalCount)> GetByUserIdAsync(
         Guid userId,
         int page,

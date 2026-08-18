@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Card, Spinner } from '../components/ui';
 import { useCurrentDashboard } from '../features/dashboard/hooks/useCurrentDashboard';
+import { FinancialPositionSummary } from '../features/dashboard/components/FinancialPositionSummary';
 
 const money = (value: number) =>
   new Intl.NumberFormat('es-US', {
@@ -36,9 +37,7 @@ export function CurrentDashboardPage() {
     );
   }
 
-  const used = data.cycleIncome > 0
-    ? Math.max(0, Math.min(100, ((data.cycleIncome - data.cycleAvailable) / data.cycleIncome) * 100))
-    : 0;
+  const used = 0;
 
   return (
     <div className="space-y-6 bg-[#FBF9F4] p-6">
@@ -52,12 +51,12 @@ export function CurrentDashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
         <Card className="!rounded-[28px] !bg-[#2C2A29] !p-7 text-white">
-          <p className="text-sm text-white/65">Disponible del ciclo</p>
+          <p className="text-sm text-white/65">Presupuesto disponible</p>
           <p className={`mt-2 text-4xl font-semibold ${data.cycleAvailable < 0 ? 'text-[#E7A38E]' : ''}`}>
-            {money(data.cycleAvailable)}
+            {money(data.budgetAvailable)}
           </p>
           <p className="mt-2 text-sm text-white/65">
-            de {money(data.cycleIncome)} recibidos para este ciclo
+            autorizado para gastar en este ciclo; no es el saldo de tus cuentas
           </p>
 
           <div className="mt-6 h-2.5 overflow-hidden rounded-full bg-white/15">
@@ -80,7 +79,7 @@ export function CurrentDashboardPage() {
         </Card>
 
         <Card className="!rounded-[28px] !p-7">
-          <p className="text-sm text-[#7C756E]">Saldo disponible en cuentas</p>
+          <p className="text-sm text-[#7C756E]">Saldo físico en cuentas</p>
           <p className="mt-2 text-3xl font-semibold text-[#2C2A29]">{money(data.cashBalance)}</p>
           <p className="mt-3 text-xs leading-relaxed text-[#7C756E]">
             Este saldo sí acumula sobrantes de ciclos anteriores. El disponible mensual se renueva
@@ -97,8 +96,11 @@ export function CurrentDashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: 'Gastos del ciclo', value: data.cycleExpenses, icon: Wallet, color: '#C97B63' },
-          { label: 'Ahorro reservado', value: data.savingsBalance, icon: PiggyBank, color: '#8FA888' },
+          { label: 'Flujo de caja del ciclo', value: data.cycleCashFlow, icon: Wallet, color: '#5C7A99' },
+          { label: 'Gasto bruto del ciclo', value: data.cycleExpenses, icon: Wallet, color: '#C97B63' },
+          { label: 'Reembolsos recibidos', value: data.cycleReimbursements, icon: Wallet, color: '#5C7A99' },
+          { label: 'Gasto neto personal', value: data.cycleNetExpenses, icon: Wallet, color: '#2C2A29' },
+          { label: 'Saldo en cuentas de ahorro', value: data.savingsBalance, icon: PiggyBank, color: '#8FA888' },
           { label: 'Inversiones', value: data.investmentBalance, icon: BarChart3, color: '#5C7A99' },
           { label: 'Deuda pendiente', value: data.debtBalance, icon: Landmark, color: '#D9A46B' },
         ].map(({ label, value, icon: Icon, color }) => (
@@ -114,13 +116,17 @@ export function CurrentDashboardPage() {
         ))}
       </div>
 
+      <FinancialPositionSummary position={data.financialPosition} />
+
       <Card className="!rounded-[28px] !p-6">
         <h2 className="font-serif text-lg font-medium text-[#2C2A29]">Asignación del ingreso</h2>
         <p className="mt-1 text-sm text-[#7C756E]">
           Lo que salió del fondo mensual durante el ciclo actual.
         </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <CycleItem label="Consumo" value={data.cycleExpenses} />
+          <CycleItem label="Gasto bruto" value={data.cycleExpenses} />
+          <CycleItem label="Reembolsos" value={-data.cycleReimbursements} />
+          <CycleItem label="Consumo neto" value={data.cycleNetExpenses} />
           <CycleItem label="Ahorro" value={data.cycleSavings} />
           <CycleItem label="Inversión" value={data.cycleInvestments} />
           <CycleItem label="Pagos de deuda" value={data.cycleDebtPayments} />

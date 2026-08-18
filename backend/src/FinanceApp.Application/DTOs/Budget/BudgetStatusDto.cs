@@ -7,6 +7,7 @@
 public class BudgetStatusDto
 {
     public string Period { get; set; } = string.Empty;
+    public decimal BudgetRolloverAmount { get; set; }
     public decimal TotalLimit { get; set; }
     public decimal TotalSpent { get; set; }
     public decimal TotalRemaining { get; set; }

@@ -45,6 +45,10 @@ public class SavingsGoalWithdrawalConfiguration : IEntityTypeConfiguration<Savin
             .HasColumnName("notes")
             .IsRequired(false);
 
+        builder.Property(w => w.OperationId)
+            .HasColumnName("operation_id")
+            .IsRequired(false);
+
         builder.Property(w => w.CreatedAt)
             .HasColumnName("created_at")
             .HasDefaultValueSql("NOW()");
@@ -69,6 +73,9 @@ public class SavingsGoalWithdrawalConfiguration : IEntityTypeConfiguration<Savin
             .HasDatabaseName("idx_savings_goal_withdrawals_linked_expense_id")
             .HasFilter("linked_expense_id IS NOT NULL AND deleted_at IS NULL");
 
+        builder.HasIndex(w => w.OperationId)
+            .HasDatabaseName("idx_savings_goal_withdrawals_operation_id")
+            .HasFilter("operation_id IS NOT NULL");
         builder.HasOne(w => w.SavingsGoal)
             .WithMany(s => s.Withdrawals)
             .HasForeignKey(w => w.SavingsGoalId)

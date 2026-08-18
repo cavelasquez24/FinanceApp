@@ -1,4 +1,4 @@
-﻿using FinanceApp.Domain.Entities;
+using FinanceApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -31,6 +31,15 @@ public class BudgetPeriodConfiguration : IEntityTypeConfiguration<BudgetPeriod>
             .HasColumnName("total_limit")
             .HasColumnType("numeric(15,2)")
             .IsRequired(false);
+
+        builder.Property(b => b.BudgetRolloverAmount)
+            .HasColumnName("budget_rollover_amount")
+            .HasColumnType("numeric(15,2)")
+            .HasDefaultValue(0m);
+        builder.Property(b => b.BudgetRolloverDate).HasColumnName("budget_rollover_date");
+        builder.Property(b => b.BudgetRolloverNote).HasColumnName("budget_rollover_note").HasMaxLength(300);
+        builder.Property(b => b.BudgetRolloverIdempotencyKey)
+            .HasColumnName("budget_rollover_idempotency_key");
 
         builder.Property(b => b.Notes)
             .HasColumnName("notes")

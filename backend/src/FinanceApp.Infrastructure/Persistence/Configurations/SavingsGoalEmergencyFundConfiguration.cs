@@ -9,7 +9,7 @@ public class SavingsGoalEmergencyFundConfiguration : IEntityTypeConfiguration<Sa
     public void Configure(EntityTypeBuilder<SavingsGoal> builder)
     {
         builder.Property(g => g.MinimumProtectedAmount).HasColumnType("numeric(15,2)");
-        builder.HasIndex(g => g.Purpose)
+        builder.HasIndex(g => new { g.UserId, g.Purpose })
             .IsUnique()
             .HasDatabaseName("ux_savings_goals_single_emergency_fund")
             .HasFilter("\"Purpose\" = 1 AND \"DeletedAt\" IS NULL");

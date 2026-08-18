@@ -7,14 +7,16 @@ namespace FinanceApp.Application.DTOs.Dashboard;
 public class CashFlowStatementDto
 {
     public decimal Income { get; set; }
-    public decimal ConsumptionExpenses { get; set; }       // = Expenses reales, sin contaminar
+    public decimal ConsumptionExpenses { get; set; }
+    public decimal ReimbursementsReceived { get; set; }
+    public decimal NetPersonalExpenses { get; set; }
     public decimal SavingsContributions { get; set; }
     public decimal RestorationContributions { get; set; }
     public decimal NewSavingsContributions { get; set; }
     public decimal InvestmentContributions { get; set; }
     public decimal SavingsWithdrawals { get; set; }
     public decimal DebtPrincipalPaid { get; set; }
-    public decimal CashFlowResidual { get; set; }           // income + withdrawals - expenses - savings - investments - debt principal
-    public decimal ConsumptionRate { get; set; }             // consumptionExpenses / income
-    public decimal WealthBuildingRate { get; set; }          // (savingsContributions + investmentContributions + debtPrincipalPaid) / income
+    public decimal CashFlowResidual { get; set; }
+    public decimal ConsumptionRate { get; set; }
+    public decimal WealthBuildingRate { get; set; }
 }

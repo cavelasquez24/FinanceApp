@@ -1,4 +1,4 @@
-﻿namespace FinanceApp.Application.DTOs.Dashboard;
+namespace FinanceApp.Application.DTOs.Dashboard;
 
 /// <summary>
 /// Resumen principal del Dashboard.
@@ -9,13 +9,17 @@ public class DashboardOverviewDto
     public PeriodDto Period { get; set; } = null!;
     public decimal TotalIncome { get; set; }
     public decimal TotalExpenses { get; set; }
+    public decimal ReimbursementsReceived { get; set; }
+    public decimal NetPersonalExpenses { get; set; }
     public decimal NetSavings { get; set; }
     public decimal SavingsRate { get; set; }
-    public decimal TotalDebt { get; set; }           // saldo pendiente total, no depende de rango
+    public DateOnly NetWorthAsOf => FinancialPosition.AsOf;
+    public decimal TotalDebt => FinancialPosition.Liabilities.Total;
     public decimal TotalDebtPayments { get; set; }    // pagado en este ciclo
-    public decimal TotalInvestments { get; set; }
+    public decimal TotalInvestments => FinancialPosition.Assets.Investments;
     public decimal TotalSavingsGoals { get; set; }
-    public decimal NetWorth { get; set; }
+    public decimal NetWorth => FinancialPosition.NetWorth;
+    public FinancialPositionDto FinancialPosition { get; set; } = new();
     public decimal PendingEmergencyFundRestoration { get; set; }
     public PreviousMonthDto PreviousMonth { get; set; } = null!;
     public ChangesDto Changes { get; set; } = null!;
@@ -32,6 +36,8 @@ public class PreviousMonthDto
 {
     public decimal TotalIncome { get; set; }
     public decimal TotalExpenses { get; set; }
+    public decimal ReimbursementsReceived { get; set; }
+    public decimal NetPersonalExpenses { get; set; }
     public decimal NetSavings { get; set; }
     public decimal TotalDebtPayments { get; set; }
 

@@ -1,3 +1,5 @@
+import type { FinancialPosition } from './dashboard.types';
+
 export interface CurrentDashboard {
   asOf: string;
   cycleStart: string;
@@ -8,11 +10,16 @@ export interface CurrentDashboard {
   investmentBalance: number;
   debtBalance: number;
   netWorth: number;
+  financialPosition: FinancialPosition;
   cycleIncome: number;
   cycleExpenses: number;
+  cycleReimbursements: number;
+  cycleNetExpenses: number;
   cycleSavings: number;
   cycleInvestments: number;
   cycleDebtPayments: number;
+  cycleCashFlow: number;
+  budgetAvailable: number;
   cycleAvailable: number;
   suggestedDailyAvailable: number;
   daysRemaining: number;

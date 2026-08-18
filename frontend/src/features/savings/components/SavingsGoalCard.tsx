@@ -21,6 +21,8 @@ export default function SavingsGoalCard({ goal, onDeposit, onWithdraw, onEdit, o
   const isDepositDisabled = goal.isCompleted || hasPendingRestoration;
   const protectedMinimum = goal.minimumProtectedAmount ?? 0;
   const availableAboveMinimum = Math.max(0, goal.currentAmount - protectedMinimum);
+  const hasBalance = goal.currentAmount > 0;
+  const canArchive = !hasPendingRestoration && !hasBalance;
   const progress = Math.min(100, Math.max(0, goal.progressPercentage));
   const { data: restorations } = useEmergencyFundRestorations(isEmergencyFund ? goal.id : undefined);
   const { data: accounts } = useAccounts();
@@ -31,7 +33,7 @@ export default function SavingsGoalCard({ goal, onDeposit, onWithdraw, onEdit, o
     <article className={`group relative flex flex-col rounded-[28px] border bg-[#FBF9F4]/95 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-md ${isEmergencyFund ? 'border-[#D7E1D2]' : 'border-[#EFEAE2]'}`}>
       <div className="absolute right-5 top-5 flex items-center space-x-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
         <button type="button" onClick={onEdit} className="rounded-full p-1.5 text-[#7C756E] transition-colors hover:bg-[#EFEAE2]" title="Editar meta"><Pencil className="h-4 w-4" /></button>
-        <button type="button" onClick={onDelete} disabled={hasPendingRestoration} className="rounded-full p-1.5 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-35" title={hasPendingRestoration ? "Completa o cancela las restauraciones antes de archivar" : "Archivar meta"}><Archive className="h-4 w-4" /></button>
+        <button type="button" onClick={onDelete} disabled={!canArchive} className="rounded-full p-1.5 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-35" title={hasPendingRestoration ? "Completa o cancela las restauraciones antes de archivar" : hasBalance ? "No se puede archivar una meta con saldo mayor que cero" : "Archivar meta"}><Archive className="h-4 w-4" /></button>
       </div>
 
       <div className="mb-6 pr-16">
@@ -51,6 +53,7 @@ export default function SavingsGoalCard({ goal, onDeposit, onWithdraw, onEdit, o
             <div className="h-full rounded-full bg-[#9EAB98] transition-all duration-500 ease-out" style={{ width: `${progress}%`, backgroundColor: goal.isCompleted ? '#7FA083' : '#9EAB98' }} />
           </div>
           {goal.isCompleted && <p className="mt-2 text-xs font-medium text-[#5F8667]">Meta alcanzada</p>}
+          {hasBalance && <p className="mt-2 text-xs text-[#7C756E]">Para archivar esta meta, primero deja su saldo en $0.00.</p>}
         </div>
 
         {isEmergencyFund && (
