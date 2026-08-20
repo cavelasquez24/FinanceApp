@@ -58,3 +58,33 @@ export interface UpdateAccountDto {
   isDefault: boolean;
   isActive: boolean;
 }
+
+export interface ReconciliationPreview {
+  accountId: string;
+  accountName: string;
+  ledgerBalance: number;
+  currentBalance: number;
+  lastReconciliationDate: string | null;
+  lastReconciliationActualBalance: number | null;
+}
+
+export interface ReconciliationCreateDto {
+  actualBalance: number;
+  reconciliationDate: string;
+  notes?: string;
+}
+
+export interface ReconciliationResult {
+  id: string;
+  accountId: string;
+  accountName: string;
+  reconciliationDate: string;
+  expectedBalance: number;
+  actualBalance: number;
+  difference: number;
+  adjustmentCreated: boolean;
+  adjustmentTransactionId: string | null;
+  notes: string | null;
+  status: "Reconciled" | "Skipped";
+  createdAt: string;
+}

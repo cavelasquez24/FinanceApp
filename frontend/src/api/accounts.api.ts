@@ -7,6 +7,9 @@ import type {
   CreateAccountDto,
   FinancialAccount,
   UpdateAccountDto,
+  ReconciliationPreview,
+  ReconciliationCreateDto,
+  ReconciliationResult,
 } from '../types/account.types';
 
 export const accountsApi = {
@@ -30,6 +33,28 @@ export const accountsApi = {
   },
   transfer: async (dto: CreateAccountTransferDto) => {
     const response = await apiClient.post<ApiResponse<AccountTransfer>>('/accounts/transfers', dto);
+    return response.data.data;
+  },
+
+  getReconciliationPreview: async (accountId: string) => {
+    const response = await apiClient.get<ApiResponse<ReconciliationPreview>>(
+      `/accounts/${accountId}/reconciliations/preview`
+    );
+    return response.data.data;
+  },
+
+  applyReconciliation: async (accountId: string, dto: ReconciliationCreateDto) => {
+    const response = await apiClient.post<ApiResponse<ReconciliationResult>>(
+      `/accounts/${accountId}/reconciliations`,
+      dto
+    );
+    return response.data.data;
+  },
+
+  getReconciliationHistory: async (accountId: string, page = 1, pageSize = 20) => {
+    const response = await apiClient.get<ApiResponse<ReconciliationResult[]>>(
+      `/accounts/${accountId}/reconciliations?page=${page}&pageSize=${pageSize}`
+    );
     return response.data.data;
   },
 };
