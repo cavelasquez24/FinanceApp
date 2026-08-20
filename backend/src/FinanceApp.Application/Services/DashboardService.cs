@@ -81,10 +81,11 @@ public class DashboardService : IDashboardService
             + cardPrincipalPaid;
         var prevDebtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken)
             + prevCardPrincipalPaid;
-        var savingsContributions = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
-        var prevSavingsContributions = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
-        var savingsWithdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);
-        var prevSavingsWithdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
+        // Las metas registran asignaciones manuales; no son entradas ni salidas físicas.
+        const decimal savingsContributions = 0m;
+        const decimal prevSavingsContributions = 0m;
+        const decimal savingsWithdrawals = 0m;
+        const decimal prevSavingsWithdrawals = 0m;
         var investmentContributions = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
         var prevInvestmentContributions = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, prevStart, prevEnd, cancellationToken);
         var debtPrincipalPaid = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken)
@@ -164,8 +165,8 @@ public class DashboardService : IDashboardService
             var income = await _incomeRepository.GetTotalByCycleAsync(userId, start, end, cancellationToken);
             var expenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
             var reimbursements = await _reimbursementRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
-            var savings = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
-            var withdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);
+            const decimal savings = 0m;
+            const decimal withdrawals = 0m;
             var investments = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
             var debtPrincipal = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken);
             var residual = CashFlowCalculator.CalculateResidual(
@@ -222,12 +223,13 @@ public class DashboardService : IDashboardService
         var consumptionExpenses = await _expenseRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
         var reimbursements = await _reimbursementRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
         var netPersonalExpenses = consumptionExpenses - reimbursements;
-        var savingsContributions = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
-        var savingsWithdrawals = await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(userId, start, end, cancellationToken);
+        // Se exponen como cero en flujo de caja: son progreso interno de metas.
+        const decimal savingsContributions = 0m;
+        const decimal savingsWithdrawals = 0m;
         var investmentContributions = await _investmentRepository.GetTotalContributionsByDateRangeAsync(userId, start, end, cancellationToken);
         var debtPrincipalPaid = await _debtRepository.GetTotalPrincipalPaidByDateRangeAsync(userId, start, end, cancellationToken);
-        var restorationContributions = await _restorationRepository.GetRestoredByDateRangeAsync(userId, start, end, cancellationToken);
-        var newSavingsContributions = Math.Max(savingsContributions - restorationContributions, 0);
+        const decimal restorationContributions = 0m;
+        const decimal newSavingsContributions = 0m;
 
         var cashFlowResidual = CashFlowCalculator.CalculateResidual(
             income,

@@ -3,6 +3,9 @@
 public class SavingsGoalResponseDto
 {
     public Guid Id { get; set; }
+    public Guid? SavingsAccountId { get; set; }
+    public string? SavingsAccountName { get; set; }
+    public decimal? SavingsAccountBalance { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal TargetAmount { get; set; }

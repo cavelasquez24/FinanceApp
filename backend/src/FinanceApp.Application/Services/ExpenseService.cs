@@ -343,8 +343,15 @@ public class ExpenseService : IExpenseService
             throw new DomainException("EXPENSE_ACCOUNT_REQUIRED",
                 "Selecciona explícitamente la cuenta desde la que se pagó el gasto.");
 
-        await _accountService.GetAvailableBalanceAsync(
-            userId, accountId, FinancialAccountType.Cash, cancellationToken);
+        var account = (await _accountService.GetAllAsync(userId, cancellationToken))
+            .SingleOrDefault(item => item.Id == accountId.Value);
+        if (account == null || !account.IsActive)
+            throw new DomainException("INVALID_ACCOUNT", "La cuenta seleccionada no está disponible.");
+        if (!string.Equals(account.Type, "cash", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(account.Type, "savings", StringComparison.OrdinalIgnoreCase))
+            throw new DomainException(
+                "INVALID_EXPENSE_ACCOUNT",
+                "Los gastos liquidados solo pueden descontar una cuenta de efectivo o ahorro.");
         return paymentMethod;
     }
 

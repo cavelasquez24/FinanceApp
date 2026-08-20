@@ -61,11 +61,6 @@ public class CurrentDashboardService : ICurrentDashboardService
             userId, start, end, cancellationToken);
         var reimbursements = await _reimbursementRepository.GetTotalByDateRangeAsync(userId, start, end, cancellationToken);
         var netExpenses = expenses - reimbursements;
-        var savings = await _savingsGoalRepository.GetTotalContributionsByDateRangeAsync(
-            userId, start, end, cancellationToken);
-        var savingsWithdrawals =
-            await _savingsGoalRepository.GetTotalCashFlowWithdrawalsByDateRangeAsync(
-                userId, start, end, cancellationToken);
         var investments = await _investmentRepository.GetTotalContributionsByDateRangeAsync(
             userId, start, end, cancellationToken);
         var debtPayments = await _debtRepository.GetTotalPaymentsByDateRangeAsync(
@@ -75,8 +70,8 @@ public class CurrentDashboardService : ICurrentDashboardService
 
         // Flujo de caja del ciclo: movimientos reales, no saldos de apertura ni transferencias.
         // Los reembolsos se mantienen separados de ingresos ganados, aunque restauran el efectivo.
-        var cashFlow = income + reimbursements + savingsWithdrawals - expenses
-            - savings - investments - debtPayments;
+        // Las metas son seguimiento manual y no forman parte del flujo de caja.
+        var cashFlow = income + reimbursements - expenses - investments - debtPayments;
         var budget = await _budgetService.GetByPeriodAsync(userId, cycleMonth, cycleYear, cancellationToken);
         var budgetAvailable = budget is null
             ? 0m
@@ -93,7 +88,7 @@ public class CurrentDashboardService : ICurrentDashboardService
             CycleExpenses = expenses,
             CycleReimbursements = reimbursements,
             CycleNetExpenses = netExpenses,
-            CycleSavings = savings,
+            CycleSavings = 0m,
             CycleInvestments = investments,
             CycleDebtPayments = debtPayments,
             CycleCashFlow = cashFlow,

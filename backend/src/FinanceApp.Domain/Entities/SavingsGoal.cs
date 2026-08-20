@@ -5,6 +5,7 @@ using FinanceApp.Domain.Enums;
 public class SavingsGoal : BaseEntity
 {
     public Guid UserId { get; set; }
+    public Guid? SavingsAccountId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal TargetAmount { get; set; }
@@ -17,6 +18,7 @@ public class SavingsGoal : BaseEntity
 
     // Propiedad de navegación
     public User User { get; set; } = null!;
+    public FinancialAccount? SavingsAccount { get; set; }
 
     // v2.0.1 — historial de movimientos (SavingsGoalContribution/Withdrawal)
     public ICollection<SavingsGoalContribution> Contributions { get; set; } = new List<SavingsGoalContribution>();

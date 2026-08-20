@@ -12,7 +12,7 @@ public class EmergencyFundRestoration : BaseEntity
     public Guid UserId { get; set; }
     public Guid SavingsGoalId { get; set; }
     public Guid SourceWithdrawalId { get; set; }
-    public Guid LinkedExpenseId { get; set; }
+    public Guid? LinkedExpenseId { get; set; }
     public string Description { get; set; } = string.Empty;
     public DateOnly AcquisitionDate { get; set; }
     public decimal OriginalAmount { get; set; }
@@ -28,7 +28,7 @@ public class EmergencyFundRestoration : BaseEntity
     public User User { get; set; } = null!;
     public SavingsGoal SavingsGoal { get; set; } = null!;
     public SavingsGoalWithdrawal SourceWithdrawal { get; set; } = null!;
-    public Expense LinkedExpense { get; set; } = null!;
+    public Expense? LinkedExpense { get; set; }
     public ICollection<SavingsGoalContribution> Contributions { get; set; } = new List<SavingsGoalContribution>();
 
     public DateOnly? EstimatedCompletionDate

@@ -24,6 +24,7 @@ public class SavingsGoalWithdrawal : BaseEntity
     /// Sin navegación obligatoria: Expense pertenece a otro agregado.
     /// </summary>
     public Guid? LinkedExpenseId { get; set; }
+    public Guid? DestinationAccountId { get; set; }
 
     /// <summary>Correlaciona un retiro, liberación o reasignación.</summary>
     public Guid? OperationId { get; set; }

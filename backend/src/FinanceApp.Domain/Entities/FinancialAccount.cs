@@ -17,4 +17,5 @@ public class FinancialAccount : BaseEntity
     public User User { get; set; } = null!;
     public ICollection<AccountTransaction> Transactions { get; set; } = new List<AccountTransaction>();
     public ICollection<Reimbursement> Reimbursements { get; set; } = new List<Reimbursement>();
+    public ICollection<SavingsGoal> SavingsGoals { get; set; } = new List<SavingsGoal>();
 }

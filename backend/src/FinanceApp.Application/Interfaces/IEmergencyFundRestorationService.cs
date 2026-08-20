@@ -12,9 +12,6 @@ public interface IEmergencyFundRestorationService
     Task<EmergencyFundRestorationResponseDto> RegisterPaymentAsync(
         Guid restorationId, Guid userId, EmergencyFundRestorationPaymentDto dto,
         CancellationToken cancellationToken = default);
-    Task<DueRestorationProcessingResultDto> ProcessDueAsync(
-        Guid userId, DateOnly asOfDate,
-        CancellationToken cancellationToken = default);
     Task<EmergencyFundRestorationResponseDto> CancelAsync(
         Guid restorationId, Guid userId, CancellationToken cancellationToken = default);
 }

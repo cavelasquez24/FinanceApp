@@ -6,9 +6,11 @@ public class SavingsGoalCreateDto
     public string? Description { get; set; }
     public decimal TargetAmount { get; set; }
     public decimal InitialAmount { get; set; } = 0;
-    public Guid? InitialSourceAccountId { get; set; }
     public DateOnly? InitialFundingDate { get; set; }
     public Guid? IdempotencyKey { get; set; }
+    public Guid SavingsAccountId { get; set; }
+    public string InitialFundingMode { get; set; } = "existing_balance";
+    public Guid? InitialSourceAccountId { get; set; }
     public DateOnly? TargetDate { get; set; }
     public string? Icon { get; set; }
     public string Purpose { get; set; } = "general";

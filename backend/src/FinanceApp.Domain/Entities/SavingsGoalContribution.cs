@@ -12,6 +12,7 @@ public class SavingsGoalContribution : BaseEntity
     public decimal Amount { get; set; }
     public string? Notes { get; set; }
     public Guid? EmergencyFundRestorationId { get; set; }
+    public Guid? SourceAccountId { get; set; }
 
     /// <summary>Correlaciona un aporte financiado o una reasignación.</summary>
     public Guid? OperationId { get; set; }

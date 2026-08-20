@@ -1,5 +1,6 @@
-using FinanceApp.Application.DTOs.Account;
 using FinanceApp.Application.DTOs.SavingsGoal;
+using FinanceApp.Application.DTOs.Account;
+using FinanceApp.Application.DTOs.Expense;
 using FinanceApp.Application.Interfaces;
 using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
@@ -10,22 +11,43 @@ namespace FinanceApp.Application.Services;
 
 public class SavingsGoalService : ISavingsGoalService
 {
+    private const string ExistingBalanceMode = "existing_balance";
+    private const string AccountTransferMode = "account_transfer";
     private readonly ISavingsGoalRepository _savingsGoalRepository;
     private readonly IFinancialAccountService _accountService;
+    private readonly IExpenseService _expenseService;
     private readonly IUnitOfWork? _unitOfWork;
 
-    public SavingsGoalService(ISavingsGoalRepository savingsGoalRepository, IFinancialAccountService accountService, IUnitOfWork? unitOfWork = null)
+    public SavingsGoalService(ISavingsGoalRepository savingsGoalRepository, IFinancialAccountService accountService, IExpenseService expenseService, IUnitOfWork? unitOfWork = null)
     {
         _savingsGoalRepository = savingsGoalRepository;
         _accountService = accountService;
+        _expenseService = expenseService;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<SavingsGoalResponseDto>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default)
-        => (await _savingsGoalRepository.GetByUserIdAsync(userId, cancellationToken)).Select(MapToResponseDto);
+    {
+        var goals = (await _savingsGoalRepository.GetByUserIdAsync(userId, cancellationToken)).ToList();
+        var accounts = await _accountService.GetAllAsync(userId, cancellationToken);
+        var defaultSavings = accounts.FirstOrDefault(account => account.IsActive && account.IsDefault
+            && string.Equals(account.Type, "savings", StringComparison.OrdinalIgnoreCase));
+        foreach (var goal in goals.Where(goal => !goal.SavingsAccountId.HasValue))
+        {
+            if (defaultSavings == null) continue;
+            goal.SavingsAccountId = defaultSavings.Id;
+            await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
+        }
+        return goals.Select(goal => MapToResponseDto(
+            goal, accounts.SingleOrDefault(account => account.Id == goal.SavingsAccountId)));
+    }
 
     public async Task<SavingsGoalResponseDto> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
-        => MapToResponseDto(await GetActiveGoalAsync(id, userId, cancellationToken));
+    {
+        var goal = await GetActiveGoalAsync(id, userId, cancellationToken);
+        var account = await EnsureGoalSavingsAccountAsync(goal, userId, cancellationToken);
+        return MapToResponseDto(goal, account);
+    }
 
     public async Task<SavingsGoalResponseDto> CreateAsync(Guid userId, SavingsGoalCreateDto dto, CancellationToken cancellationToken = default)
     {
@@ -40,14 +62,19 @@ public class SavingsGoalService : ISavingsGoalService
                 var previous = (await _savingsGoalRepository.GetByUserIdAsync(userId, ct))
                     .SingleOrDefault(g => g.Contributions.Any(c => c.OperationId == dto.IdempotencyKey));
                 if (previous != null)
-                    return MapToResponseDto(previous);
+                {
+                    var previousAccount = await EnsureGoalSavingsAccountAsync(previous, userId, ct);
+                    return MapToResponseDto(previous, previousAccount);
+                }
             }
             if (!Enum.TryParse<SavingsGoalPurpose>(dto.Purpose.Replace("_", ""), true, out var purpose))
                 throw new DomainException("INVALID_GOAL_PURPOSE", "El propósito de la meta no es válido.");
             if (dto.MinimumProtectedAmount is < 0 || dto.MinimumProtectedAmount > dto.TargetAmount)
                 throw new DomainException("INVALID_PROTECTED_AMOUNT", "El mínimo protegido debe estar entre cero y el objetivo.");
-            if (dto.InitialAmount > 0 && (!dto.InitialSourceAccountId.HasValue || dto.InitialSourceAccountId == Guid.Empty || !dto.IdempotencyKey.HasValue || dto.IdempotencyKey == Guid.Empty))
-                throw new DomainException("INITIAL_FUNDING_REQUIRED", "El saldo inicial requiere cuenta de origen y clave de idempotencia.");
+            if (dto.SavingsAccountId == Guid.Empty)
+                throw new DomainException("SAVINGS_ACCOUNT_REQUIRED", "Selecciona la cuenta de ahorro que respalda esta meta.");
+            if (dto.InitialAmount > 0 && (!dto.IdempotencyKey.HasValue || dto.IdempotencyKey == Guid.Empty))
+                throw new DomainException("INITIAL_OPERATION_REQUIRED", "El saldo inicial requiere una clave de idempotencia.");
 
             if (purpose == SavingsGoalPurpose.EmergencyFund)
             {
@@ -56,18 +83,23 @@ public class SavingsGoalService : ISavingsGoalService
                     throw new DomainException("EMERGENCY_FUND_ALREADY_EXISTS", "Solo puede existir un fondo de emergencia activo.");
             }
 
+            var savingsAccount = await EnsureSavingsAccountAsync(userId, dto.SavingsAccountId, ct);
+            Guid? sourceAccountId = null;
             if (dto.InitialAmount > 0)
             {
-                var source = await EnsureLiquidAccountAsync(userId, dto.InitialSourceAccountId!.Value, ct);
-                if (source.CurrentBalance < dto.InitialAmount)
-                    throw new DomainException("INSUFFICIENT_ACCOUNT_BALANCE", "La cuenta de respaldo no tiene saldo suficiente.");
-                await EnsureAllocationBackedAsync(userId, dto.InitialAmount, ct);
+                sourceAccountId = await ValidateFundingAsync(
+                    userId, savingsAccount, dto.InitialAmount,
+                    dto.InitialFundingMode, dto.InitialSourceAccountId, ct);
             }
+
+
             var goal = new SavingsGoal
             {
                 UserId = userId,
                 Name = dto.Name.Trim(),
                 Description = dto.Description?.Trim(),
+                Id = Guid.NewGuid(),
+                SavingsAccountId = savingsAccount.Id,
                 TargetAmount = dto.TargetAmount,
                 CurrentAmount = dto.InitialAmount,
                 TargetDate = dto.TargetDate,
@@ -85,16 +117,33 @@ public class SavingsGoalService : ISavingsGoalService
                 var date = dto.InitialFundingDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
                 var contribution = new SavingsGoalContribution
                 {
+                    Id = Guid.NewGuid(),
                     SavingsGoalId = goal.Id,
                     ContributionDate = date,
                     Amount = dto.InitialAmount,
-                    Notes = "Saldo inicial financiado",
-                    OperationId = operationId
+                    Notes = sourceAccountId.HasValue ? "Saldo inicial transferido a la cuenta de ahorro" : "Saldo inicial asignado desde ahorro disponible",
+                    OperationId = operationId,
+                    SourceAccountId = sourceAccountId
                 };
                 await _savingsGoalRepository.AddContributionAsync(contribution, ct);
 
+                if (sourceAccountId.HasValue)
+                {
+                    await _accountService.SyncTransferBetweenAccountsAsync(
+                        userId,
+                        sourceAccountId,
+                        FinancialAccountType.Cash,
+                        savingsAccount.Id,
+                        FinancialAccountType.Savings,
+                        dto.InitialAmount,
+                        date,
+                        "savings-goal-funding",
+                        contribution.Id,
+                        $"Aporte inicial: {goal.Name}",
+                        ct);
+                }
             }
-            return MapToResponseDto(goal);
+            return MapToResponseDto(goal, await EnsureSavingsAccountAsync(userId, savingsAccount.Id, ct));
         }, cancellationToken);
     }
 
@@ -119,7 +168,8 @@ public class SavingsGoalService : ISavingsGoalService
         goal.MinimumProtectedAmount = purpose == SavingsGoalPurpose.EmergencyFund ? dto.MinimumProtectedAmount : null;
         goal.IsCompleted = goal.CurrentAmount >= goal.TargetAmount;
         await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
-        return MapToResponseDto(goal);
+        var account = await EnsureGoalSavingsAccountAsync(goal, userId, cancellationToken);
+        return MapToResponseDto(goal, account);
     }
 
     public Task DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken = default)
@@ -145,9 +195,6 @@ public class SavingsGoalService : ISavingsGoalService
             var date = dto.Date ?? DateOnly.FromDateTime(DateTime.UtcNow);
             if (string.Equals(dto.Resolution, "release", StringComparison.OrdinalIgnoreCase))
             {
-                if (!dto.DestinationAccountId.HasValue || dto.DestinationAccountId == Guid.Empty)
-                    throw new DomainException("DESTINATION_ACCOUNT_REQUIRED", "Selecciona la cuenta líquida que recibirá el saldo.");
-                await EnsureLiquidAccountAsync(userId, dto.DestinationAccountId.Value, ct);
                 await AddWithdrawalAsync(goal, amount, date, SavingsWithdrawalReason.ReallocatedToLiquid, dto.IdempotencyKey, dto.Notes, ct);
             }
             else if (string.Equals(dto.Resolution, "reassign", StringComparison.OrdinalIgnoreCase))
@@ -173,21 +220,46 @@ public class SavingsGoalService : ISavingsGoalService
         return await RunInTransactionAsync(async ct =>
         {
             var goal = await GetActiveGoalAsync(id, userId, ct);
+            var savingsAccount = await EnsureGoalSavingsAccountAsync(goal, userId, ct);
             if (HasOpenRestorations(goal)) throw new DomainException("USE_RESTORATION_PAYMENT", "Registra el aporte contra una restauración abierta.");
             if (dto.Amount <= 0) throw new DomainException("INVALID_DEPOSIT_AMOUNT", "El monto del aporte debe ser mayor a cero.");
-            if (dto.SourceAccountId == Guid.Empty || dto.IdempotencyKey == Guid.Empty) throw new DomainException("SOURCE_AND_IDEMPOTENCY_REQUIRED", "El aporte requiere cuenta de origen y clave de idempotencia.");
-            if (goal.Contributions.Any(c => c.OperationId == dto.IdempotencyKey)) return MapToResponseDto(goal);
+            if (dto.IdempotencyKey == Guid.Empty) throw new DomainException("IDEMPOTENCY_REQUIRED", "El aporte requiere una clave de idempotencia.");
+            if (goal.Contributions.Any(c => c.OperationId == dto.IdempotencyKey)) return MapToResponseDto(goal, savingsAccount);
             EnsureCapacity(goal, dto.Amount);
-            var source = await EnsureLiquidAccountAsync(userId, dto.SourceAccountId, ct);
-            if (source.CurrentBalance < dto.Amount)
-                throw new DomainException("INSUFFICIENT_ACCOUNT_BALANCE", "La cuenta de respaldo no tiene saldo suficiente.");
-            await EnsureAllocationBackedAsync(userId, dto.Amount, ct);
+            var sourceAccountId = await ValidateFundingAsync(
+                userId, savingsAccount, dto.Amount, dto.FundingMode, dto.SourceAccountId, ct);
+
             var date = dto.ContributionDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
             goal.CurrentAmount += dto.Amount; goal.IsCompleted = goal.CurrentAmount >= goal.TargetAmount;
-            await _savingsGoalRepository.AddContributionAsync(new SavingsGoalContribution { SavingsGoalId = goal.Id, ContributionDate = date, Amount = dto.Amount, Notes = dto.Notes, OperationId = dto.IdempotencyKey }, ct);
+            var contribution = new SavingsGoalContribution
+            {
+                Id = Guid.NewGuid(),
+                SavingsGoalId = goal.Id,
+                ContributionDate = date,
+                Amount = dto.Amount,
+                Notes = dto.Notes?.Trim(),
+                OperationId = dto.IdempotencyKey,
+                SourceAccountId = sourceAccountId
+            };
+            await _savingsGoalRepository.AddContributionAsync(contribution, ct);
+            if (sourceAccountId.HasValue)
+            {
+                await _accountService.SyncTransferBetweenAccountsAsync(
+                    userId,
+                    sourceAccountId,
+                    FinancialAccountType.Cash,
+                    savingsAccount.Id,
+                    FinancialAccountType.Savings,
+                    dto.Amount,
+                    date,
+                    "savings-goal-funding",
+                    contribution.Id,
+                    $"Aporte a meta: {goal.Name}",
+                    ct);
+            }
 
             await _savingsGoalRepository.UpdateAsync(goal, ct);
-            return MapToResponseDto(goal);
+            return MapToResponseDto(goal, await EnsureSavingsAccountAsync(userId, savingsAccount.Id, ct));
         }, cancellationToken);
     }
 
@@ -196,11 +268,11 @@ public class SavingsGoalService : ISavingsGoalService
         return await RunInTransactionAsync(async ct =>
         {
             var goal = await GetActiveGoalAsync(id, userId, ct);
+            var savingsAccount = await EnsureGoalSavingsAccountAsync(goal, userId, ct);
             if (dto.Amount <= 0 || dto.Amount > goal.CurrentAmount) throw new DomainException("INSUFFICIENT_SAVINGS_BALANCE", "El retiro debe ser positivo y no puede superar el saldo disponible.");
             if (dto.IdempotencyKey == Guid.Empty) throw new DomainException("INVALID_IDEMPOTENCY_KEY", "La clave de idempotencia es obligatoria.");
             var existing = goal.Withdrawals.SingleOrDefault(w => w.OperationId == dto.IdempotencyKey);
             if (existing != null) return MapWithdrawal(existing, goal.CurrentAmount);
-            if (dto.LinkedExpenseId.HasValue && dto.Reason != SavingsWithdrawalReason.Consumed) throw new DomainException("INVALID_LINKED_EXPENSE", "LinkedExpenseId solo es válido para consumo.");
             if (dto.Reason == SavingsWithdrawalReason.Correction && string.IsNullOrWhiteSpace(dto.Notes))
                 throw new DomainException("CORRECTION_REASON_REQUIRED", "Explica el motivo de la corrección para conservar trazabilidad.");
             if (dto.Reason != SavingsWithdrawalReason.Correction && goal.Purpose == SavingsGoalPurpose.EmergencyFund && goal.CurrentAmount - dto.Amount < (goal.MinimumProtectedAmount ?? 0)) throw new DomainException("MINIMUM_PROTECTED_AMOUNT", "El retiro dejaría el fondo bajo su mínimo protegido.");
@@ -217,12 +289,60 @@ public class SavingsGoalService : ISavingsGoalService
                 return MapWithdrawal(withdrawal, goal.CurrentAmount);
             }
 
-            var withdrawalCreated = await AddWithdrawalAsync(goal, dto.Amount, date, dto.Reason, dto.IdempotencyKey, dto.Notes, ct, dto.LinkedExpenseId);
-            if (dto.Reason != SavingsWithdrawalReason.Correction)
+            if (dto.Reason == SavingsWithdrawalReason.Consumed)
             {
-                if (!dto.DestinationAccountId.HasValue || dto.DestinationAccountId == Guid.Empty) throw new DomainException("DESTINATION_ACCOUNT_REQUIRED", "Selecciona la cuenta líquida de destino.");
-                await EnsureLiquidAccountAsync(userId, dto.DestinationAccountId.Value, ct);
+                if (!dto.ExpenseCategoryId.HasValue || string.IsNullOrWhiteSpace(dto.ExpenseDescription))
+                    throw new DomainException("EXPENSE_DETAILS_REQUIRED", "Selecciona una categoría y describe el gasto realizado con el ahorro.");
+                if (savingsAccount.CurrentBalance < dto.Amount)
+                    throw new DomainException("INSUFFICIENT_SAVINGS_ACCOUNT_BALANCE", "La cuenta de ahorro no tiene saldo real suficiente.");
 
+                var consumedWithdrawal = await AddWithdrawalAsync(
+                    goal, dto.Amount, date, dto.Reason, dto.IdempotencyKey, dto.Notes, ct);
+                var expense = await _expenseService.CreateAsync(userId, new ExpenseCreateDto
+                {
+                    CategoryId = dto.ExpenseCategoryId.Value,
+                    AccountId = savingsAccount.Id,
+                    IdempotencyKey = dto.IdempotencyKey,
+                    Amount = dto.Amount,
+                    Description = dto.ExpenseDescription.Trim(),
+                    Date = date,
+                    PaymentMethod = "cash",
+                    IsRecurring = false,
+                    Notes = dto.Notes?.Trim()
+                }, ct);
+                consumedWithdrawal.LinkedExpenseId = expense.Id;
+                await _savingsGoalRepository.UpdateAsync(goal, ct);
+                return MapWithdrawal(consumedWithdrawal, goal.CurrentAmount);
+            }
+
+            Guid? destinationAccountId = null;
+            if (dto.Reason == SavingsWithdrawalReason.ReallocatedToLiquid && dto.DestinationAccountId.HasValue)
+            {
+                var destination = await EnsureLiquidAccountAsync(userId, dto.DestinationAccountId.Value, ct);
+                if (destination.Id == savingsAccount.Id)
+                    throw new DomainException("SAME_SAVINGS_ACCOUNT", "Para mantener el dinero en ahorro, usa Liberar asignación.");
+                if (savingsAccount.CurrentBalance < dto.Amount)
+                    throw new DomainException("INSUFFICIENT_SAVINGS_ACCOUNT_BALANCE", "La cuenta de ahorro no tiene saldo real suficiente.");
+                destinationAccountId = destination.Id;
+            }
+
+            var withdrawalCreated = await AddWithdrawalAsync(
+                goal, dto.Amount, date, dto.Reason, dto.IdempotencyKey,
+                dto.Notes, ct, destinationAccountId: destinationAccountId);
+            if (destinationAccountId.HasValue)
+            {
+                await _accountService.SyncTransferBetweenAccountsAsync(
+                    userId,
+                    savingsAccount.Id,
+                    FinancialAccountType.Savings,
+                    destinationAccountId,
+                    FinancialAccountType.Cash,
+                    dto.Amount,
+                    date,
+                    "savings-goal-withdrawal",
+                    withdrawalCreated.Id,
+                    $"Retiro de meta: {goal.Name}",
+                    ct);
             }
             return MapWithdrawal(withdrawalCreated, goal.CurrentAmount);
         }, cancellationToken);
@@ -234,7 +354,12 @@ public class SavingsGoalService : ISavingsGoalService
     private async Task<SavingsGoal> GetArchiveTargetAsync(SavingsGoal source, Guid? targetId, Guid userId, CancellationToken ct)
     {
         if (!targetId.HasValue || targetId == Guid.Empty || targetId == source.Id) throw new DomainException("TARGET_GOAL_REQUIRED", "Selecciona otra meta activa como destino.");
-        return await GetActiveGoalAsync(targetId.Value, userId, ct);
+        var target = await GetActiveGoalAsync(targetId.Value, userId, ct);
+        await EnsureGoalSavingsAccountAsync(target, userId, ct);
+        if (target.SavingsAccountId != source.SavingsAccountId)
+            throw new DomainException("DIFFERENT_SAVINGS_ACCOUNTS", "Solo puedes reasignar entre metas respaldadas por la misma cuenta de ahorro.");
+        return target;
+
     }
 
     private static void EnsureCapacity(SavingsGoal goal, decimal amount)
@@ -242,10 +367,21 @@ public class SavingsGoalService : ISavingsGoalService
         if (goal.CurrentAmount + amount > goal.TargetAmount) throw new DomainException("GOAL_TARGET_EXCEEDED", "La operación supera el objetivo de la meta; ajusta el monto o el objetivo primero.");
     }
 
-    private async Task<SavingsGoalWithdrawal> AddWithdrawalAsync(SavingsGoal goal, decimal amount, DateOnly date, SavingsWithdrawalReason reason, Guid operationId, string? notes, CancellationToken ct, Guid? linkedExpenseId = null)
+    private async Task<SavingsGoalWithdrawal> AddWithdrawalAsync(SavingsGoal goal, decimal amount, DateOnly date, SavingsWithdrawalReason reason, Guid operationId, string? notes, CancellationToken ct, Guid? linkedExpenseId = null, Guid? destinationAccountId = null)
     {
         goal.CurrentAmount -= amount; goal.IsCompleted = false;
-        var withdrawal = new SavingsGoalWithdrawal { SavingsGoalId = goal.Id, WithdrawalDate = date, Amount = amount, Reason = reason, Notes = notes, OperationId = operationId, LinkedExpenseId = reason == SavingsWithdrawalReason.Consumed ? linkedExpenseId : null };
+        var withdrawal = new SavingsGoalWithdrawal
+        {
+            Id = Guid.NewGuid(),
+            SavingsGoalId = goal.Id,
+            WithdrawalDate = date,
+            Amount = amount,
+            Reason = reason,
+            Notes = notes?.Trim(),
+            OperationId = operationId,
+            LinkedExpenseId = reason == SavingsWithdrawalReason.Consumed ? linkedExpenseId : null,
+            DestinationAccountId = destinationAccountId
+        };
         await _savingsGoalRepository.AddWithdrawalAsync(withdrawal, ct);
         await _savingsGoalRepository.UpdateAsync(goal, ct);
         return withdrawal;
@@ -254,44 +390,134 @@ public class SavingsGoalService : ISavingsGoalService
 
     private Task<T> RunInTransactionAsync<T>(Func<CancellationToken, Task<T>> action, CancellationToken cancellationToken)
         => _unitOfWork == null ? action(cancellationToken) : _unitOfWork.ExecuteInTransactionAsync(action, cancellationToken);
-
-    private async Task<FinancialAccountResponseDto> EnsureLiquidAccountAsync(Guid userId, Guid accountId, CancellationToken cancellationToken)
+    private async Task<Guid?> ValidateFundingAsync(
+        Guid userId,
+        FinancialAccountResponseDto savingsAccount,
+        decimal amount,
+        string mode,
+        Guid? sourceAccountId,
+        CancellationToken cancellationToken)
     {
-        var account = (await _accountService.GetAllAsync(userId, cancellationToken)).SingleOrDefault(a => a.Id == accountId);
-        if (account == null) throw new NotFoundException("Cuenta", accountId);
-        if (!account.IsActive) throw new DomainException("INACTIVE_ACCOUNT", "La cuenta seleccionada está inactiva.");
-        if (!string.Equals(account.Type, "cash", StringComparison.OrdinalIgnoreCase)
-            && !string.Equals(account.Type, "savings", StringComparison.OrdinalIgnoreCase))
-            throw new DomainException("INVALID_LIQUID_ACCOUNT", "Selecciona una cuenta líquida para esta operación.");
+        var allocated = (await _savingsGoalRepository.GetByUserIdAsync(userId, cancellationToken))
+            .Where(goal => goal.SavingsAccountId == savingsAccount.Id)
+            .Sum(goal => goal.CurrentAmount);
+
+        if (allocated > savingsAccount.CurrentBalance)
+            throw new DomainException(
+                "SAVINGS_ACCOUNT_OVERALLOCATED",
+                $"Las metas ya superan el saldo real de {savingsAccount.Name}. Concilia la cuenta antes de aportar.");
+
+        if (string.Equals(mode, ExistingBalanceMode, StringComparison.OrdinalIgnoreCase))
+        {
+            if (allocated + amount > savingsAccount.CurrentBalance)
+                throw new DomainException(
+                    "INSUFFICIENT_UNALLOCATED_SAVINGS",
+                    $"No hay saldo sin asignar suficiente en {savingsAccount.Name}.");
+            return null;
+        }
+
+        if (!string.Equals(mode, AccountTransferMode, StringComparison.OrdinalIgnoreCase))
+            throw new DomainException(
+                "INVALID_FUNDING_MODE",
+                "Elige asignar saldo existente o transferir dinero a la cuenta de ahorro.");
+        if (!sourceAccountId.HasValue || sourceAccountId == Guid.Empty)
+            throw new DomainException(
+                "SOURCE_ACCOUNT_REQUIRED",
+                "Selecciona la cuenta desde la que aportarás el dinero.");
+
+        var source = await EnsureLiquidAccountAsync(userId, sourceAccountId.Value, cancellationToken);
+        if (source.Id == savingsAccount.Id)
+            throw new DomainException(
+                "SAME_SAVINGS_ACCOUNT",
+                "Para usar dinero que ya está en ahorro, selecciona Asignar saldo existente.");
+        if (source.CurrentBalance < amount)
+            throw new DomainException(
+                "INSUFFICIENT_ACCOUNT_BALANCE",
+                "La cuenta de origen no tiene saldo suficiente.");
+        return source.Id;
+    }
+
+    private async Task<FinancialAccountResponseDto> EnsureGoalSavingsAccountAsync(
+        SavingsGoal goal, Guid userId, CancellationToken cancellationToken)
+    {
+        if (!goal.SavingsAccountId.HasValue)
+        {
+            var defaultSavings = await _accountService.GetOrCreateDefaultAsync(
+                userId, FinancialAccountType.Savings, cancellationToken);
+            goal.SavingsAccountId = defaultSavings.Id;
+            await _savingsGoalRepository.UpdateAsync(goal, cancellationToken);
+            return defaultSavings;
+        }
+
+        return await EnsureSavingsAccountAsync(
+            userId, goal.SavingsAccountId.Value, cancellationToken);
+    }
+
+    private async Task<FinancialAccountResponseDto> EnsureSavingsAccountAsync(
+        Guid userId, Guid accountId, CancellationToken cancellationToken)
+    {
+        var account = (await _accountService.GetAllAsync(userId, cancellationToken))
+            .SingleOrDefault(item => item.Id == accountId)
+            ?? throw new NotFoundException("Cuenta de ahorro", accountId);
+        if (!account.IsActive)
+            throw new DomainException("INACTIVE_SAVINGS_ACCOUNT", "La cuenta de ahorro seleccionada está inactiva.");
+        if (!string.Equals(account.Type, "savings", StringComparison.OrdinalIgnoreCase))
+            throw new DomainException("INVALID_SAVINGS_ACCOUNT", "Las metas solo pueden respaldarse con una cuenta de tipo ahorro.");
         return account;
     }
 
-    private async Task EnsureAllocationBackedAsync(Guid userId, decimal additionalAmount, CancellationToken cancellationToken)
+    private async Task<FinancialAccountResponseDto> EnsureLiquidAccountAsync(
+        Guid userId, Guid accountId, CancellationToken cancellationToken)
     {
-        var accounts = await _accountService.GetAllAsync(userId, cancellationToken);
-        var liquidBalance = accounts
-            .Where(a => a.IsActive && (string.Equals(a.Type, "cash", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(a.Type, "savings", StringComparison.OrdinalIgnoreCase)))
-            .Sum(a => a.CurrentBalance);
-        var allocated = (await _savingsGoalRepository.GetByUserIdAsync(userId, cancellationToken))
-            .Sum(g => g.CurrentAmount);
-        if (allocated + additionalAmount > liquidBalance)
-            throw new DomainException(
-                "INSUFFICIENT_UNALLOCATED_SAVINGS",
-                "No hay saldo líquido sin asignar suficiente para respaldar esta meta.");
+        var account = (await _accountService.GetAllAsync(userId, cancellationToken))
+            .SingleOrDefault(item => item.Id == accountId)
+            ?? throw new NotFoundException("Cuenta", accountId);
+        if (!account.IsActive)
+            throw new DomainException("INACTIVE_ACCOUNT", "La cuenta seleccionada está inactiva.");
+        if (!string.Equals(account.Type, "cash", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(account.Type, "savings", StringComparison.OrdinalIgnoreCase))
+            throw new DomainException("INVALID_LIQUID_ACCOUNT", "Selecciona una cuenta de efectivo o ahorro.");
+        return account;
     }
+
+
+
 
     private static bool HasOpenRestorations(SavingsGoal goal) => goal.Restorations.Any(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted);
 
     private static SavingsGoalWithdrawalResponseDto MapWithdrawal(SavingsGoalWithdrawal withdrawal, decimal amountAfter) => new()
     {
-        Id = withdrawal.Id, WithdrawalDate = withdrawal.WithdrawalDate, Amount = withdrawal.Amount, LinkedExpenseId = withdrawal.LinkedExpenseId, Reason = withdrawal.Reason, Notes = withdrawal.Notes, CreatedAt = withdrawal.CreatedAt, GoalCurrentAmountAfter = amountAfter
+        Id = withdrawal.Id,
+        WithdrawalDate = withdrawal.WithdrawalDate,
+        Amount = withdrawal.Amount,
+        LinkedExpenseId = withdrawal.LinkedExpenseId,
+        Reason = withdrawal.Reason,
+        Notes = withdrawal.Notes,
+        CreatedAt = withdrawal.CreatedAt,
+        GoalCurrentAmountAfter = amountAfter
     };
 
-    private static SavingsGoalResponseDto MapToResponseDto(SavingsGoal goal) => new()
+    private static SavingsGoalResponseDto MapToResponseDto(SavingsGoal goal, FinancialAccountResponseDto? account) => new()
     {
-        Id = goal.Id, Name = goal.Name, Description = goal.Description, TargetAmount = goal.TargetAmount, CurrentAmount = goal.CurrentAmount, RemainingAmount = goal.RemainingAmount, ProgressPercentage = goal.ProgressPercentage, TargetDate = goal.TargetDate, IsCompleted = goal.IsCompleted, Icon = goal.Icon, EstimatedMonthsToComplete = null, CreatedAt = goal.CreatedAt,
-        Purpose = goal.Purpose == SavingsGoalPurpose.EmergencyFund ? "emergency_fund" : "general", MinimumProtectedAmount = goal.MinimumProtectedAmount,
-        PendingRestorationAmount = goal.Restorations.Where(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted).Sum(r => r.OutstandingAmount), OpenRestorationsCount = goal.Restorations.Count(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted), NextRestorationDate = goal.Restorations.Where(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted).Select(r => (DateOnly?)r.NextScheduledDate).Min()
+        Id = goal.Id,
+        SavingsAccountId = goal.SavingsAccountId,
+        SavingsAccountName = account?.Name,
+        SavingsAccountBalance = account?.CurrentBalance,
+        Name = goal.Name,
+        Description = goal.Description,
+        TargetAmount = goal.TargetAmount,
+        CurrentAmount = goal.CurrentAmount,
+        RemainingAmount = goal.RemainingAmount,
+        ProgressPercentage = goal.ProgressPercentage,
+        TargetDate = goal.TargetDate,
+        IsCompleted = goal.IsCompleted,
+        Icon = goal.Icon,
+        EstimatedMonthsToComplete = null,
+        CreatedAt = goal.CreatedAt,
+        Purpose = goal.Purpose == SavingsGoalPurpose.EmergencyFund ? "emergency_fund" : "general",
+        MinimumProtectedAmount = goal.MinimumProtectedAmount,
+        PendingRestorationAmount = goal.Restorations.Where(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted).Sum(r => r.OutstandingAmount),
+        OpenRestorationsCount = goal.Restorations.Count(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted),
+        NextRestorationDate = goal.Restorations.Where(r => r.Status == EmergencyFundRestorationStatus.Open && !r.IsDeleted).Select(r => (DateOnly?)r.NextScheduledDate).Min()
     };
 }
