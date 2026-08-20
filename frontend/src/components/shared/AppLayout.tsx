@@ -1,32 +1,13 @@
 ﻿// src/components/shared/AppLayout.tsx
-import { useEffect, useRef, useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { Menu } from 'lucide-react';
-import { Sidebar } from './Sidebar';
-import { useAuth } from '../../context/AuthContext';
-import { useProcessDueRestorations } from '../../features/savings/hooks/useEmergencyFundRestorations';
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+import { Menu } from "lucide-react";
+import { Sidebar } from "./Sidebar";
+import { useAuth } from "../../context/AuthContext";
 
 export function AppLayout() {
   const { logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { mutate: processDueRestorations } = useProcessDueRestorations();
-  const didProcessDueRestorations = useRef(false);
-
-  useEffect(() => {
-    if (didProcessDueRestorations.current) return;
-    didProcessDueRestorations.current = true;
-
-    const now = new Date();
-    const localDate = [
-      now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, '0'),
-      String(now.getDate()).padStart(2, '0'),
-    ].join('-');
-    const processingKey = 'due-restorations:' + localDate;
-    if (sessionStorage.getItem(processingKey)) return;
-    sessionStorage.setItem(processingKey, 'started');
-    processDueRestorations(localDate);
-  }, [processDueRestorations]);
 
   return (
     <div className="flex h-screen bg-[#FBF9F4]">
