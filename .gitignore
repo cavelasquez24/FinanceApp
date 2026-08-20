@@ -15,4 +15,7 @@
 # Otros
 .env
 .env.local
-*.log
+*.logbin/
+obj/
+*.cache
+.vs/
