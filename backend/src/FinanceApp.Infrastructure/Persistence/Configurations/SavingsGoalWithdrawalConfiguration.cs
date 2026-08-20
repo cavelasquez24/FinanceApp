@@ -33,6 +33,10 @@ public class SavingsGoalWithdrawalConfiguration : IEntityTypeConfiguration<Savin
         builder.Property(w => w.LinkedExpenseId)
             .HasColumnName("linked_expense_id")
             .IsRequired(false);
+        builder.Property(w => w.DestinationAccountId)
+            .HasColumnName("destination_account_id")
+            .IsRequired(false);
+
 
         // Enum como string, snake_case en BD (ADR-008), mismo patrón que DebtType
         builder.Property(w => w.Reason)
@@ -76,6 +80,12 @@ public class SavingsGoalWithdrawalConfiguration : IEntityTypeConfiguration<Savin
         builder.HasIndex(w => w.OperationId)
             .HasDatabaseName("idx_savings_goal_withdrawals_operation_id")
             .HasFilter("operation_id IS NOT NULL");
+        builder.HasIndex(w => w.DestinationAccountId);
+        builder.HasOne<FinancialAccount>()
+            .WithMany()
+            .HasForeignKey(w => w.DestinationAccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasOne(w => w.SavingsGoal)
             .WithMany(s => s.Withdrawals)
             .HasForeignKey(w => w.SavingsGoalId)

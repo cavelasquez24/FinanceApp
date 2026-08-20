@@ -1,5 +1,8 @@
 export interface SavingsGoal {
   id: string;
+  savingsAccountId: string | null;
+  savingsAccountName: string | null;
+  savingsAccountBalance: number | null;
   name: string;
   description: string | null;
   targetAmount: number;
@@ -11,7 +14,7 @@ export interface SavingsGoal {
   icon: string | null;
   estimatedMonthsToComplete: number | null;
   createdAt: string;
-  purpose: 'general' | 'emergency_fund';
+  purpose: "general" | "emergency_fund";
   minimumProtectedAmount: number | null;
   pendingRestorationAmount: number;
   openRestorationsCount: number;
@@ -23,26 +26,28 @@ export interface CreateSavingsGoalDto {
   description?: string;
   targetAmount: number;
   initialAmount?: number;
-  initialSourceAccountId?: string;
   initialFundingDate?: string;
   idempotencyKey?: string;
+  savingsAccountId: string;
+  initialFundingMode?: "existing_balance" | "account_transfer";
+  initialSourceAccountId?: string;
   targetDate?: string; // Formato "YYYY-MM-DD"
   icon?: string;
-  purpose?: 'general' | 'emergency_fund';
+  purpose?: "general" | "emergency_fund";
   minimumProtectedAmount?: number;
 }
 
 export interface DepositDto {
   amount: number;
-  sourceAccountId: string;
+  fundingMode: "existing_balance" | "account_transfer";
+  sourceAccountId?: string;
   idempotencyKey: string;
   contributionDate?: string;
   notes?: string;
 }
 
 export interface ArchiveSavingsGoalDto {
-  resolution: 'release' | 'reassign';
-  destinationAccountId?: string;
+  resolution: "release" | "reassign";
   targetGoalId?: string;
   date?: string;
   idempotencyKey: string;
@@ -50,10 +55,7 @@ export interface ArchiveSavingsGoalDto {
 }
 
 export type SavingsWithdrawalReason =
-  | 'Consumed'
-  | 'ReallocatedToOtherGoal'
-  | 'ReallocatedToLiquid'
-  | 'Correction';
+  "Consumed" | "ReallocatedToOtherGoal" | "ReallocatedToLiquid" | "Correction";
 
 export interface SavingsGoalWithdrawal {
   id: string;
@@ -70,38 +72,40 @@ export interface WithdrawDto {
   amount: number;
   withdrawalDate?: string; // "YYYY-MM-DD", opcional → hoy
   reason: SavingsWithdrawalReason;
-  destinationAccountId?: string;
   targetGoalId?: string;
   idempotencyKey: string;
-  linkedExpenseId?: string; // solo si reason = 'Consumed'
+  destinationAccountId?: string;
+  expenseCategoryId?: string;
+  expenseDescription?: string;
   notes?: string;
 }
 export interface EmergencyFundUseDto {
   fundedAmount: number;
-  expenseAmount: number;
-  categoryId: string;
-  expenseAccountId?: string;
   description: string;
-  scheduledSourceAccountId?: string;
   acquisitionDate: string;
-  paymentMethod: string;
   targetRestorationDate: string;
+  useMode: "expense" | "account_transfer";
+  destinationAccountId?: string;
+  expenseCategoryId?: string;
   scheduledContributionAmount: number;
   firstScheduledDate: string;
+  idempotencyKey: string;
   notes?: string;
 }
 
 export interface EmergencyFundRestorationPaymentDto {
   amount: number;
   paymentDate: string;
-  sourceAccountId?: string;
+  idempotencyKey: string;
   notes?: string;
+  fundingMode: "existing_balance" | "account_transfer";
+  sourceAccountId?: string;
 }
 
 export interface EmergencyFundRestoration {
   id: string;
   savingsGoalId: string;
-  linkedExpenseId: string;
+  linkedExpenseId: string | null;
   estimatedCompletionDate: string | null;
   description: string;
   acquisitionDate: string;
@@ -112,15 +116,9 @@ export interface EmergencyFundRestoration {
   scheduledContributionAmount: number;
   nextContributionAmount: number;
   nextScheduledDate: string;
-  scheduledSourceAccountId?: string;
-  status: 'open' | 'completed' | 'cancelled';
+  status: "open" | "completed" | "cancelled";
   completedDate: string | null;
   isOverdue: boolean;
+  scheduledSourceAccountId: string | null;
   notes: string | null;
-}
-
-export interface DueRestorationProcessingResult {
-  processedCount: number;
-  processedAmount: number;
-  insufficientFundsCount: number;
 }

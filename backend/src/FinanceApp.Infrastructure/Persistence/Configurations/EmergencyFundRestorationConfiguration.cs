@@ -14,7 +14,7 @@ public class EmergencyFundRestorationConfiguration : IEntityTypeConfiguration<Em
         builder.Property(r => r.UserId).HasColumnName("user_id").IsRequired();
         builder.Property(r => r.SavingsGoalId).HasColumnName("savings_goal_id").IsRequired();
         builder.Property(r => r.SourceWithdrawalId).HasColumnName("source_withdrawal_id").IsRequired();
-        builder.Property(r => r.LinkedExpenseId).HasColumnName("linked_expense_id").IsRequired();
+        builder.Property(r => r.LinkedExpenseId).HasColumnName("linked_expense_id");
         builder.Property(r => r.Description).HasColumnName("description").HasMaxLength(200).IsRequired();
         builder.Property(r => r.AcquisitionDate).HasColumnName("acquisition_date").IsRequired();
         builder.Property(r => r.OriginalAmount).HasColumnName("original_amount").HasColumnType("numeric(15,2)").IsRequired();

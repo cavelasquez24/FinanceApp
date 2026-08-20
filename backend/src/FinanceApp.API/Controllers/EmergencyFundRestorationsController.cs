@@ -43,17 +43,6 @@ public class EmergencyFundRestorationsController : ControllerBase
         return Ok(ApiResponse<EmergencyFundRestorationResponseDto>.Ok(result, "Aporte de restauración registrado"));
     }
 
-    [HttpPost("emergency-fund-restorations/process-due")]
-    public async Task<IActionResult> ProcessDue(
-        [FromQuery] DateOnly? asOfDate, CancellationToken cancellationToken)
-    {
-        var processingDate = asOfDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
-        var result = await _service.ProcessDueAsync(GetUserId(), processingDate, cancellationToken);
-        return Ok(ApiResponse<DueRestorationProcessingResultDto>.Ok(
-            result, result.ProcessedCount > 0
-                ? "Aportes programados aplicados"
-                : "No hay aportes programados por aplicar"));
-    }
 
     [HttpPost("emergency-fund-restorations/{id:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken)

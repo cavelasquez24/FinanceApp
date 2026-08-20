@@ -45,17 +45,10 @@ public class SavingsGoalAllocationIntegrationTests
 
         var unitOfWork = new UnitOfWork(context);
         var savingsRepository = new SavingsGoalRepository(context);
-        var accountService = new FinancialAccountService(
-            new FinancialAccountRepository(context),
-            savingsRepository,
-            new InvestmentRepository(context),
-            unitOfWork);
-        var service = new SavingsGoalService(savingsRepository, accountService, unitOfWork);
+        var service = new SavingsGoalService(savingsRepository, unitOfWork);
 
-        var first = await service.CreateAsync(user.Id, CreateGoal(
-            "Vacaciones", 500m, 300m, cash.Id));
-        var second = await service.CreateAsync(user.Id, CreateGoal(
-            "Computadora", 400m, 100m, cash.Id));
+        var first = await service.CreateAsync(user.Id, CreateGoal("Vacaciones", 500m, 300m));
+        var second = await service.CreateAsync(user.Id, CreateGoal("Computadora", 400m, 100m));
 
         context.ChangeTracker.Clear();
         var persistedCash = await context.FinancialAccounts.SingleAsync(account => account.Id == cash.Id);
@@ -89,16 +82,14 @@ public class SavingsGoalAllocationIntegrationTests
 
         var unitOfWork = new UnitOfWork(context);
         var savingsRepository = new SavingsGoalRepository(context);
-        var accountService = new FinancialAccountService(new FinancialAccountRepository(context), savingsRepository, new InvestmentRepository(context), unitOfWork);
-        var service = new SavingsGoalService(savingsRepository, accountService, unitOfWork);
-        var goal = await service.CreateAsync(user.Id, CreateGoal("Reserva", 300m, 100m, cash.Id));
+        var service = new SavingsGoalService(savingsRepository, unitOfWork);
+        var goal = await service.CreateAsync(user.Id, CreateGoal("Reserva", 300m, 100m));
 
         await service.WithdrawAsync(goal.Id, user.Id, new SavingsGoalWithdrawalCreateDto
         {
             Amount = 40m,
             WithdrawalDate = new DateOnly(2026, 8, 17),
             Reason = SavingsWithdrawalReason.ReallocatedToLiquid,
-            DestinationAccountId = cash.Id,
             IdempotencyKey = Guid.NewGuid()
         });
 
@@ -126,7 +117,7 @@ public class SavingsGoalAllocationIntegrationTests
         await context.SaveChangesAsync();
 
         var repository = new SavingsGoalRepository(context);
-        var service = new SavingsGoalService(repository, null!, new UnitOfWork(context));
+        var service = new SavingsGoalService(repository, new UnitOfWork(context));
 
         await service.CreateAsync(firstUser.Id, new SavingsGoalCreateDto { Name = "Reserva A", TargetAmount = 500m, Purpose = "emergency_fund", MinimumProtectedAmount = 100m });
         await service.CreateAsync(secondUser.Id, new SavingsGoalCreateDto { Name = "Reserva B", TargetAmount = 500m, Purpose = "emergency_fund", MinimumProtectedAmount = 100m });
@@ -137,12 +128,11 @@ public class SavingsGoalAllocationIntegrationTests
         Assert.Equal("EMERGENCY_FUND_ALREADY_EXISTS", exception.Code);
         Assert.Equal(2, await context.SavingsGoals.CountAsync());
     }
-    private static SavingsGoalCreateDto CreateGoal(string name, decimal target, decimal initial, Guid accountId) => new()
+    private static SavingsGoalCreateDto CreateGoal(string name, decimal target, decimal initial) => new()
     {
         Name = name,
         TargetAmount = target,
         InitialAmount = initial,
-        InitialSourceAccountId = accountId,
         InitialFundingDate = new DateOnly(2026, 8, 17),
         IdempotencyKey = Guid.NewGuid(),
         Purpose = "general"
