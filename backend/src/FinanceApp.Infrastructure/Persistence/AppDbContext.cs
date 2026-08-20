@@ -42,6 +42,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<ExpenseTag> ExpenseTags => Set<ExpenseTag>();
+    public DbSet<AccountReconciliation> AccountReconciliations => Set<AccountReconciliation>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

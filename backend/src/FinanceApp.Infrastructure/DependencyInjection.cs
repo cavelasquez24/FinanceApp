@@ -45,6 +45,7 @@ public static class DependencyInjection
         services.AddSingleton<IBusinessDateProvider, EcuadorBusinessDateProvider>();
         services.AddScoped<IFinancialAccountRepository, FinancialAccountRepository>();
         services.AddScoped<IEmergencyFundRestorationRepository, EmergencyFundRestorationRepository>();
+        services.AddScoped<IAccountReconciliationRepository, AccountReconciliationRepository>();
         services.AddScoped<IDebtService, DebtService>();
 
 
@@ -69,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IEmergencyFundRestorationService, EmergencyFundRestorationService>();
+        services.AddScoped<IAccountReconciliationService, AccountReconciliationService>();
 
         return services;
     }
