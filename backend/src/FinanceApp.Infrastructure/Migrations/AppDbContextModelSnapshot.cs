@@ -910,7 +910,7 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("description");
 
-                    b.Property<Guid>("LinkedExpenseId")
+                    b.Property<Guid?>("LinkedExpenseId")
                         .HasColumnType("uuid")
                         .HasColumnName("linked_expense_id");
 
@@ -1570,6 +1570,10 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Property<int>("Purpose")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("SavingsAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("SavingsAccountId");
+
                     b.Property<decimal>("TargetAmount")
                         .HasColumnType("numeric");
 
@@ -1583,6 +1587,10 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SavingsAccountId")
+                        .HasDatabaseName("IX_SavingsGoals_SavingsAccountId")
+                        .HasFilter("\"SavingsAccountId\" IS NOT NULL");
 
                     b.HasIndex("UserId", "Purpose")
                         .IsUnique()
@@ -1634,6 +1642,10 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("savings_goal_id");
 
+                    b.Property<Guid?>("SourceAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_account_id");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -1651,6 +1663,8 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.HasIndex("SavingsGoalId")
                         .HasDatabaseName("idx_savings_goal_contributions_goal_id")
                         .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("SourceAccountId");
 
                     b.ToTable("savings_goal_contributions", (string)null);
                 });
@@ -1676,6 +1690,10 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
+
+                    b.Property<Guid?>("DestinationAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("destination_account_id");
 
                     b.Property<Guid?>("LinkedExpenseId")
                         .HasColumnType("uuid")
@@ -1710,6 +1728,8 @@ namespace FinanceApp.Infrastructure.Migrations
                         .HasColumnName("withdrawal_date");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DestinationAccountId");
 
                     b.HasIndex("LinkedExpenseId")
                         .HasDatabaseName("idx_savings_goal_withdrawals_linked_expense_id")
@@ -2029,8 +2049,7 @@ namespace FinanceApp.Infrastructure.Migrations
                     b.HasOne("FinanceApp.Domain.Entities.Expense", "LinkedExpense")
                         .WithOne()
                         .HasForeignKey("FinanceApp.Domain.Entities.EmergencyFundRestoration", "LinkedExpenseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("FinanceApp.Domain.Entities.SavingsGoal", "SavingsGoal")
                         .WithMany("Restorations")
@@ -2226,11 +2245,18 @@ namespace FinanceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.SavingsGoal", b =>
                 {
+                    b.HasOne("FinanceApp.Domain.Entities.FinancialAccount", "SavingsAccount")
+                        .WithMany("SavingsGoals")
+                        .HasForeignKey("SavingsAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("FinanceApp.Domain.Entities.User", "User")
                         .WithMany("SavingsGoals")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("SavingsAccount");
 
                     b.Navigation("User");
                 });
@@ -2248,6 +2274,11 @@ namespace FinanceApp.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FinanceApp.Domain.Entities.FinancialAccount", null)
+                        .WithMany()
+                        .HasForeignKey("SourceAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("EmergencyFundRestoration");
 
                     b.Navigation("SavingsGoal");
@@ -2255,6 +2286,11 @@ namespace FinanceApp.Infrastructure.Migrations
 
             modelBuilder.Entity("FinanceApp.Domain.Entities.SavingsGoalWithdrawal", b =>
                 {
+                    b.HasOne("FinanceApp.Domain.Entities.FinancialAccount", null)
+                        .WithMany()
+                        .HasForeignKey("DestinationAccountId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("FinanceApp.Domain.Entities.SavingsGoal", "SavingsGoal")
                         .WithMany("Withdrawals")
                         .HasForeignKey("SavingsGoalId")
@@ -2327,6 +2363,8 @@ namespace FinanceApp.Infrastructure.Migrations
             modelBuilder.Entity("FinanceApp.Domain.Entities.FinancialAccount", b =>
                 {
                     b.Navigation("Reimbursements");
+
+                    b.Navigation("SavingsGoals");
 
                     b.Navigation("Transactions");
                 });
