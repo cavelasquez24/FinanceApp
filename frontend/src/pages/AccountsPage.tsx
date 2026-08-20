@@ -1,7 +1,7 @@
 import { todayDateOnly } from '../utils/dateOnly';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { ArrowRightLeft, Landmark, Plus, RefreshCw, Wallet } from 'lucide-react';
+import { ArrowRightLeft, Landmark, Plus, Scale, Wallet } from 'lucide-react';
 import { Button, Card, Input, Modal, ModalFooter, Spinner } from '../components/ui';
 import {
   useAccounts,
@@ -10,7 +10,8 @@ import {
   useUpdateAccount,
   useCreateAccountTransfer,
 } from '../features/accounts/hooks/useAccounts';
-import type { FinancialAccountType } from '../types/account.types';
+import { ReconciliationModal } from '../features/accounts/components/ReconciliationModal';
+import type { FinancialAccount, FinancialAccountType } from '../types/account.types';
 
 const money = (value: number) =>
   new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(value);
@@ -26,7 +27,7 @@ export function AccountsPage() {
   const [type, setType] = useState<FinancialAccountType>('cash');
   const [openingBalance, setOpeningBalance] = useState(0);
   const [openingDate, setOpeningDate] = useState(() => todayDateOnly());
-  const [balances, setBalances] = useState<Record<string, string>>({});
+  const [reconcileAccount, setReconcileAccount] = useState<FinancialAccount | null>(null);
   const [showTransfer, setShowTransfer] = useState(false);
   const [fromAccountId, setFromAccountId] = useState('');
   const [toAccountId, setToAccountId] = useState('');
@@ -124,7 +125,6 @@ export function AccountsPage() {
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {accounts?.map((account) => {
-          const currentInput = balances[account.id] ?? String(account.currentBalance);
           return (
             <Card key={account.id} className="!rounded-[24px] !p-5">
               <div className="flex items-start justify-between">
@@ -146,32 +146,14 @@ export function AccountsPage() {
               <p className="mt-5 text-2xl font-semibold text-[#2C2A29]">
                 {money(account.currentBalance)}
               </p>
-              <div className="mt-4 flex gap-2">
-                <input
-                  type="number"
-                  step="0.01"
-                  value={currentInput}
-                  onChange={(e) => setBalances((old) => ({ ...old, [account.id]: e.target.value }))}
-                  className="min-w-0 flex-1 rounded-xl border border-[#EFEAE2] px-3 py-2 text-sm"
-                  aria-label={`Saldo actual de ${account.name}`}
-                />
+              <div className="mt-4">
                 <button
                   type="button"
-                  onClick={() =>
-                    updateAccount.mutate({
-                      id: account.id,
-                      dto: {
-                        name: account.name,
-                        currentBalance: Number(currentInput),
-                        isDefault: account.isDefault,
-                        isActive: account.isActive,
-                      },
-                    })
-                  }
-                  className="rounded-xl border border-[#EFEAE2] p-2 text-[#5C7A99] hover:bg-[#5C7A99]/5"
-                  title="Conciliar saldo"
+                  onClick={() => setReconcileAccount(account)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#EFEAE2] px-3 py-2 text-sm text-[#5C7A99] hover:bg-[#5C7A99]/5 transition-colors"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <Scale className="h-4 w-4" />
+                  Conciliar saldo
                 </button>
               </div>
               {!account.isDefault && (
@@ -182,7 +164,7 @@ export function AccountsPage() {
                       id: account.id,
                       dto: {
                         name: account.name,
-                        currentBalance: Number(currentInput),
+                        currentBalance: account.currentBalance,
                         isDefault: true,
                         isActive: account.isActive,
                       },
@@ -219,6 +201,13 @@ export function AccountsPage() {
           )}
         </div>
       </Card>
+
+      {reconcileAccount && (
+        <ReconciliationModal
+          account={reconcileAccount}
+          onClose={() => setReconcileAccount(null)}
+        />
+      )}
 
       <Modal isOpen={showCreate} onClose={closeCreate} title="Nueva cuenta">
         <form onSubmit={create} className="space-y-5">
