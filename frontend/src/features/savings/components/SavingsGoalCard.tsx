@@ -85,6 +85,7 @@ export default function SavingsGoalCard({
           {goal.savingsAccountBalance != null
             ? ` · saldo real ${formatCurrency(goal.savingsAccountBalance)}`
             : ""}
+        </p>
         {goal.description && (
           <p className="mt-2 line-clamp-2 text-sm text-[#7C756E]">
             {goal.description}

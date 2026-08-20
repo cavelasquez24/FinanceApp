@@ -118,12 +118,10 @@ export default function WithdrawModal({ goal, onClose }: Props) {
           amount: numericAmount,
           reason,
           withdrawalDate,
-          targetGoalId:
+          targetGoalId: reason === "ReallocatedToOtherGoal" ? targetGoalId : undefined,
           destinationAccountId: action === "transfer" ? destinationAccountId : undefined,
           expenseCategoryId: action === "expense" ? expenseCategoryId : undefined,
           expenseDescription: action === "expense" ? expenseDescription.trim() : undefined,
-
-            reason === "ReallocatedToOtherGoal" ? targetGoalId : undefined,
           idempotencyKey: crypto.randomUUID(),
           notes: notes.trim() || undefined,
         },
