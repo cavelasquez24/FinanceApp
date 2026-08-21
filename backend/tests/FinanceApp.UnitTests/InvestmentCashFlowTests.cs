@@ -56,7 +56,7 @@ public class InvestmentCashFlowTests
     }
 
     [Fact]
-    public async Task LaterContribution_IncreasesBasisAndCurrentValue()
+    public async Task LaterContribution_IncreasesContributedCapital_NotMarketValue()
     {
         var investment = NewInvestment(initialAmount: 50m, currentValue: 49.20m);
         var repository = new FakeInvestmentRepository { Stored = investment };
@@ -65,8 +65,8 @@ public class InvestmentCashFlowTests
         await service.AddContributionAsync(investment.Id, investment.UserId,
             new InvestmentContributionCreateDto { Amount = 10m });
 
-        Assert.Equal(60m, investment.InitialAmount);
-        Assert.Equal(59.20m, investment.CurrentValue);
+        Assert.Equal(60m, investment.InitialAmount);       // capital base sube
+        Assert.Equal(49.20m, investment.CurrentValue);    // valor de mercado no se toca
         Assert.Equal(10m, repository.AddedContribution!.Amount);
     }
 

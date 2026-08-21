@@ -300,7 +300,7 @@ public class InvestmentService : IInvestmentService
                 userId, FinancialAccountType.Investment, cancellationToken);
         }
         investment.InitialAmount += dto.Amount;
-        investment.CurrentValue += dto.Amount;
+        // CurrentValue NO se toca: la valoración de mercado es un evento separado (AddRecordAsync).
         var contribution = new InvestmentContribution
         {
             InvestmentId = investmentId,
@@ -338,22 +338,33 @@ public class InvestmentService : IInvestmentService
             ? action(cancellationToken)
             : _unitOfWork.ExecuteInTransactionAsync(action, cancellationToken);
 
-    private static InvestmentResponseDto MapToResponseDto(Investment investment) => new()
+    private static InvestmentResponseDto MapToResponseDto(Investment investment)
     {
-        Id = investment.Id,
-        Name = investment.Name,
-        Type = investment.Type.ToString().ToLowerInvariant(),
-        Ticker = investment.Ticker,
-        Broker = investment.Broker,
-        InitialAmount = investment.InitialAmount,
-        CurrentValue = investment.CurrentValue,
-        GainLoss = investment.GainLoss,
-        GainLossPercentage = investment.GainLossPercentage,
-        PurchaseDate = investment.PurchaseDate,
-        IsActive = investment.IsActive,
-        Notes = investment.Notes,
-        CreatedAt = investment.CreatedAt
-    };
+        var unrealizedGainLoss = investment.CurrentValue - investment.InitialAmount;
+        var unrealizedGainLossPct = investment.InitialAmount > 0
+            ? Math.Round(unrealizedGainLoss / investment.InitialAmount * 100, 2)
+            : 0m;
+        return new InvestmentResponseDto
+        {
+            Id = investment.Id,
+            Name = investment.Name,
+            Type = investment.Type.ToString().ToLowerInvariant(),
+            Ticker = investment.Ticker,
+            Broker = investment.Broker,
+            ContributedCapital = investment.InitialAmount,
+            CurrentValue = investment.CurrentValue,
+            UnrealizedGainLoss = unrealizedGainLoss,
+            UnrealizedGainLossPercentage = unrealizedGainLossPct,
+            // aliases de compatibilidad
+            InitialAmount = investment.InitialAmount,
+            GainLoss = unrealizedGainLoss,
+            GainLossPercentage = unrealizedGainLossPct,
+            PurchaseDate = investment.PurchaseDate,
+            IsActive = investment.IsActive,
+            Notes = investment.Notes,
+            CreatedAt = investment.CreatedAt
+        };
+    }
 
     private static InvestmentRecordResponseDto MapRecordToResponseDto(
         InvestmentRecord record) => new()
