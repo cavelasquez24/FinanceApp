@@ -7,6 +7,7 @@ import {
   Target,
   PiggyBank,
   BarChart3,
+  BrainCircuit,
   User,
   X,
   Skull,
@@ -29,6 +30,7 @@ interface SidebarProps {
 
 const navItems = [
   { to: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
+  { to: '/analytics',   label: 'Analytics',   icon: BrainCircuit    },
   { to: '/incomes',     label: 'Ingresos',    icon: TrendingUp      },
   { to: '/expenses',    label: 'Gastos',      icon: TrendingDown    },
   { to: '/reimbursements', label: 'Reembolsos', icon: Undo2 },

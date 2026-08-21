@@ -1,6 +1,5 @@
 import type { DebtProjectionDto } from '../types/analytics.types';
 import { formatCurrency } from '../../../utils/formatCurrency';
-import { CalendarClock, BanknoteArrowDown } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 
 interface Props {

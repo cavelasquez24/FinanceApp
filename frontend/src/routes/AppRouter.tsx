@@ -18,6 +18,7 @@ import  DebtsPage  from '../pages/DebtsPage';
 import TagsPage from '../pages/TagsPage';
 import CreditCardsPage from '../pages/CreditCardsPage';
 import ReimbursementsPage from '../pages/ReimbursementsPage';
+import { AnalyticsPage } from '../pages/AnalyticsPage';
 
 // Layout
 import { AppLayout } from '../components/shared/AppLayout';
@@ -77,6 +78,7 @@ export function AppRouter() {
           <Route path="debts" element={<DebtsPage />} />
           <Route path="credit-cards" element={<CreditCardsPage />} />
           <Route path="reimbursements" element={<ReimbursementsPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
         </Route>
 
         {/* Ruta por defecto */}
