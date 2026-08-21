@@ -5,6 +5,7 @@ using FinanceApp.Application.Interfaces;
 using FinanceApp.Application.Services;
 using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
+using FinanceApp.Domain.Exceptions;
 using FinanceApp.Domain.Interfaces.Repositories;
 using System.Text.Json;
 
@@ -342,6 +343,86 @@ public class InvestmentCashFlowTests
         Assert.Equal(98.97m, repository.Stored!.InitialAmount);
         Assert.Equal(2, repository.Stored.Transactions.Count);
         Assert.All(repository.Stored.Transactions, t => Assert.True(t.IsHistorical));
+    }
+
+    // --- Tests: Withdrawal ---
+
+    [Fact]
+    public async Task Withdrawal_ReducesCurrentValueAndCapital()
+    {
+        var investment = NewInvestment(initialAmount: 400m, currentValue: 550m);
+        var repository = new FakeInvestmentRepository { Stored = investment };
+        var service = new InvestmentService(repository);
+
+        var result = await service.WithdrawAsync(investment.Id, investment.UserId,
+            new InvestmentWithdrawalDto
+            {
+                WithdrawalAmount = 500m,
+                CapitalReturned = 400m,
+                Fee = 5m,
+                WithdrawalDate = new DateOnly(2026, 8, 1)
+            });
+
+        Assert.Equal(50m, investment.CurrentValue);
+        Assert.Equal(0m, investment.InitialAmount);
+        Assert.Equal(495m, result.NetCashReceived);
+    }
+
+    [Fact]
+    public async Task Withdrawal_CannotExceedCurrentValue()
+    {
+        var investment = NewInvestment(initialAmount: 400m, currentValue: 550m);
+        var repository = new FakeInvestmentRepository { Stored = investment };
+        var service = new InvestmentService(repository);
+
+        await Assert.ThrowsAsync<DomainException>(() =>
+            service.WithdrawAsync(investment.Id, investment.UserId,
+                new InvestmentWithdrawalDto
+                {
+                    WithdrawalAmount = 600m,
+                    CapitalReturned = 400m,
+                    Fee = 0m,
+                    WithdrawalDate = new DateOnly(2026, 8, 1)
+                }));
+    }
+
+    [Fact]
+    public async Task Withdrawal_CannotReturnMoreCapitalThanContributed()
+    {
+        var investment = NewInvestment(initialAmount: 400m, currentValue: 550m);
+        var repository = new FakeInvestmentRepository { Stored = investment };
+        var service = new InvestmentService(repository);
+
+        await Assert.ThrowsAsync<DomainException>(() =>
+            service.WithdrawAsync(investment.Id, investment.UserId,
+                new InvestmentWithdrawalDto
+                {
+                    WithdrawalAmount = 500m,
+                    CapitalReturned = 450m,
+                    Fee = 0m,
+                    WithdrawalDate = new DateOnly(2026, 8, 1)
+                }));
+    }
+
+    [Fact]
+    public async Task PartialWithdrawal_PreservesRemainingCapitalCorrectly()
+    {
+        var investment = NewInvestment(initialAmount: 200m, currentValue: 300m);
+        var repository = new FakeInvestmentRepository { Stored = investment };
+        var service = new InvestmentService(repository);
+
+        var result = await service.WithdrawAsync(investment.Id, investment.UserId,
+            new InvestmentWithdrawalDto
+            {
+                WithdrawalAmount = 100m,
+                CapitalReturned = 80m,
+                Fee = 0m,
+                WithdrawalDate = new DateOnly(2026, 8, 1)
+            });
+
+        Assert.Equal(120m, investment.InitialAmount);
+        Assert.Equal(200m, investment.CurrentValue);
+        Assert.Equal(20m, result.RealizedGain);
     }
 
     private sealed class SpyAccountService : IFinancialAccountService

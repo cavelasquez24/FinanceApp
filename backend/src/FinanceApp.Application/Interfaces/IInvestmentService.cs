@@ -54,4 +54,10 @@ public interface IInvestmentService
         Guid userId,
         InvestmentContributionCreateDto dto,
         CancellationToken cancellationToken = default);
+
+    Task<InvestmentWithdrawalResponseDto> WithdrawAsync(
+        Guid investmentId,
+        Guid userId,
+        InvestmentWithdrawalDto dto,
+        CancellationToken cancellationToken = default);
 }

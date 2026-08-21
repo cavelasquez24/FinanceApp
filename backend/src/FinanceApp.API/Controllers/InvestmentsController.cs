@@ -113,4 +113,16 @@ public class InvestmentsController : ControllerBase
         return StatusCode(201, ApiResponse<InvestmentContributionResponseDto>.Ok(
             result, "Aporte registrado exitosamente"));
     }
+
+    [HttpPost("{id:guid}/withdraw")]
+    public async Task<IActionResult> Withdraw(
+        Guid id,
+        [FromBody] InvestmentWithdrawalDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _investmentService.WithdrawAsync(
+            id, GetUserId(), dto, cancellationToken);
+        return Ok(ApiResponse<InvestmentWithdrawalResponseDto>.Ok(
+            result, "Retiro registrado exitosamente"));
+    }
 }

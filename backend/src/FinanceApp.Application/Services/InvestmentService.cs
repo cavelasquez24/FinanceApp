@@ -354,6 +354,92 @@ public class InvestmentService : IInvestmentService
         };
     }
 
+    public Task<InvestmentWithdrawalResponseDto> WithdrawAsync(
+        Guid investmentId, Guid userId, InvestmentWithdrawalDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        if (dto.WithdrawalAmount <= 0)
+            throw new DomainException("INVALID_WITHDRAWAL_AMOUNT",
+                "El monto del retiro debe ser mayor que cero.");
+        if (dto.CapitalReturned < 0 || dto.CapitalReturned > dto.WithdrawalAmount)
+            throw new DomainException("INVALID_CAPITAL_RETURNED",
+                "El capital recuperado debe estar entre cero y el monto del retiro.");
+        if (dto.Fee < 0 || dto.Fee >= dto.WithdrawalAmount)
+            throw new DomainException("INVALID_FEE",
+                "La comisión no puede ser negativa ni mayor o igual al monto del retiro.");
+        if (dto.CapitalReturned + dto.Fee > dto.WithdrawalAmount)
+            throw new DomainException("WITHDRAWAL_BREAKDOWN_EXCEEDS_AMOUNT",
+                "La suma de capital recuperado y comisión no puede superar el monto del retiro.");
+
+        return RunInTransactionAsync(async ct =>
+        {
+            var investment = await _investmentRepository.GetByIdAsync(investmentId, ct);
+            if (investment == null || investment.UserId != userId || investment.IsDeleted)
+                throw new NotFoundException("Inversión", investmentId);
+            if (!investment.IsActive)
+                throw new DomainException("INACTIVE_INVESTMENT",
+                    "No se puede retirar de una inversión inactiva.");
+            if (dto.WithdrawalAmount > investment.CurrentValue)
+                throw new DomainException("WITHDRAWAL_EXCEEDS_CURRENT_VALUE",
+                    "El monto del retiro supera el valor actual de la inversión.");
+            if (dto.CapitalReturned > investment.InitialAmount)
+                throw new DomainException("CAPITAL_RETURNED_EXCEEDS_CONTRIBUTED",
+                    "El capital recuperado supera el capital aportado acumulado.");
+
+            var netCash = dto.WithdrawalAmount - dto.Fee;
+            var realizedGain = dto.WithdrawalAmount - dto.CapitalReturned - dto.Fee;
+
+            await _investmentRepository.AddTransactionAsync(new InvestmentTransaction
+            {
+                InvestmentId = investmentId,
+                TransactionType = InvestmentTransactionType.Withdrawal,
+                Amount = dto.WithdrawalAmount,
+                TransactionDate = dto.WithdrawalDate,
+                IsHistorical = false,
+                Notes = dto.Notes?.Trim()
+            }, ct);
+
+            if (dto.Fee > 0)
+            {
+                await _investmentRepository.AddTransactionAsync(new InvestmentTransaction
+                {
+                    InvestmentId = investmentId,
+                    TransactionType = InvestmentTransactionType.Fee,
+                    Amount = dto.Fee,
+                    TransactionDate = dto.WithdrawalDate,
+                    IsHistorical = false,
+                    Notes = $"Comisión de retiro: {investment.Name}"
+                }, ct);
+            }
+
+            investment.InitialAmount -= dto.CapitalReturned;
+            investment.CurrentValue -= dto.WithdrawalAmount;
+            await _investmentRepository.UpdateAsync(investment, ct);
+
+            if (_accountService != null)
+            {
+                await _accountService.SyncTransferAsync(
+                    userId, FinancialAccountType.Investment, FinancialAccountType.Cash,
+                    netCash, dto.WithdrawalDate,
+                    "investment-withdrawal", investmentId,
+                    $"Retiro: {investment.Name}", ct);
+            }
+
+            return new InvestmentWithdrawalResponseDto
+            {
+                InvestmentId = investmentId,
+                WithdrawalAmount = dto.WithdrawalAmount,
+                CapitalReturned = dto.CapitalReturned,
+                RealizedGain = realizedGain,
+                Fee = dto.Fee,
+                NetCashReceived = netCash,
+                WithdrawalDate = dto.WithdrawalDate,
+                RemainingContributedCapital = investment.InitialAmount,
+                RemainingCurrentValue = investment.CurrentValue
+            };
+        }, cancellationToken);
+    }
+
     private Task<T> RunInTransactionAsync<T>(
         Func<CancellationToken, Task<T>> action,
         CancellationToken cancellationToken)
