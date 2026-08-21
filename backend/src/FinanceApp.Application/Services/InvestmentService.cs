@@ -47,9 +47,15 @@ public class InvestmentService : IInvestmentService
     {
         return RunInTransactionAsync(async ct =>
         {
-            if (_accountService != null)
-                await _accountService.GetOrCreateDefaultAsync(
-                    userId, FinancialAccountType.Investment, ct);
+            // Determina el capital base: suma de aportes históricos si se proveen,
+            // o dto.InitialAmount como fallback.
+            var hasRealContributions = dto.IsHistoricalImport
+                && !dto.IsConsolidatedSnapshot
+                && dto.HistoricalContributions is { Count: > 0 };
+
+            var contributedCapital = hasRealContributions
+                ? dto.HistoricalContributions!.Sum(c => c.Amount)
+                : dto.InitialAmount;
 
             var investment = new Investment
             {
@@ -59,15 +65,18 @@ public class InvestmentService : IInvestmentService
                     dto.Type.Replace("_", ""), true),
                 Ticker = dto.Ticker?.Trim().ToUpperInvariant(),
                 Broker = dto.Broker?.Trim(),
-                InitialAmount = dto.InitialAmount,
+                InitialAmount = contributedCapital,
                 CurrentValue = dto.IsHistoricalImport
-                    ? dto.CurrentValue ?? dto.InitialAmount
-                    : dto.InitialAmount,
+                    ? dto.CurrentValue ?? contributedCapital
+                    : contributedCapital,
                 PurchaseDate = dto.PurchaseDate,
-                Notes = dto.Notes?.Trim(),
+                Notes = dto.IsHistoricalImport && dto.IsConsolidatedSnapshot
+                    ? "Saldo de apertura consolidado — historial anterior no disponible"
+                    : dto.Notes?.Trim(),
                 IsActive = true
             };
 
+            // Alta normal: crea la InvestmentContribution en cascada.
             if (!dto.IsHistoricalImport)
             {
                 investment.Contributions.Add(new InvestmentContribution
@@ -80,40 +89,54 @@ public class InvestmentService : IInvestmentService
 
             await _investmentRepository.CreateAsync(investment, ct);
 
-            var openingTxn = new InvestmentTransaction
+            // InvestmentTransaction records según el modo de alta.
+            if (!dto.IsHistoricalImport)
             {
-                InvestmentId = investment.Id,
-                TransactionType = dto.IsHistoricalImport
-                    ? InvestmentTransactionType.HistoricalContribution
-                    : InvestmentTransactionType.Contribution,
-                Amount = dto.IsHistoricalImport
-                    ? investment.CurrentValue
-                    : dto.InitialAmount,
-                TransactionDate = dto.PurchaseDate,
-                IsHistorical = dto.IsHistoricalImport,
-                Notes = dto.IsHistoricalImport ? "Importación histórica" : "Compra inicial"
-            };
-            await _investmentRepository.AddTransactionAsync(openingTxn, ct);
+                // CASO 1 — alta normal: un solo IT de Contribution.
+                await _investmentRepository.AddTransactionAsync(new InvestmentTransaction
+                {
+                    InvestmentId = investment.Id,
+                    TransactionType = InvestmentTransactionType.Contribution,
+                    Amount = dto.InitialAmount,
+                    TransactionDate = dto.PurchaseDate,
+                    IsHistorical = false,
+                    Notes = "Compra inicial"
+                }, ct);
+            }
+            else if (!dto.IsConsolidatedSnapshot)
+            {
+                // CASO 2 — histórico con aportes reales: un IT por cada aporte.
+                var contribs = hasRealContributions
+                    ? dto.HistoricalContributions!
+                    : [new HistoricalContributionDto
+                        { ContributionDate = dto.PurchaseDate, Amount = dto.InitialAmount }];
 
-            if (_accountService != null)
+                foreach (var hc in contribs)
+                {
+                    await _investmentRepository.AddTransactionAsync(new InvestmentTransaction
+                    {
+                        InvestmentId = investment.Id,
+                        TransactionType = InvestmentTransactionType.HistoricalContribution,
+                        Amount = hc.Amount,
+                        TransactionDate = hc.ContributionDate,
+                        IsHistorical = true,
+                        Notes = hc.Notes?.Trim() ?? "Importación histórica"
+                    }, ct);
+                }
+            }
+            // CASO 3 — snapshot consolidado: sin IT de aporte ni movimiento de cuenta.
+
+            // Movimiento de cuenta solo en alta normal (caso 1).
+            if (_accountService != null && !dto.IsHistoricalImport)
             {
-                if (dto.IsHistoricalImport)
-                {
-                    await _accountService.SyncMovementAsync(
-                        userId, null, FinancialAccountType.Investment,
-                        investment.CurrentValue, investment.PurchaseDate,
-                        "investment-opening", investment.Id,
-                        $"Importación: {investment.Name}", ct);
-                }
-                else
-                {
-                    var initial = investment.Contributions.Single();
-                    await _accountService.SyncTransferAsync(
-                        userId, FinancialAccountType.Cash,
-                        FinancialAccountType.Investment, initial.Amount,
-                        initial.ContributionDate, "investment-contribution",
-                        initial.Id, $"Compra: {investment.Name}", ct);
-                }
+                await _accountService.GetOrCreateDefaultAsync(
+                    userId, FinancialAccountType.Investment, ct);
+                var initial = investment.Contributions.Single();
+                await _accountService.SyncTransferAsync(
+                    userId, FinancialAccountType.Cash,
+                    FinancialAccountType.Investment, initial.Amount,
+                    initial.ContributionDate, "investment-contribution",
+                    initial.Id, $"Compra: {investment.Name}", ct);
             }
 
             return MapToResponseDto(investment);

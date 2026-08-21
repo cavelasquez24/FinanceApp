@@ -10,5 +10,7 @@ public class InvestmentCreateDto
     public decimal? CurrentValue { get; set; }
     public DateOnly PurchaseDate { get; set; }
     public bool IsHistoricalImport { get; set; }
+    public bool IsConsolidatedSnapshot { get; set; } = false;
+    public List<HistoricalContributionDto>? HistoricalContributions { get; set; }
     public string? Notes { get; set; }
 }

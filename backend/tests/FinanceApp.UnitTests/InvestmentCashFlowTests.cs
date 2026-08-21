@@ -1,5 +1,7 @@
+using FinanceApp.Application.DTOs.Account;
 using FinanceApp.Application.DTOs.Investment;
 using FinanceApp.Application.DTOs.SavingsGoal;
+using FinanceApp.Application.Interfaces;
 using FinanceApp.Application.Services;
 using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
@@ -261,7 +263,120 @@ public class InvestmentCashFlowTests
             Guid userId, DateOnly start, DateOnly end, CancellationToken cancellationToken = default) =>
             Task.FromResult(0m);
 
-        public Task AddTransactionAsync(InvestmentTransaction transaction, CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+        public Task AddTransactionAsync(InvestmentTransaction transaction, CancellationToken cancellationToken = default)
+        {
+            if (Stored != null && Stored.Id == transaction.InvestmentId)
+                Stored.Transactions.Add(transaction);
+            return Task.CompletedTask;
+        }
+    }
+
+    // --- Tests: ImportaciónHistórica / ConsolidatedSnapshot ---
+
+    [Fact]
+    public async Task HistoricalImport_DoesNotCreateAccountTransaction()
+    {
+        var repository = new FakeInvestmentRepository();
+        var spy = new SpyAccountService();
+        var service = new InvestmentService(repository, spy);
+
+        await service.CreateAsync(Guid.NewGuid(), new InvestmentCreateDto
+        {
+            Name = "VWCE",
+            Type = "etf",
+            InitialAmount = 98.97m,
+            CurrentValue = 102.50m,
+            PurchaseDate = new DateOnly(2026, 7, 6),
+            IsHistoricalImport = true,
+            IsConsolidatedSnapshot = false
+        });
+
+        Assert.False(spy.SyncTransferCalled);
+        Assert.False(spy.SyncMovementCalled);
+    }
+
+    [Fact]
+    public async Task ConsolidatedSnapshot_SetsValueWithoutContributionOrTransaction()
+    {
+        var repository = new FakeInvestmentRepository();
+        var service = new InvestmentService(repository);
+
+        await service.CreateAsync(Guid.NewGuid(), new InvestmentCreateDto
+        {
+            Name = "Portfolio legacy",
+            Type = "etf",
+            InitialAmount = 4382.24m,
+            CurrentValue = 4382.24m,
+            PurchaseDate = new DateOnly(2024, 1, 1),
+            IsHistoricalImport = true,
+            IsConsolidatedSnapshot = true
+        });
+
+        Assert.Equal(4382.24m, repository.Stored!.CurrentValue);
+        Assert.Empty(repository.Stored.Contributions);
+        Assert.Empty(repository.Stored.Transactions);
+    }
+
+    [Fact]
+    public async Task HistoricalContributions_SumBecomesContributedCapital()
+    {
+        var repository = new FakeInvestmentRepository();
+        var service = new InvestmentService(repository);
+
+        await service.CreateAsync(Guid.NewGuid(), new InvestmentCreateDto
+        {
+            Name = "VWCE",
+            Type = "etf",
+            InitialAmount = 0m,
+            CurrentValue = 105.00m,
+            PurchaseDate = new DateOnly(2026, 7, 6),
+            IsHistoricalImport = true,
+            IsConsolidatedSnapshot = false,
+            HistoricalContributions =
+            [
+                new HistoricalContributionDto { ContributionDate = new DateOnly(2026, 7, 6),  Amount = 48.99m },
+                new HistoricalContributionDto { ContributionDate = new DateOnly(2026, 7, 31), Amount = 49.98m }
+            ]
+        });
+
+        Assert.Equal(98.97m, repository.Stored!.InitialAmount);
+        Assert.Equal(2, repository.Stored.Transactions.Count);
+        Assert.All(repository.Stored.Transactions, t => Assert.True(t.IsHistorical));
+    }
+
+    private sealed class SpyAccountService : IFinancialAccountService
+    {
+        public bool SyncTransferCalled { get; private set; }
+        public bool SyncMovementCalled { get; private set; }
+
+        public Task<FinancialAccountResponseDto> GetOrCreateDefaultAsync(
+            Guid userId, FinancialAccountType type, CancellationToken cancellationToken = default)
+            => Task.FromResult(new FinancialAccountResponseDto());
+
+        public Task SyncTransferAsync(
+            Guid userId, FinancialAccountType fromType, FinancialAccountType toType,
+            decimal amount, DateOnly date, string sourceType, Guid sourceId,
+            string description, CancellationToken cancellationToken = default)
+        {
+            SyncTransferCalled = true;
+            return Task.CompletedTask;
+        }
+
+        public Task SyncMovementAsync(
+            Guid userId, Guid? accountId, FinancialAccountType fallbackType,
+            decimal signedAmount, DateOnly date, string sourceType, Guid sourceId,
+            string description, CancellationToken cancellationToken = default)
+        {
+            SyncMovementCalled = true;
+            return Task.CompletedTask;
+        }
+
+        public Task<IReadOnlyList<FinancialAccountResponseDto>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<IReadOnlyList<AccountTransactionResponseDto>> GetRecentTransactionsAsync(Guid userId, int count, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<FinancialAccountResponseDto> CreateAsync(Guid userId, FinancialAccountCreateDto dto, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<FinancialAccountResponseDto> UpdateAsync(Guid id, Guid userId, FinancialAccountUpdateDto dto, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<AccountTransferResponseDto> TransferAsync(Guid userId, AccountTransferCreateDto dto, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<decimal> GetAvailableBalanceAsync(Guid userId, Guid? accountId, FinancialAccountType fallbackType, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task SyncTransferBetweenAccountsAsync(Guid userId, Guid? fromAccountId, FinancialAccountType fromFallbackType, Guid? toAccountId, FinancialAccountType toFallbackType, decimal amount, DateOnly date, string sourceType, Guid sourceId, string description, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     }
 }
