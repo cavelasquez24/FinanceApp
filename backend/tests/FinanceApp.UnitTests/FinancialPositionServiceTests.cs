@@ -52,15 +52,15 @@ public class FinancialPositionServiceTests
     }
 
     [Fact]
-    public void ExcessInvestmentAccountBalance_IsPreservedAsUninvestedCash()
+    public void ExcessInvestmentAccountBalance_RaisesWarningButDoesNotInflateNetWorth()
     {
         var position = Calculate(
             accounts: [Account(FinancialAccountType.Investment, 125m)],
             investments: [Investment(100m)]);
 
         Assert.Equal(100m, position.Assets.InvestmentPositions);
-        Assert.Equal(25m, position.Assets.UninvestedInvestmentCash);
-        Assert.Equal(125m, position.Assets.Investments);
+        Assert.Equal(0m, position.Assets.UninvestedInvestmentCash);
+        Assert.Equal(100m, position.Assets.Investments);
         Assert.Contains(position.Warnings, warning => warning.Code == "INVESTMENT_LEDGER_DIFFERENCE");
     }
 

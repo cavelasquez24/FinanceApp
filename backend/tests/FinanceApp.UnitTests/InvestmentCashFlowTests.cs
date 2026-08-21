@@ -126,6 +126,88 @@ public class InvestmentCashFlowTests
         Assert.NotNull(dto);
         Assert.Equal(SavingsWithdrawalReason.ReallocatedToLiquid, dto.Reason);
     }
+    // --- Patrimony / FinancialPosition tests ---
+
+    private static readonly DateOnly Today = DateOnly.FromDateTime(DateTime.Today);
+
+    [Fact]
+    public void NetWorth_UsesInvestmentPositions_NotAggregateAccount()
+    {
+        var result = FinancialPositionService.CalculateCurrentSnapshot(
+            Today,
+            accounts: [Acct(FinancialAccountType.Investment, 200m), Acct(FinancialAccountType.Cash, 500m)],
+            investments: [Inv(currentValue: 101.59m, costBasis: 101.59m)],
+            debts: [],
+            cards: [],
+            savingsGoalAllocations: 0m);
+
+        Assert.Equal(601.59m, result.NetWorth);
+        Assert.Equal(101.59m, result.Assets.Investments);
+        Assert.Contains(result.Warnings, w => w.Code == "INVESTMENT_LEDGER_DIFFERENCE");
+    }
+
+    [Fact]
+    public void NetWorth_WhenPositionsMatchAccount_NoLedgerWarning()
+    {
+        var result = FinancialPositionService.CalculateCurrentSnapshot(
+            Today,
+            accounts: [Acct(FinancialAccountType.Investment, 101.59m), Acct(FinancialAccountType.Cash, 500m)],
+            investments: [Inv(currentValue: 101.59m, costBasis: 101.59m)],
+            debts: [],
+            cards: [],
+            savingsGoalAllocations: 0m);
+
+        Assert.Equal(601.59m, result.NetWorth);
+        Assert.DoesNotContain(result.Warnings, w => w.Code == "INVESTMENT_LEDGER_DIFFERENCE");
+    }
+
+    [Fact]
+    public void Contribution_DoesNotReduceNetWorth()
+    {
+        var before = FinancialPositionService.CalculateCurrentSnapshot(
+            Today,
+            accounts: [Acct(FinancialAccountType.Cash, 600m)],
+            investments: [],
+            debts: [], cards: [], savingsGoalAllocations: 0m);
+
+        var after = FinancialPositionService.CalculateCurrentSnapshot(
+            Today,
+            accounts: [Acct(FinancialAccountType.Cash, 500m)],
+            investments: [Inv(currentValue: 100m, costBasis: 100m)],
+            debts: [], cards: [], savingsGoalAllocations: 0m);
+
+        Assert.Equal(before.NetWorth, after.NetWorth);
+    }
+
+    [Fact]
+    public void Valuation_IncreasesNetWorth_NotContributedCapital()
+    {
+        var result = FinancialPositionService.CalculateCurrentSnapshot(
+            Today,
+            accounts: [Acct(FinancialAccountType.Cash, 500m)],
+            investments: [Inv(currentValue: 115m, costBasis: 100m)],
+            debts: [], cards: [], savingsGoalAllocations: 0m);
+
+        Assert.Equal(115m, result.Assets.InvestmentPositions);
+        Assert.Equal(100m, result.Assets.InvestmentCostBasis);
+        Assert.Equal(15m, result.Assets.InvestmentUnrealizedGainLoss);
+        Assert.Equal(615m, result.NetWorth);
+    }
+
+    private static FinancialAccount Acct(FinancialAccountType type, decimal balance) => new()
+    {
+        Type = type,
+        CurrentBalance = balance,
+        IsActive = true
+    };
+
+    private static Investment Inv(decimal currentValue, decimal costBasis) => new()
+    {
+        InitialAmount = costBasis,
+        CurrentValue = currentValue,
+        IsActive = true
+    };
+
     private static Investment NewInvestment(decimal initialAmount, decimal currentValue) => new()
     {
         Id = Guid.NewGuid(),

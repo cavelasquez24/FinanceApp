@@ -95,10 +95,12 @@ public class FinancialPositionService : IFinancialPositionService
         var investmentPositions = Round(investmentList.Sum(i => i.CurrentValue));
         var investmentCostBasis = Round(investmentList.Sum(i => i.InitialAmount));
         var investmentUnrealizedGainLoss = Round(investmentPositions - investmentCostBasis);
-        var uninvestedInvestmentCash = Round(Math.Max(
-            investmentAccountBalance - investmentPositions,
-            0m));
-        var totalInvestments = Round(investmentPositions + uninvestedInvestmentCash);
+        // Las posiciones son la fuente canónica del valor invertido.
+        // El efectivo real en broker se registrará explícitamente (#7).
+        // El exceso de la cuenta agregada sobre posiciones no entra al patrimonio
+        // para evitar inflar activos con saldos fantasma.
+        var uninvestedInvestmentCash = 0m;
+        var totalInvestments = investmentPositions;
 
         var debtLiabilities = Round(debtList
             .Where(d => d.CurrentBalance > 0)
