@@ -6,14 +6,21 @@ export interface Investment {
   type: InvestmentType;
   ticker: string | null;
   broker: string | null;
-  initialAmount: number;
+  /** Capital aportado acumulado (costo base). */
+  contributedCapital: number;
   currentValue: number;
-  gainLoss: number;
-  gainLossPercentage: number;
+  unrealizedGainLoss: number;
+  unrealizedGainLossPercentage: number;
   purchaseDate: string; // "YYYY-MM-DD"
   isActive: boolean;
   notes: string | null;
   createdAt: string;
+  /** @deprecated Usar contributedCapital */
+  initialAmount: number;
+  /** @deprecated Usar unrealizedGainLoss */
+  gainLoss: number;
+  /** @deprecated Usar unrealizedGainLossPercentage */
+  gainLossPercentage: number;
 }
 
 export interface InvestmentSummary {
@@ -38,15 +45,23 @@ export interface InvestmentRecord {
   notes: string | null;
 }
 
+export interface HistoricalContribution {
+  contributionDate: string; // "YYYY-MM-DD"
+  amount: number;
+  notes?: string;
+}
+
 export interface CreateInvestmentDto {
   name: string;
   type: InvestmentType;
-  ticker?: string; 
+  ticker?: string;
   broker?: string;
   initialAmount: number;
   currentValue?: number;
   purchaseDate: string; // "YYYY-MM-DD"
   isHistoricalImport: boolean;
+  isConsolidatedSnapshot?: boolean;
+  historicalContributions?: HistoricalContribution[];
   notes?: string;
 }
 
@@ -62,7 +77,7 @@ export interface UpdateInvestmentDto {
 export interface CreateInvestmentRecordDto {
   recordDate: string; // "YYYY-MM-DD"
   value: number;
-  dividends?: number; // default 0
+  dividends?: number;
   notes?: string;
 }
 
@@ -76,6 +91,26 @@ export interface InvestmentContribution {
 
 export interface CreateInvestmentContributionDto {
   contributionDate?: string; // "YYYY-MM-DD", opcional → hoy si se omite
-  amount: number;            // > 0
+  amount: number;
   notes?: string;
+}
+
+export interface InvestmentWithdrawalDto {
+  withdrawalAmount: number;
+  capitalReturned: number;
+  fee?: number;
+  withdrawalDate: string; // "YYYY-MM-DD"
+  notes?: string;
+}
+
+export interface InvestmentWithdrawalResponse {
+  investmentId: string;
+  withdrawalAmount: number;
+  capitalReturned: number;
+  realizedGain: number;
+  fee: number;
+  netCashReceived: number;
+  withdrawalDate: string;
+  remainingContributedCapital: number;
+  remainingCurrentValue: number;
 }

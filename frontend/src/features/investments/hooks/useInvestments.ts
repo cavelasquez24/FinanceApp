@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { investmentsApi } from '../../../api/investments.api';
 import toast from 'react-hot-toast';
-import type { CreateInvestmentDto, UpdateInvestmentDto, CreateInvestmentRecordDto, CreateInvestmentContributionDto } from '../../../types/investment.types';
+import type { CreateInvestmentDto, UpdateInvestmentDto, CreateInvestmentRecordDto, CreateInvestmentContributionDto, InvestmentWithdrawalDto } from '../../../types/investment.types';
 
 
 export function useInvestments() {
@@ -96,5 +96,20 @@ export function useAddInvestmentContribution() {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
     onError: () => toast.error('Error al registrar el aporte'),
+  });
+}
+
+export function useWithdrawInvestment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: InvestmentWithdrawalDto }) =>
+      investmentsApi.withdraw(id, data),
+    onSuccess: () => {
+      toast.success('Retiro registrado exitosamente');
+      queryClient.invalidateQueries({ queryKey: ['investments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+    onError: () => toast.error('Error al registrar el retiro'),
   });
 }

@@ -1,7 +1,8 @@
 // src/pages/InvestmentsPage.tsx
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, TrendingUp, DollarSign, PieChart, Activity, PlusCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, TrendingUp, DollarSign, PieChart, Activity, PlusCircle, ArrowDownLeft } from 'lucide-react';
 import { AddInvestmentContributionForm } from '../features/investments/components/AddInvestmentContributionForm';
+import { WithdrawalModal } from '../features/investments/components/WithdrawalModal';
 import { useInvestments, useInvestmentSummary, useDeleteInvestment } from '../features/investments/hooks/useInvestments';
 import { CreateInvestmentForm } from '../features/investments/components/CreateInvestmentForm';
 import { EditInvestmentForm } from '../features/investments/components/EditInvestmentForm';
@@ -21,6 +22,7 @@ export default function InvestmentsPage() {
   const [deletingInvestment, setDeletingInvestment] = useState<Investment | null>(null);
   const [addingRecordInvestment, setAddingRecordInvestment] = useState<Investment | null>(null);
   const [addingContributionInvestment, setAddingContributionInvestment] = useState<Investment | null>(null);
+  const [withdrawingInvestment, setWithdrawingInvestment] = useState<Investment | null>(null);
 
   if (loadingSummary || loadingInvestments) {
     return (
@@ -43,15 +45,15 @@ export default function InvestmentsPage() {
 
   return (
     <div className="space-y-8 bg-[#FBF9F4] min-h-screen p-4 md:p-8 font-sans">
-      
+
       {/* Encabezado */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-semibold text-[#2C2A29] tracking-tight">Portafolio</h1>
           <p className="text-sm text-[#7C756E] mt-1">Monitorea y gestiona tus activos financieros</p>
         </div>
-        <Button 
-          onClick={() => setIsCreateOpen(true)} 
+        <Button
+          onClick={() => setIsCreateOpen(true)}
           className="flex items-center gap-2 bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#2C2A29]/90 rounded-2xl px-5 py-2.5 transition-all shadow-md"
           leftIcon={<Plus className="h-4 w-4" />}
         >
@@ -62,7 +64,7 @@ export default function InvestmentsPage() {
       {/* Resumen del Portafolio - Diseño Bento Grid / Glassmorphism */}
       {summary && (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4 md:grid-rows-2">
-          
+
           {/* Bento Card: Valor Actual (Destacada) */}
           <div className="md:col-span-2 md:row-span-2 rounded-[28px] border border-[#EFEAE2] bg-white/60 backdrop-blur-xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden group">
             <div className="absolute top-6 right-6 p-3 bg-[#EFEAE2]/50 rounded-2xl text-[#2C2A29]">
@@ -128,7 +130,7 @@ export default function InvestmentsPage() {
                 <th className="p-5 font-semibold">Tipo</th>
                 <th className="p-5 font-semibold">Capital Base</th>
                 <th className="p-5 font-semibold">Valor Actual</th>
-                <th className="p-5 font-semibold">Retorno</th>
+                <th className="p-5 font-semibold">Retorno No Realizado</th>
                 <th className="p-5 font-semibold text-right">Gestión</th>
               </tr>
             </thead>
@@ -147,26 +149,26 @@ export default function InvestmentsPage() {
                     </span>
                   </td>
                   <td className="p-5 text-sm font-medium text-[#7C756E]">
-                    {formatCurrency(inv.initialAmount)}
+                    {formatCurrency(inv.contributedCapital)}
                   </td>
                   <td className="p-5 text-sm font-bold text-[#2C2A29]">
                     {formatCurrency(inv.currentValue)}
                   </td>
                   <td className="p-5">
                     <div className="flex flex-col">
-                      <span className={`text-sm font-bold ${inv.gainLoss >= 0 ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
-                        {inv.gainLoss >= 0 ? '+' : ''}{formatCurrency(inv.gainLoss)}
+                      <span className={`text-sm font-bold ${inv.unrealizedGainLoss >= 0 ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
+                        {inv.unrealizedGainLoss >= 0 ? '+' : ''}{formatCurrency(inv.unrealizedGainLoss)}
                       </span>
-                      <span className={`text-xs font-medium mt-0.5 ${inv.gainLoss >= 0 ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
-                        ({inv.gainLossPercentage}%)
+                      <span className={`text-xs font-medium mt-0.5 ${inv.unrealizedGainLoss >= 0 ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
+                        ({inv.unrealizedGainLossPercentage >= 0 ? '+' : ''}{inv.unrealizedGainLossPercentage.toFixed(2)}%)
                       </span>
                     </div>
                   </td>
                   <td className="p-5 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                      <button 
+                      <button
                         onClick={() => setAddingRecordInvestment(inv)}
-                        title="Añadir Valor/Registro" 
+                        title="Actualizar valor de mercado"
                         className="p-2 text-[#7C756E] hover:text-[#8FA888] hover:bg-[#8FA888]/10 rounded-xl transition-all"
                       >
                         <TrendingUp className="h-4 w-4" />
@@ -178,16 +180,25 @@ export default function InvestmentsPage() {
                       >
                         <PlusCircle className="h-4 w-4" />
                       </button>
+                      {inv.isActive && (
+                        <button
+                          onClick={() => setWithdrawingInvestment(inv)}
+                          title="Registrar retiro"
+                          className="p-2 text-[#7C756E] hover:text-[#C97B63] hover:bg-[#C97B63]/10 rounded-xl transition-all"
+                        >
+                          <ArrowDownLeft className="h-4 w-4" />
+                        </button>
+                      )}
                       <button
-                        onClick={() => setEditingInvestment(inv)} 
-                        title="Editar" 
+                        onClick={() => setEditingInvestment(inv)}
+                        title="Editar"
                         className="p-2 text-[#7C756E] hover:text-[#2C2A29] hover:bg-[#EFEAE2] rounded-xl transition-all"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
-                      <button 
-                        onClick={() => setDeletingInvestment(inv)} 
-                        title="Eliminar" 
+                      <button
+                        onClick={() => setDeletingInvestment(inv)}
+                        title="Eliminar"
                         className="p-2 text-[#7C756E] hover:text-[#C97B63] hover:bg-[#C97B63]/10 rounded-xl transition-all"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -225,13 +236,12 @@ export default function InvestmentsPage() {
         )}
       </Modal>
 
-      {/* Modal Faltante: Añadir Registro */}
       <Modal isOpen={!!addingRecordInvestment} onClose={() => setAddingRecordInvestment(null)} title="Actualizar Valor del Activo">
         {addingRecordInvestment && (
-          <AddInvestmentRecordForm 
-            investment={addingRecordInvestment} 
-            onSuccess={() => setAddingRecordInvestment(null)} 
-            onCancel={() => setAddingRecordInvestment(null)} 
+          <AddInvestmentRecordForm
+            investment={addingRecordInvestment}
+            onSuccess={() => setAddingRecordInvestment(null)}
+            onCancel={() => setAddingRecordInvestment(null)}
           />
         )}
       </Modal>
@@ -242,6 +252,16 @@ export default function InvestmentsPage() {
             investment={addingContributionInvestment}
             onSuccess={() => setAddingContributionInvestment(null)}
             onCancel={() => setAddingContributionInvestment(null)}
+          />
+        )}
+      </Modal>
+
+      <Modal isOpen={!!withdrawingInvestment} onClose={() => setWithdrawingInvestment(null)} title="Registrar Retiro">
+        {withdrawingInvestment && (
+          <WithdrawalModal
+            investment={withdrawingInvestment}
+            onSuccess={() => setWithdrawingInvestment(null)}
+            onCancel={() => setWithdrawingInvestment(null)}
           />
         )}
       </Modal>
