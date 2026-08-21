@@ -110,4 +110,16 @@ public class SavingsGoalRepository : BaseRepository<SavingsGoal>, ISavingsGoalRe
                 && w.DeletedAt == null)
             .SumAsync(w => w.Amount, cancellationToken);
     }
+
+    public async Task<decimal> GetAvgMonthlyContributionAsync(
+        Guid goalId, int months, CancellationToken cancellationToken = default)
+    {
+        var cutoff = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-months));
+        var total = await _context.SavingsGoalContributions
+            .Where(c => c.SavingsGoalId == goalId
+                && c.ContributionDate >= cutoff
+                && c.DeletedAt == null)
+            .SumAsync(c => c.Amount, cancellationToken);
+        return months > 0 ? total / months : 0m;
+    }
 }

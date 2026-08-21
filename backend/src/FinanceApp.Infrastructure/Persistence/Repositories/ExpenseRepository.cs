@@ -229,4 +229,38 @@ public class ExpenseRepository : BaseRepository<Expense>, IExpenseRepository
 
         return results.Select(r => (r.CategoryId, r.Name, r.Color, r.Total));
     }
+
+    public async Task<IReadOnlyList<(string Merchant, decimal Total, int Count, string CategoryName)>>
+        GetTopMerchantsByDateRangeAsync(
+            Guid userId, DateOnly start, DateOnly end, int topN,
+            CancellationToken cancellationToken = default)
+    {
+        var results = await _context.Expenses
+            .Include(e => e.Category)
+            .Where(e => e.UserId == userId
+                     && e.Merchant != null && e.Merchant != ""
+                     && e.Date >= start && e.Date <= end
+                     && e.DeletedAt == null)
+            .GroupBy(e => new { e.Merchant, e.Category.Name })
+            .Select(g => new
+            {
+                Merchant = g.Key.Merchant!,
+                Total = g.Sum(e => e.Amount),
+                Count = g.Count(),
+                CategoryName = g.Key.Name
+            })
+            .OrderByDescending(x => x.Total)
+            .Take(topN)
+            .ToListAsync(cancellationToken);
+
+        return results.Select(r => (r.Merchant, r.Total, r.Count, r.CategoryName)).ToList();
+    }
+
+    public async Task<IReadOnlyList<Expense>> GetRecurringByUserAsync(
+        Guid userId, CancellationToken cancellationToken = default) =>
+        await _context.Expenses
+            .Include(e => e.Category)
+            .Where(e => e.UserId == userId && e.IsRecurring && e.DeletedAt == null)
+            .OrderByDescending(e => e.Amount)
+            .ToListAsync(cancellationToken);
 }

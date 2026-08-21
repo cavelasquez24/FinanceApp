@@ -60,10 +60,6 @@ public class DebtRepository : BaseRepository<Debt>, IDebtRepository
             .SumAsync(p => p.Amount, cancellationToken);
     }
 
-    // v2.0.1 — Cash Flow Statement (sección 5) necesita solo la porción de
-    // capital (PrincipalAmount), no el pago total (que incluye interés).
-    // No reemplaza GetTotalPaymentsByDateRangeAsync, que se sigue usando
-    // en el Dashboard overview tal cual.
     public async Task<decimal> GetTotalPrincipalPaidByDateRangeAsync(
         Guid userId, DateOnly start, DateOnly end,
         CancellationToken cancellationToken = default)
@@ -73,5 +69,17 @@ public class DebtRepository : BaseRepository<Debt>, IDebtRepository
                 && p.PaymentDate >= start && p.PaymentDate <= end
                 && p.DeletedAt == null)
             .SumAsync(p => p.PrincipalAmount, cancellationToken);
+    }
+
+    public async Task<decimal> GetAvgMonthlyPaymentAsync(
+        Guid debtId, int months, CancellationToken cancellationToken = default)
+    {
+        var cutoff = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-months));
+        var total = await _context.DebtPayments
+            .Where(p => p.DebtId == debtId
+                && p.PaymentDate >= cutoff
+                && p.DeletedAt == null)
+            .SumAsync(p => p.Amount, cancellationToken);
+        return months > 0 ? total / months : 0m;
     }
 }
