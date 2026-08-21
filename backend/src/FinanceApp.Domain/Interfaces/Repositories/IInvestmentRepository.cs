@@ -29,4 +29,8 @@ public interface IInvestmentRepository : IBaseRepository<Investment>
     Task<decimal> GetTotalContributionsByDateRangeAsync(
         Guid userId, DateOnly start, DateOnly end,
         CancellationToken cancellationToken = default);
+
+    Task AddTransactionAsync(
+        InvestmentTransaction transaction,
+        CancellationToken cancellationToken = default);
 }

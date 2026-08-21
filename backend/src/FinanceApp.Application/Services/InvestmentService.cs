@@ -11,13 +11,16 @@ public class InvestmentService : IInvestmentService
 {
     private readonly IInvestmentRepository _investmentRepository;
     private readonly IFinancialAccountService? _accountService;
+    private readonly IUnitOfWork? _unitOfWork;
 
     public InvestmentService(
         IInvestmentRepository investmentRepository,
-        IFinancialAccountService? accountService = null)
+        IFinancialAccountService? accountService = null,
+        IUnitOfWork? unitOfWork = null)
     {
         _investmentRepository = investmentRepository;
         _accountService = accountService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IEnumerable<InvestmentResponseDto>> GetAllAsync(
@@ -38,64 +41,83 @@ public class InvestmentService : IInvestmentService
         return MapToResponseDto(investment);
     }
 
-    public async Task<InvestmentResponseDto> CreateAsync(
+    public Task<InvestmentResponseDto> CreateAsync(
         Guid userId, InvestmentCreateDto dto,
         CancellationToken cancellationToken = default)
     {
-        if (_accountService != null)
-            await _accountService.GetOrCreateDefaultAsync(
-                userId, FinancialAccountType.Investment, cancellationToken);
-
-        var investment = new Investment
+        return RunInTransactionAsync(async ct =>
         {
-            UserId = userId,
-            Name = dto.Name.Trim(),
-            Type = Enum.Parse<InvestmentType>(
-                dto.Type.Replace("_", ""), true),
-            Ticker = dto.Ticker?.Trim().ToUpperInvariant(),
-            Broker = dto.Broker?.Trim(),
-            InitialAmount = dto.InitialAmount,
-            CurrentValue = dto.IsHistoricalImport
-                ? dto.CurrentValue ?? dto.InitialAmount
-                : dto.InitialAmount,
-            PurchaseDate = dto.PurchaseDate,
-            Notes = dto.Notes?.Trim(),
-            IsActive = true
-        };
+            if (_accountService != null)
+                await _accountService.GetOrCreateDefaultAsync(
+                    userId, FinancialAccountType.Investment, ct);
 
-        if (!dto.IsHistoricalImport)
-        {
-            investment.Contributions.Add(new InvestmentContribution
+            var investment = new Investment
             {
-                ContributionDate = dto.PurchaseDate,
-                Amount = dto.InitialAmount,
-                Notes = "Compra inicial"
-            });
-        }
+                UserId = userId,
+                Name = dto.Name.Trim(),
+                Type = Enum.Parse<InvestmentType>(
+                    dto.Type.Replace("_", ""), true),
+                Ticker = dto.Ticker?.Trim().ToUpperInvariant(),
+                Broker = dto.Broker?.Trim(),
+                InitialAmount = dto.InitialAmount,
+                CurrentValue = dto.IsHistoricalImport
+                    ? dto.CurrentValue ?? dto.InitialAmount
+                    : dto.InitialAmount,
+                PurchaseDate = dto.PurchaseDate,
+                Notes = dto.Notes?.Trim(),
+                IsActive = true
+            };
 
-        await _investmentRepository.CreateAsync(investment, cancellationToken);
-        if (_accountService != null)
-        {
-            if (dto.IsHistoricalImport)
+            if (!dto.IsHistoricalImport)
             {
-                await _accountService.SyncMovementAsync(
-                    userId, null, FinancialAccountType.Investment,
-                    investment.CurrentValue, investment.PurchaseDate,
-                    "investment-opening", investment.Id,
-                    $"Importación: {investment.Name}", cancellationToken);
+                investment.Contributions.Add(new InvestmentContribution
+                {
+                    ContributionDate = dto.PurchaseDate,
+                    Amount = dto.InitialAmount,
+                    Notes = "Compra inicial"
+                });
             }
-            else
-            {
-                var initial = investment.Contributions.Single();
-                await _accountService.SyncTransferAsync(
-                    userId, FinancialAccountType.Cash,
-                    FinancialAccountType.Investment, initial.Amount,
-                    initial.ContributionDate, "investment-contribution",
-                    initial.Id, $"Compra: {investment.Name}", cancellationToken);
-            }
-        }
 
-        return MapToResponseDto(investment);
+            await _investmentRepository.CreateAsync(investment, ct);
+
+            var openingTxn = new InvestmentTransaction
+            {
+                InvestmentId = investment.Id,
+                TransactionType = dto.IsHistoricalImport
+                    ? InvestmentTransactionType.HistoricalContribution
+                    : InvestmentTransactionType.Contribution,
+                Amount = dto.IsHistoricalImport
+                    ? investment.CurrentValue
+                    : dto.InitialAmount,
+                TransactionDate = dto.PurchaseDate,
+                IsHistorical = dto.IsHistoricalImport,
+                Notes = dto.IsHistoricalImport ? "Importación histórica" : "Compra inicial"
+            };
+            await _investmentRepository.AddTransactionAsync(openingTxn, ct);
+
+            if (_accountService != null)
+            {
+                if (dto.IsHistoricalImport)
+                {
+                    await _accountService.SyncMovementAsync(
+                        userId, null, FinancialAccountType.Investment,
+                        investment.CurrentValue, investment.PurchaseDate,
+                        "investment-opening", investment.Id,
+                        $"Importación: {investment.Name}", ct);
+                }
+                else
+                {
+                    var initial = investment.Contributions.Single();
+                    await _accountService.SyncTransferAsync(
+                        userId, FinancialAccountType.Cash,
+                        FinancialAccountType.Investment, initial.Amount,
+                        initial.ContributionDate, "investment-contribution",
+                        initial.Id, $"Compra: {investment.Name}", ct);
+                }
+            }
+
+            return MapToResponseDto(investment);
+        }, cancellationToken);
     }
 
     public async Task<InvestmentResponseDto> UpdateAsync(
@@ -120,15 +142,50 @@ public class InvestmentService : IInvestmentService
         return MapToResponseDto(investment);
     }
 
-    public async Task DeleteAsync(
+    public Task DeleteAsync(
         Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        var investment = await _investmentRepository.GetByIdAsync(
-            id, cancellationToken);
-        if (investment == null || investment.UserId != userId || investment.IsDeleted)
-            throw new NotFoundException("Inversión", id);
-        investment.DeletedAt = DateTimeOffset.UtcNow;
-        await _investmentRepository.UpdateAsync(investment, cancellationToken);
+        return RunInTransactionAsync(async ct =>
+        {
+            var investment = await _investmentRepository.GetByIdAsync(id, ct);
+            if (investment == null || investment.UserId != userId || investment.IsDeleted)
+                throw new NotFoundException("Inversión", id);
+
+            // Busca la transacción original para enlazar ReversalOf.
+            // Null para inversiones creadas antes de este cambio (sin InvestmentTransaction).
+            var originalTxn = investment.Transactions
+                .Where(t => t.TransactionType is InvestmentTransactionType.Contribution
+                                               or InvestmentTransactionType.HistoricalContribution
+                    && t.DeletedAt == null)
+                .OrderBy(t => t.TransactionDate)
+                .FirstOrDefault();
+
+            var reversalDate = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var reversalTxn = new InvestmentTransaction
+            {
+                InvestmentId = investment.Id,
+                TransactionType = InvestmentTransactionType.Reversal,
+                Amount = -investment.CurrentValue,
+                TransactionDate = reversalDate,
+                ReversalOf = originalTxn?.Id,
+                Notes = "Eliminación de inversión"
+            };
+            await _investmentRepository.AddTransactionAsync(reversalTxn, ct);
+
+            if (_accountService != null)
+            {
+                await _accountService.SyncMovementAsync(
+                    userId, null, FinancialAccountType.Investment,
+                    -investment.CurrentValue, reversalDate,
+                    "investment-deletion", investment.Id,
+                    $"Eliminación: {investment.Name}", ct);
+            }
+
+            investment.DeletedAt = DateTimeOffset.UtcNow;
+            await _investmentRepository.UpdateAsync(investment, ct);
+            return true;
+        }, cancellationToken);
     }
 
     public async Task<InvestmentSummaryDto> GetSummaryAsync(
@@ -273,6 +330,13 @@ public class InvestmentService : IInvestmentService
             CreatedAt = contribution.CreatedAt
         };
     }
+
+    private Task<T> RunInTransactionAsync<T>(
+        Func<CancellationToken, Task<T>> action,
+        CancellationToken cancellationToken)
+        => _unitOfWork == null
+            ? action(cancellationToken)
+            : _unitOfWork.ExecuteInTransactionAsync(action, cancellationToken);
 
     private static InvestmentResponseDto MapToResponseDto(Investment investment) => new()
     {

@@ -8,6 +8,13 @@ public class InvestmentRepository : BaseRepository<Investment>, IInvestmentRepos
 {
     public InvestmentRepository(AppDbContext context) : base(context) { }
 
+    public override async Task<Investment?> GetByIdAsync(
+        Guid id, CancellationToken cancellationToken = default)
+        => await _context.Investments
+            .Include(i => i.Contributions)
+            .Include(i => i.Transactions)
+            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+
     public async Task<IEnumerable<Investment>> GetByUserIdAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
@@ -54,5 +61,13 @@ public class InvestmentRepository : BaseRepository<Investment>, IInvestmentRepos
                 && c.ContributionDate >= start && c.ContributionDate <= end
                 && c.DeletedAt == null)
             .SumAsync(c => c.Amount, cancellationToken);
+    }
+
+    public async Task AddTransactionAsync(
+        InvestmentTransaction transaction,
+        CancellationToken cancellationToken = default)
+    {
+        await _context.InvestmentTransactions.AddAsync(transaction, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

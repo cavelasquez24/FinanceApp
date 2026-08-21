@@ -260,5 +260,8 @@ public class InvestmentCashFlowTests
         public Task<decimal> GetTotalContributionsByDateRangeAsync(
             Guid userId, DateOnly start, DateOnly end, CancellationToken cancellationToken = default) =>
             Task.FromResult(0m);
+
+        public Task AddTransactionAsync(InvestmentTransaction transaction, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
     }
 }
