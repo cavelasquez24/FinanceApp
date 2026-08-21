@@ -55,4 +55,8 @@ public interface ISavingsGoalRepository : IBaseRepository<SavingsGoal>
     Task<decimal> GetTotalConsumedWithdrawalsByDateRangeAsync(
         Guid userId, DateOnly start, DateOnly end,
         CancellationToken cancellationToken = default);
+
+    Task<decimal> GetAvgMonthlyContributionAsync(
+        Guid goalId, int months,
+        CancellationToken cancellationToken = default);
 }

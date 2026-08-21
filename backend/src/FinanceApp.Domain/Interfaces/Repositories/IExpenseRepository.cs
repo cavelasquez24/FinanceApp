@@ -47,4 +47,13 @@ public interface IExpenseRepository : IBaseRepository<Expense>
     GetByCategoryByDateRangeAsync(
         Guid userId, DateOnly startDate, DateOnly endDate,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<(string Merchant, decimal Total, int Count, string CategoryName)>>
+    GetTopMerchantsByDateRangeAsync(
+        Guid userId, DateOnly start, DateOnly end, int topN,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Expense>> GetRecurringByUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

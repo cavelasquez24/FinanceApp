@@ -42,4 +42,8 @@ public interface IDebtRepository : IBaseRepository<Debt>
     Task AddWithdrawalAsync(
         DebtWithdrawal withdrawal,
         CancellationToken cancellationToken = default);
+
+    Task<decimal> GetAvgMonthlyPaymentAsync(
+        Guid debtId, int months,
+        CancellationToken cancellationToken = default);
 }
