@@ -19,7 +19,7 @@ public class ExpenseAccountSourceTests
     {
         var userId = Guid.NewGuid();
         var accountId = Guid.NewGuid();
-        var accounts = new RecordingAccountService();
+        var accounts = new RecordingAccountService(new FinancialAccountResponseDto { Id = accountId, Type = "cash", IsActive = true });
         var repository = new FakeExpenseRepository();
         var service = CreateService(repository, accounts);
 
@@ -27,8 +27,6 @@ public class ExpenseAccountSourceTests
 
         var expense = Assert.Single(repository.Items);
         Assert.Equal(accountId, expense.AccountId);
-        Assert.Single(accounts.ValidatedAccounts);
-        Assert.Equal((userId, accountId, FinancialAccountType.Cash), accounts.ValidatedAccounts[0]);
         var movement = Assert.Single(accounts.Movements);
         Assert.Equal(accountId, movement.AccountId);
         Assert.Equal(-20m, movement.SignedAmount);
@@ -43,7 +41,9 @@ public class ExpenseAccountSourceTests
         var oldAccount = Guid.NewGuid();
         var newAccount = Guid.NewGuid();
         var expense = NewExpense(userId, oldAccount, 20m, new DateOnly(2026, 8, 1));
-        var accounts = new RecordingAccountService();
+        var accounts = new RecordingAccountService(
+            new FinancialAccountResponseDto { Id = oldAccount, Type = "cash", IsActive = true },
+            new FinancialAccountResponseDto { Id = newAccount, Type = "cash", IsActive = true });
         var service = CreateService(new FakeExpenseRepository(expense), accounts);
 
         await service.UpdateAsync(expense.Id, userId, new ExpenseUpdateDto
@@ -181,11 +181,19 @@ public class ExpenseAccountSourceTests
         public List<(Guid UserId, Guid AccountId, FinancialAccountType Type)> ValidatedAccounts { get; } = [];
         public List<Movement> Movements { get; } = [];
 
+        private readonly List<FinancialAccountResponseDto> _accounts;
+
+        public RecordingAccountService(params FinancialAccountResponseDto[] accounts)
+        {
+            _accounts = [.. accounts];
+        }
+
         public Task<decimal> GetAvailableBalanceAsync(Guid userId, Guid? accountId, FinancialAccountType fallbackType, CancellationToken cancellationToken = default)
         {
             if (AvailableBalanceException is not null)
                 throw AvailableBalanceException;
-            ValidatedAccounts.Add((userId, accountId!.Value, fallbackType));
+            if (accountId.HasValue)
+                ValidatedAccounts.Add((userId, accountId.Value, fallbackType));
             return Task.FromResult(0m);
         }
 
@@ -195,7 +203,7 @@ public class ExpenseAccountSourceTests
             return Task.CompletedTask;
         }
 
-        public Task<IReadOnlyList<FinancialAccountResponseDto>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<FinancialAccountResponseDto>>([]);
+        public Task<IReadOnlyList<FinancialAccountResponseDto>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<FinancialAccountResponseDto>>(_accounts);
         public Task<IReadOnlyList<AccountTransactionResponseDto>> GetRecentTransactionsAsync(Guid userId, int count, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<AccountTransactionResponseDto>>([]);
         public Task<FinancialAccountResponseDto> CreateAsync(Guid userId, FinancialAccountCreateDto dto, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<FinancialAccountResponseDto> UpdateAsync(Guid id, Guid userId, FinancialAccountUpdateDto dto, CancellationToken cancellationToken = default) => throw new NotSupportedException();
@@ -223,6 +231,8 @@ public class ExpenseAccountSourceTests
         public Task<IEnumerable<(Guid CategoryId, string CategoryName, string CategoryColor, decimal Total)>> GetByCategoryAsync(Guid userId, int month, int year, CancellationToken cancellationToken = default) => Task.FromResult<IEnumerable<(Guid, string, string, decimal)>>([]);
         public Task<decimal> GetTotalByDateRangeAsync(Guid userId, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default) => Task.FromResult(0m);
         public Task<IEnumerable<(Guid CategoryId, string CategoryName, string CategoryColor, decimal Total)>> GetByCategoryByDateRangeAsync(Guid userId, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default) => Task.FromResult<IEnumerable<(Guid, string, string, decimal)>>([]);
+        public Task<IReadOnlyList<(string Merchant, decimal Total, int Count, string CategoryName)>> GetTopMerchantsByDateRangeAsync(Guid userId, DateOnly start, DateOnly end, int topN, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<(string, decimal, int, string)>>([]);
+        public Task<IReadOnlyList<Expense>> GetRecurringByUserAsync(Guid userId, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<Expense>>([]);
     }
 
     private sealed class EmptyTagRepository : ITagRepository

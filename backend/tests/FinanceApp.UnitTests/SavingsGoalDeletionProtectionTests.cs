@@ -13,7 +13,7 @@ public class SavingsGoalDeletionProtectionTests
         var userId = Guid.NewGuid();
         var goal = new SavingsGoal { Id = Guid.NewGuid(), UserId = userId, Name = "Reserva", CurrentAmount = 1m };
         var repository = new FakeSavingsGoalRepository(goal);
-        var service = new SavingsGoalService(repository, null!);
+        var service = new SavingsGoalService(repository, null!, null!, null);
 
         var error = await Assert.ThrowsAsync<DomainException>(() => service.DeleteAsync(goal.Id, userId));
 
@@ -38,5 +38,6 @@ public class SavingsGoalDeletionProtectionTests
         public Task<decimal> GetTotalContributionsByDateRangeAsync(Guid userId, DateOnly start, DateOnly end, CancellationToken cancellationToken = default) => Task.FromResult(0m);
         public Task<decimal> GetTotalCashFlowWithdrawalsByDateRangeAsync(Guid userId, DateOnly start, DateOnly end, CancellationToken cancellationToken = default) => Task.FromResult(0m);
         public Task<decimal> GetTotalConsumedWithdrawalsByDateRangeAsync(Guid userId, DateOnly start, DateOnly end, CancellationToken cancellationToken = default) => Task.FromResult(0m);
+        public Task<decimal> GetAvgMonthlyContributionAsync(Guid goalId, int months, CancellationToken cancellationToken = default) => Task.FromResult(0m);
     }
 }

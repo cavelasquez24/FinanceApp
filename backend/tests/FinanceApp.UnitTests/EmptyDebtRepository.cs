@@ -30,6 +30,10 @@ internal sealed class EmptyDebtRepository : IDebtRepository
         DebtWithdrawal withdrawal,
         CancellationToken cancellationToken = default) => Task.CompletedTask;
 
+    public Task<decimal> GetAvgMonthlyPaymentAsync(
+        Guid debtId, int months,
+        CancellationToken cancellationToken = default) => Task.FromResult(0m);
+
     public Task<Debt?> GetByIdAsync(
         Guid id,
         CancellationToken cancellationToken = default) => Task.FromResult<Debt?>(null);
