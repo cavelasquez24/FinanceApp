@@ -22,6 +22,8 @@ public class Investment : BaseEntity
     // v2.0.1 — historial de aportes de caja (distinto de Records/valuation)
     public ICollection<InvestmentContribution> Contributions { get; set; } = new List<InvestmentContribution>();
 
+    public ICollection<InvestmentTransaction> Transactions { get; set; } = new List<InvestmentTransaction>();
+
     // Calculadas en memoria no BD
     public decimal GainLoss => CurrentValue - InitialAmount;
     public decimal GainLossPercentage => InitialAmount > 0

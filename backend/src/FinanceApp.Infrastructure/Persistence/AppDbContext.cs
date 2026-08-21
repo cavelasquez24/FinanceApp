@@ -31,6 +31,7 @@ public class AppDbContext : DbContext
     public DbSet<Investment> Investments => Set<Investment>();
     public DbSet<InvestmentRecord> InvestmentRecords => Set<InvestmentRecord>();
     public DbSet<InvestmentContribution> InvestmentContributions => Set<InvestmentContribution>();
+    public DbSet<InvestmentTransaction> InvestmentTransactions => Set<InvestmentTransaction>();
     public DbSet<SavingsGoal> SavingsGoals => Set<SavingsGoal>();
     public DbSet<SavingsGoalContribution> SavingsGoalContributions => Set<SavingsGoalContribution>();
     public DbSet<SavingsGoalWithdrawal> SavingsGoalWithdrawals => Set<SavingsGoalWithdrawal>();
