@@ -18,19 +18,22 @@ public class FinancialPositionService : IFinancialPositionService
     private readonly IDebtRepository _debtRepository;
     private readonly ICreditCardRepository _creditCardRepository;
     private readonly ISavingsGoalRepository _savingsGoalRepository;
+    private readonly IBusinessDateProvider _businessDateProvider;
 
     public FinancialPositionService(
         IFinancialAccountRepository accountRepository,
         IInvestmentRepository investmentRepository,
         IDebtRepository debtRepository,
         ICreditCardRepository creditCardRepository,
-        ISavingsGoalRepository savingsGoalRepository)
+        ISavingsGoalRepository savingsGoalRepository,
+        IBusinessDateProvider businessDateProvider)
     {
         _accountRepository = accountRepository;
         _investmentRepository = investmentRepository;
         _debtRepository = debtRepository;
         _creditCardRepository = creditCardRepository;
         _savingsGoalRepository = savingsGoalRepository;
+        _businessDateProvider = businessDateProvider;
     }
 
     public async Task<FinancialPositionDto> GetAsync(
@@ -38,7 +41,7 @@ public class FinancialPositionService : IFinancialPositionService
         DateOnly? asOf = null,
         CancellationToken cancellationToken = default)
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = _businessDateProvider.Today;
         if (asOf.HasValue && asOf.Value != today)
         {
             throw new DomainException(

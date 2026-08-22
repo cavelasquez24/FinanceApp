@@ -1,3 +1,4 @@
+using FinanceApp.Application.Interfaces;
 using FinanceApp.Application.Services;
 using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
@@ -67,7 +68,14 @@ public class FinancialPositionServiceIntegrationTests
         new InvestmentRepository(context),
         new EmptyDebtRepository(),
         new CreditCardRepository(context),
-        new SavingsGoalRepository(context));
+        new SavingsGoalRepository(context),
+        new FixedBusinessDateProvider(DateOnly.FromDateTime(DateTime.Today)));
+
+    private sealed class FixedBusinessDateProvider(DateOnly today) : IBusinessDateProvider
+    {
+        public DateOnly Today { get; } = today;
+        public DateOnly GetDate(DateTimeOffset instant) => Today;
+    }
 
     private static User User(string email) => new()
     {
