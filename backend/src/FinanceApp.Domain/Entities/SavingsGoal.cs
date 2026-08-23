@@ -25,10 +25,16 @@ public class SavingsGoal : BaseEntity
     public ICollection<SavingsGoalWithdrawal> Withdrawals { get; set; } = new List<SavingsGoalWithdrawal>();
 
     public ICollection<EmergencyFundRestoration> Restorations { get; set; } = new List<EmergencyFundRestoration>();
+    public ICollection<SavingsReplenishment> Replenishments { get; set; } = new List<SavingsReplenishment>();
     // Calculadas en memoria
     public decimal ProgressPercentage => TargetAmount > 0
         ? Math.Min((CurrentAmount / TargetAmount) * 100, 100)
         : 0;
 
     public decimal RemainingAmount => Math.Max(TargetAmount - CurrentAmount, 0);
+
+    public decimal TotalPendingReplenishment =>
+        Replenishments
+            .Where(r => r.Status is ReplenishmentStatus.Active or ReplenishmentStatus.Paused)
+            .Sum(r => r.PendingAmount);
 }

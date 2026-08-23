@@ -1,3 +1,5 @@
+using FinanceApp.Domain.Enums;
+
 namespace FinanceApp.Domain.Entities;
 
 /// <summary>
@@ -14,9 +16,21 @@ public class SavingsGoalContribution : BaseEntity
     public Guid? EmergencyFundRestorationId { get; set; }
     public Guid? SourceAccountId { get; set; }
 
+    /// <summary>
+    /// FK opcional — poblado cuando este aporte es un débito (automático o
+    /// manual) de una SavingsReplenishment. Mismo patrón que
+    /// EmergencyFundRestorationId: reusa este ledger en vez de una tabla
+    /// de historial paralela.
+    /// </summary>
+    public Guid? SavingsReplenishmentId { get; set; }
+
+    /// <summary>Solo tiene sentido cuando SavingsReplenishmentId no es null.</summary>
+    public DebitType? DebitType { get; set; }
+
     /// <summary>Correlaciona un aporte financiado o una reasignación.</summary>
     public Guid? OperationId { get; set; }
     // Propiedad de navegación
     public SavingsGoal SavingsGoal { get; set; } = null!;
     public EmergencyFundRestoration? EmergencyFundRestoration { get; set; }
+    public SavingsReplenishment? SavingsReplenishment { get; set; }
 }
