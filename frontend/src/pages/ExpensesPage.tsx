@@ -9,6 +9,7 @@ import { ExpenseForm } from '../features/expenses/components/ExpenseForm';
 import { ExpensesByCategoryChart } from '../components/dashboard/ExpensesByCategoryChart';
 import { MonthYearSelector } from '../features/dashboard/components/MonthYearSelector';
 import { useDashboardExpensesByCategory } from '../features/dashboard/hooks/useDashboard';
+import { useProfile } from '../features/profile/hooks/useProfile';
 import {
   Button,
   Card,
@@ -37,6 +38,31 @@ export function ExpensesPage() {
   const pageSize = 20;
 
   const [categoryYear, setCategoryYear] = useState(today.getFullYear());
+  const { data: profile } = useProfile();
+  const [categoryCycleInitialized, setCategoryCycleInitialized] = useState(false);
+
+  // El donut usa la misma ventana de "ciclo actual" (mes de pago -> mes de
+  // pago) que Presupuesto y el Dashboard actual, no el mes calendario.
+  // Sin este ajuste, si hoy es anterior al día de pago, el selector
+  // arranca en el mes calendario mientras el backend calcula el ciclo
+  // anterior, y la consulta cae en un rango sin gastos todavía.
+  useEffect(() => {
+    if (categoryCycleInitialized || profile === undefined) return;
+    setCategoryCycleInitialized(true);
+    const paydayDay = profile?.paydayDay;
+    if (paydayDay == null) return;
+
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+    const daysInCurrentMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const cycleStartDay = Math.min(paydayDay, daysInCurrentMonth);
+
+    if (today.getDate() < cycleStartDay) {
+      setCategoryMonth(currentMonth === 1 ? 12 : currentMonth - 1);
+      setCategoryYear(currentMonth === 1 ? currentYear - 1 : currentYear);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, categoryCycleInitialized]);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { data: availableTags = [] } = useTags();
