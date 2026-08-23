@@ -190,8 +190,35 @@ export function ExpensesPage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card noPadding className="overflow-hidden lg:col-span-2">
+      <div className="flex flex-col gap-6">
+        <Card className="!rounded-[28px] max-w-2xl">
+          <CardHeader title="Por categoría" subtitle="Distribución del mes seleccionado" />
+          <div className="mb-4">
+            <MonthYearSelector
+              month={categoryMonth}
+              year={categoryYear}
+              onChange={(m, y) => {
+                setCategoryMonth(m);
+                setCategoryYear(y);
+              }}
+            />
+          </div>
+          {isLoadingCategory ? (
+            <div className="flex flex-col items-center gap-3 p-8 text-finflow-muted">
+              <Spinner />
+              <span className="text-sm">Cargando categorías...</span>
+            </div>
+          ) : isErrorCategory ? (
+            <div className="flex flex-col items-center gap-2 p-8 text-center text-finflow-rust">
+              <AlertCircle className="h-6 w-6" strokeWidth={2} />
+              <span className="text-sm font-medium">Error al cargar categorías.</span>
+            </div>
+          ) : categoryData ? (
+            <ExpensesByCategoryChart data={categoryData} />
+          ) : null}
+        </Card>
+
+        <Card noPadding className="overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center gap-3 p-12 text-finflow-muted">
               <Spinner />
@@ -312,33 +339,6 @@ export function ExpensesPage() {
               )}
             </>
           )}
-        </Card>
-
-        <Card className="!rounded-[28px]">
-          <CardHeader title="Por categoría" subtitle="Distribución del mes seleccionado" />
-          <div className="mb-4">
-            <MonthYearSelector
-              month={categoryMonth}
-              year={categoryYear}
-              onChange={(m, y) => {
-                setCategoryMonth(m);
-                setCategoryYear(y);
-              }}
-            />
-          </div>
-          {isLoadingCategory ? (
-            <div className="flex flex-col items-center gap-3 p-8 text-finflow-muted">
-              <Spinner />
-              <span className="text-sm">Cargando categorías...</span>
-            </div>
-          ) : isErrorCategory ? (
-            <div className="flex flex-col items-center gap-2 p-8 text-center text-finflow-rust">
-              <AlertCircle className="h-6 w-6" strokeWidth={2} />
-              <span className="text-sm font-medium">Error al cargar categorías.</span>
-            </div>
-          ) : categoryData ? (
-            <ExpensesByCategoryChart data={categoryData} />
-          ) : null}
         </Card>
       </div>
 
