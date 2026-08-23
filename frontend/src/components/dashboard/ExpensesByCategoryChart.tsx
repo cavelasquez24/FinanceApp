@@ -19,8 +19,8 @@ export function ExpensesByCategoryChart({ data }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative h-[220px] w-full">
+    <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
+      <div className="relative mx-auto h-[220px] w-[220px] shrink-0 lg:mx-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -63,17 +63,17 @@ export function ExpensesByCategoryChart({ data }: Props) {
       </div>
 
       {/* Leyenda */}
-      <div className="space-y-2">
+      <div className="grid flex-1 grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2 lg:border-l lg:border-[#EFEAE2] lg:pl-8">
         {data.categories.map((cat) => (
           <div key={cat.categoryName} className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <div
-                className="h-2.5 w-2.5 rounded-full"
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ backgroundColor: cat.categoryColor }}
               />
-              <span className="text-finflow-dark">{cat.categoryName}</span>
+              <span className="truncate text-finflow-dark">{cat.categoryName}</span>
             </div>
-            <div className="flex items-center gap-2 text-finflow-muted">
+            <div className="flex shrink-0 items-center gap-2 text-finflow-muted">
               <span>{currency(cat.amount)}</span>
               <span className="text-xs">({cat.percentage.toFixed(0)}%)</span>
             </div>

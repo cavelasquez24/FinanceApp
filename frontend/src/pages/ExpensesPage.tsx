@@ -191,18 +191,21 @@ export function ExpensesPage() {
       </Card>
 
       <div className="flex flex-col gap-6">
-        <Card className="!rounded-[28px] max-w-2xl">
-          <CardHeader title="Por categoría" subtitle="Distribución del mes seleccionado" />
-          <div className="mb-4">
-            <MonthYearSelector
-              month={categoryMonth}
-              year={categoryYear}
-              onChange={(m, y) => {
-                setCategoryMonth(m);
-                setCategoryYear(y);
-              }}
-            />
-          </div>
+        <Card className="!rounded-[28px]">
+          <CardHeader
+            title="Por categoría"
+            subtitle="Distribución del mes seleccionado"
+            action={
+              <MonthYearSelector
+                month={categoryMonth}
+                year={categoryYear}
+                onChange={(m, y) => {
+                  setCategoryMonth(m);
+                  setCategoryYear(y);
+                }}
+              />
+            }
+          />
           {isLoadingCategory ? (
             <div className="flex flex-col items-center gap-3 p-8 text-finflow-muted">
               <Spinner />
