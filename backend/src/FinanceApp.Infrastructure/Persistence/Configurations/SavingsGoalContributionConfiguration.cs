@@ -36,6 +36,16 @@ public class SavingsGoalContributionConfiguration : IEntityTypeConfiguration<Sav
             .HasColumnName("emergency_fund_restoration_id")
             .IsRequired(false);
 
+        builder.Property(c => c.SavingsReplenishmentId)
+            .HasColumnName("savings_replenishment_id")
+            .IsRequired(false);
+
+        builder.Property(c => c.DebitType)
+            .HasColumnName("debit_type")
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired(false);
+
         builder.Property(c => c.OperationId)
             .HasColumnName("operation_id")
             .IsRequired(false);
@@ -72,6 +82,14 @@ public class SavingsGoalContributionConfiguration : IEntityTypeConfiguration<Sav
             .HasForeignKey(c => c.EmergencyFundRestorationId)
             .OnDelete(DeleteBehavior.SetNull);
         builder.HasIndex(c => c.EmergencyFundRestorationId);
+
+        builder.HasOne(c => c.SavingsReplenishment)
+            .WithMany(r => r.Contributions)
+            .HasForeignKey(c => c.SavingsReplenishmentId)
+            .OnDelete(DeleteBehavior.SetNull);
+        builder.HasIndex(c => c.SavingsReplenishmentId)
+            .HasDatabaseName("idx_savings_goal_contributions_replenishment_id")
+            .HasFilter("savings_replenishment_id IS NOT NULL");
         builder.HasIndex(c => c.OperationId)
             .HasDatabaseName("idx_savings_goal_contributions_operation_id")
             .HasFilter("operation_id IS NOT NULL");

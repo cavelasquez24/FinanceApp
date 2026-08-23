@@ -27,8 +27,16 @@ public class SavingsReplenishment : BaseEntity
     public DateOnly? CompletedAt { get; set; }
     public DateOnly? LastDebitAt { get; set; }
 
+    public User User { get; set; } = null!;
     public SavingsGoal SavingsGoal { get; set; } = null!;
     public FinancialAccount SourceAccount { get; set; } = null!;
+
+    /// <summary>
+    /// Historial de débitos — cada aporte que repone este plan se registra
+    /// como SavingsGoalContribution (mismo ledger que EmergencyFundRestoration),
+    /// no en una tabla paralela.
+    /// </summary>
+    public ICollection<SavingsGoalContribution> Contributions { get; set; } = new List<SavingsGoalContribution>();
 
     public decimal PendingAmount => Math.Max(AmountTaken - AmountReplenished, 0);
 }
