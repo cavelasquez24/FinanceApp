@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CreditCard, PiggyBank, TrendingUp, Wallet } from 'lucide-react';
 import { useAnalytics } from '../features/analytics/hooks/useAnalytics';
+import { useCurrentDashboard } from '../features/dashboard/hooks/useCurrentDashboard';
 import { AnalyticsSectionShell } from '../features/analytics/components/AnalyticsSectionShell';
+import { Card } from '../components/ui';
+import { formatCurrency } from '../utils/formatCurrency';
 import { FinancialHealthScore } from '../features/analytics/components/FinancialHealthScore';
 import { HealthScoreBreakdown } from '../features/analytics/components/HealthScoreBreakdown';
 import { NetWorthChart } from '../features/analytics/components/NetWorthChart';
@@ -70,6 +73,11 @@ export function AnalyticsPage() {
     budgetVsActual,
   } = useAnalytics(month, year);
 
+  // Movido desde CurrentDashboardPage — es análisis retrospectivo del ciclo
+  // (breakdown de porcentajes), no acción diaria. Reutiliza el mismo hook
+  // /api/currentdashboard que ya consumía /inicio, en paralelo a useAnalytics.
+  const currentDashboard = useCurrentDashboard();
+
   return (
     <div className="space-y-6 bg-finflow-cream p-6">
       {/* Header */}
@@ -82,6 +90,70 @@ export function AnalyticsPage() {
         </div>
         <MonthYearPicker month={month} year={year} onChange={(m, y) => { setMonth(m); setYear(y); }} />
       </div>
+
+      {/* Métricas del ciclo actual — movido desde /inicio */}
+      <AnalyticsSectionShell
+        title="Métricas del ciclo actual"
+        subtitle={currentDashboard.data?.cycleLabel}
+        isLoading={currentDashboard.isLoading}
+      >
+        {currentDashboard.data && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {(
+                [
+                  { label: 'Flujo de caja del ciclo', value: currentDashboard.data.cycleCashFlow, icon: Wallet, color: '#5C7A99' },
+                  { label: 'Ingreso del ciclo', value: currentDashboard.data.cycleIncome, icon: TrendingUp, badgeClassName: 'bg-finflow-green/10 text-finflow-green' },
+                  { label: 'Gasto bruto del ciclo', value: currentDashboard.data.cycleExpenses, icon: Wallet, color: '#C97B63' },
+                  { label: 'Reembolsos recibidos', value: currentDashboard.data.cycleReimbursements, icon: Wallet, color: '#5C7A99' },
+                  { label: 'Gasto neto personal', value: currentDashboard.data.cycleNetExpenses, icon: Wallet, color: '#2C2A29' },
+                  { label: 'Saldo en cuentas de ahorro', value: currentDashboard.data.savingsBalance, icon: PiggyBank, color: '#8FA888' },
+                  { label: 'Inversiones', value: currentDashboard.data.investmentBalance, icon: TrendingUp, color: '#5C7A99' },
+                  { label: 'Deuda pendiente', value: currentDashboard.data.debtBalance, icon: CreditCard, badgeClassName: 'bg-finflow-amber/10 text-finflow-amber' },
+                ] satisfies {
+                  label: string;
+                  value: number;
+                  icon: typeof Wallet;
+                  color?: string;
+                  badgeClassName?: string;
+                }[]
+              ).map(({ label, value, icon: Icon, color, badgeClassName }) => (
+                <Card key={label} className="!rounded-[22px] !p-5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-finflow-muted">{label}</span>
+                    <span
+                      className={`rounded-xl p-2 ${badgeClassName ?? ''}`}
+                      style={badgeClassName ? undefined : { backgroundColor: `${color}18`, color }}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </span>
+                  </div>
+                  <p className="mt-4 text-xl font-semibold text-finflow-dark">{formatCurrency(value)}</p>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mt-6">
+              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-finflow-muted">
+                Asignación del ingreso
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <CycleItem label="Gasto bruto" value={currentDashboard.data.cycleExpenses} />
+                <CycleItem label="Reembolsos" value={-currentDashboard.data.cycleReimbursements} />
+                <CycleItem label="Consumo neto" value={currentDashboard.data.cycleNetExpenses} />
+                <CycleItem label="Ahorro" value={currentDashboard.data.cycleSavings} inDevelopment />
+                <CycleItem label="Inversión" value={currentDashboard.data.cycleInvestments} />
+                <CycleItem label="Pagos de deuda" value={currentDashboard.data.cycleDebtPayments} />
+              </div>
+            </div>
+          </>
+        )}
+        {currentDashboard.isError && (
+          <p className="py-4 text-center text-xs text-finflow-rust">
+            No se pudo cargar el resumen del ciclo actual.
+          </p>
+        )}
+      </AnalyticsSectionShell>
 
       {/* Score de salud financiera */}
       <AnalyticsSectionShell
@@ -180,6 +252,30 @@ export function AnalyticsPage() {
           <p className="py-4 text-center text-xs text-finflow-rust">Sin períodos presupuestados.</p>
         )}
       </AnalyticsSectionShell>
+    </div>
+  );
+}
+
+// Movido desde CurrentDashboardPage junto con la sección "Asignación del ingreso".
+function CycleItem({
+  label,
+  value,
+  inDevelopment = false,
+}: {
+  label: string;
+  value: number;
+  inDevelopment?: boolean;
+}) {
+  return (
+    <div className="rounded-2xl bg-[#F3F1EC]/70 p-4">
+      <p className="text-xs text-finflow-muted">{label}</p>
+      <p
+        className={`mt-1 text-lg font-semibold text-finflow-dark ${inDevelopment ? 'opacity-50' : ''}`}
+        title={inDevelopment ? 'En desarrollo — todavía no se calcula por ciclo' : undefined}
+      >
+        {formatCurrency(value)}
+      </p>
+      {inDevelopment && <p className="mt-0.5 text-[10px] text-finflow-muted">En desarrollo</p>}
     </div>
   );
 }

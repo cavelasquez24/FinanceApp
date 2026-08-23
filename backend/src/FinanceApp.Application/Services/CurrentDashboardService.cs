@@ -73,9 +73,10 @@ public class CurrentDashboardService : ICurrentDashboardService
         // Las metas son seguimiento manual y no forman parte del flujo de caja.
         var cashFlow = income + reimbursements - expenses - investments - debtPayments;
         var budget = await _budgetService.GetByPeriodAsync(userId, cycleMonth, cycleYear, cancellationToken);
-        var budgetAvailable = budget is null
-            ? 0m
-            : (await _budgetService.GetStatusAsync(budget.Id, userId, cancellationToken)).TotalRemaining;
+        var budgetStatus = budget is null
+            ? null
+            : await _budgetService.GetStatusAsync(budget.Id, userId, cancellationToken);
+        var budgetAvailable = budgetStatus?.TotalRemaining ?? 0m;
         var daysRemaining = Math.Max(0, end.DayNumber - today.DayNumber + 1);
 
         return new CurrentDashboardDto
@@ -95,6 +96,8 @@ public class CurrentDashboardService : ICurrentDashboardService
             BudgetAvailable = budgetAvailable,
             // Compatibilidad temporal: ahora significa disponible presupuestario, no saldo físico.
             CycleAvailable = budgetAvailable,
+            PercentageUsed = budgetStatus?.PercentageUsed,
+            IsOverBudget = budgetStatus?.IsOverBudget,
             DaysRemaining = daysRemaining,
             SuggestedDailyAvailable = daysRemaining > 0
                 ? Math.Round(budgetAvailable / daysRemaining, 2)

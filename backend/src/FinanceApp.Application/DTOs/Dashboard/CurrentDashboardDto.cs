@@ -24,6 +24,14 @@ public class CurrentDashboardDto
     public decimal CycleInvestments { get; set; }
     public decimal CycleDebtPayments { get; set; }
     public decimal CycleAvailable { get; set; }
+
+    /// <summary>
+    /// Porcentaje (0-100) del presupuesto ya consumido, calculado por
+    /// BudgetService sobre categorías presupuestadas + rollover. Null si el
+    /// usuario no tiene presupuesto configurado para el ciclo actual.
+    /// </summary>
+    public decimal? PercentageUsed { get; set; }
+    public bool? IsOverBudget { get; set; }
     public decimal SuggestedDailyAvailable { get; set; }
     public int DaysRemaining { get; set; }
 }

@@ -21,6 +21,8 @@ export interface CurrentDashboard {
   cycleCashFlow: number;
   budgetAvailable: number;
   cycleAvailable: number;
+  percentageUsed: number | null;
+  isOverBudget: boolean | null;
   suggestedDailyAvailable: number;
   daysRemaining: number;
 }
