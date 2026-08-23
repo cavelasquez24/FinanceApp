@@ -10,5 +10,12 @@ public enum SavingsWithdrawalReason
     Consumed,
     ReallocatedToOtherGoal,
     ReallocatedToLiquid,
-    Correction
+    Correction,
+
+    /// <summary>
+    /// Préstamo temporal a sí mismo — el dinero sale hacia una cuenta
+    /// líquida (DestinationAccountId obligatorio) con la intención de
+    /// reponerlo vía un SavingsReplenishment. Neutro en patrimonio.
+    /// </summary>
+    TemporaryLoan
 }

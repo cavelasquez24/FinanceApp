@@ -34,4 +34,13 @@ public class CurrentDashboardDto
     public bool? IsOverBudget { get; set; }
     public decimal SuggestedDailyAvailable { get; set; }
     public int DaysRemaining { get; set; }
+
+    /// <summary>
+    /// Suma de Min(MonthlyDebitAmount, PendingAmount) de los planes de
+    /// reposición Active + AutoDebitEnabled + no pausados del usuario.
+    /// Se muestra como compromiso separado — NO se resta de
+    /// BudgetAvailable, que sigue siendo únicamente lo que calcula
+    /// BudgetService.
+    /// </summary>
+    public decimal CycleReplenishmentCommitment { get; set; }
 }

@@ -315,8 +315,12 @@ public class SavingsGoalService : ISavingsGoalService
                 return MapWithdrawal(consumedWithdrawal, goal.CurrentAmount);
             }
 
+            if (dto.Reason == SavingsWithdrawalReason.TemporaryLoan && !dto.DestinationAccountId.HasValue)
+                throw new DomainException("DESTINATION_ACCOUNT_REQUIRED", "Un préstamo temporal requiere la cuenta que recibirá el dinero.");
+
             Guid? destinationAccountId = null;
-            if (dto.Reason == SavingsWithdrawalReason.ReallocatedToLiquid && dto.DestinationAccountId.HasValue)
+            if (dto.Reason is SavingsWithdrawalReason.ReallocatedToLiquid or SavingsWithdrawalReason.TemporaryLoan
+                && dto.DestinationAccountId.HasValue)
             {
                 var destination = await EnsureLiquidAccountAsync(userId, dto.DestinationAccountId.Value, ct);
                 if (destination.Id == savingsAccount.Id)

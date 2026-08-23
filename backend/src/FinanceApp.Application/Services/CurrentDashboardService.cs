@@ -16,6 +16,7 @@ public class CurrentDashboardService : ICurrentDashboardService
     private readonly IUserRepository _userRepository;
     private readonly IFinancialPositionService _financialPositionService;
     private readonly IBudgetService _budgetService;
+    private readonly ISavingsReplenishmentRepository _replenishmentRepository;
     private readonly IBusinessDateProvider _businessDateProvider;
 
     public CurrentDashboardService(
@@ -29,6 +30,7 @@ public class CurrentDashboardService : ICurrentDashboardService
         IUserRepository userRepository,
         IFinancialPositionService financialPositionService,
         IBudgetService budgetService,
+        ISavingsReplenishmentRepository replenishmentRepository,
         IBusinessDateProvider businessDateProvider)
     {
         _incomeRepository = incomeRepository;
@@ -41,6 +43,7 @@ public class CurrentDashboardService : ICurrentDashboardService
         _userRepository = userRepository;
         _financialPositionService = financialPositionService;
         _budgetService = budgetService;
+        _replenishmentRepository = replenishmentRepository;
         _businessDateProvider = businessDateProvider;
     }
 
@@ -79,6 +82,10 @@ public class CurrentDashboardService : ICurrentDashboardService
         var budgetAvailable = budgetStatus?.TotalRemaining ?? 0m;
         var daysRemaining = Math.Max(0, end.DayNumber - today.DayNumber + 1);
 
+        var activeReplenishments = await _replenishmentRepository.GetActiveForAutoDebitAsync(userId, cancellationToken);
+        var cycleReplenishmentCommitment = activeReplenishments
+            .Sum(r => Math.Min(r.MonthlyDebitAmount, r.PendingAmount));
+
         return new CurrentDashboardDto
         {
             CycleStart = start,
@@ -98,6 +105,7 @@ public class CurrentDashboardService : ICurrentDashboardService
             CycleAvailable = budgetAvailable,
             PercentageUsed = budgetStatus?.PercentageUsed,
             IsOverBudget = budgetStatus?.IsOverBudget,
+            CycleReplenishmentCommitment = cycleReplenishmentCommitment,
             DaysRemaining = daysRemaining,
             SuggestedDailyAvailable = daysRemaining > 0
                 ? Math.Round(budgetAvailable / daysRemaining, 2)

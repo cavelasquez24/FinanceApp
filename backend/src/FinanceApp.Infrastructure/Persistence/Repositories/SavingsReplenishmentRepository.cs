@@ -15,6 +15,7 @@ public class SavingsReplenishmentRepository
         _context.SavingsReplenishments
             .Include(r => r.SavingsGoal)
             .Include(r => r.SourceAccount)
+            .Include(r => r.Contributions.Where(c => c.DeletedAt == null))
             .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId && r.DeletedAt == null, cancellationToken);
 
     public async Task<IReadOnlyList<SavingsReplenishment>> GetByUserIdAsync(
@@ -22,6 +23,7 @@ public class SavingsReplenishmentRepository
         await _context.SavingsReplenishments
             .Include(r => r.SavingsGoal)
             .Include(r => r.SourceAccount)
+            .Include(r => r.Contributions.Where(c => c.DeletedAt == null))
             .Where(r => r.UserId == userId && r.DeletedAt == null)
             .OrderBy(r => r.Status == ReplenishmentStatus.Active ? 0 : 1)
             .ThenByDescending(r => r.CreatedAt)
@@ -30,7 +32,9 @@ public class SavingsReplenishmentRepository
     public async Task<IReadOnlyList<SavingsReplenishment>> GetByGoalIdAsync(
         Guid goalId, Guid userId, CancellationToken cancellationToken = default) =>
         await _context.SavingsReplenishments
+            .Include(r => r.SavingsGoal)
             .Include(r => r.SourceAccount)
+            .Include(r => r.Contributions.Where(c => c.DeletedAt == null))
             .Where(r => r.SavingsGoalId == goalId && r.UserId == userId && r.DeletedAt == null)
             .OrderBy(r => r.Status == ReplenishmentStatus.Active ? 0 : 1)
             .ThenByDescending(r => r.CreatedAt)

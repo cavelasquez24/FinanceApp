@@ -72,6 +72,7 @@ public static class DependencyInjection
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IEmergencyFundRestorationService, EmergencyFundRestorationService>();
+        services.AddScoped<ISavingsReplenishmentService, SavingsReplenishmentService>();
         services.AddScoped<IAccountReconciliationService, AccountReconciliationService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
 
