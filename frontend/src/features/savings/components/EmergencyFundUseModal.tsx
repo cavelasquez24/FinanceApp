@@ -397,7 +397,7 @@ function PlanModeButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl px-3 py-2.5 text-left transition ${active ? "bg-white text-[#2C2A29] shadow-sm" : "text-[#7C756E] hover:text-[#2C2A29]"}`}
+      className={`rounded-xl px-3 py-2.5 text-left transition ${active ? "bg-white text-finflow-dark shadow-sm" : "text-finflow-muted hover:text-finflow-dark"}`}
     >
       <span className="block text-sm font-semibold">{title}</span>
       <span className="block text-xs font-normal">{subtitle}</span>

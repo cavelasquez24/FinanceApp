@@ -11,21 +11,21 @@ export function ExpenseIntelligencePanel({ data }: Props) {
   return (
     <div className="grid gap-6 lg:grid-cols-3">
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#7C756E]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-finflow-muted">
           Top Comercios
         </p>
         <TopMerchantsTable merchants={data.topMerchants} />
       </div>
 
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#7C756E]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-finflow-muted">
           Gastos Recurrentes
         </p>
         <RecurringExpensesList expenses={data.recurringExpenses} />
       </div>
 
       <div>
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#7C756E]">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-finflow-muted">
           Deriva por Categoría
         </p>
         <CategoryDriftChart drift={data.categoryDrift} />

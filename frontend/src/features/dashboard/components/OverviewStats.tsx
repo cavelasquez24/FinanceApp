@@ -17,7 +17,7 @@ function ChangeBadge({ value, invert = false }: { value: number; invert?: boolea
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-        isPositive ? 'bg-[#8FA888]/15 text-[#5F7A58]' : 'bg-[#C97B63]/15 text-[#C97B63]'
+        isPositive ? 'bg-finflow-green/15 text-[#5F7A58]' : 'bg-finflow-rust/15 text-finflow-rust'
       }`}
     >
       <Icon className="h-3 w-3" strokeWidth={2.5} />
@@ -40,8 +40,8 @@ function Kpi({ label, value, change, changeInvert, icon, accent }: KpiProps) {
     <Card className="!rounded-[28px]">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">{label}</p>
-          <p className="mt-2 font-serif text-2xl font-medium text-[#2C2A29]">{value}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-finflow-muted">{label}</p>
+          <p className="mt-2 font-serif text-2xl font-medium text-finflow-dark">{value}</p>
           {change !== undefined && (
             <div className="mt-2">
               <ChangeBadge value={change} invert={changeInvert} />
@@ -120,26 +120,26 @@ export function OverviewStats({ data }: Props) {
       {/* Ratios y contexto */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="!rounded-[28px]">
-          <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Disponible / ingreso</p>
-          <p className="mt-2 font-serif text-xl font-medium text-[#2C2A29]">
+          <p className="text-xs font-medium uppercase tracking-wide text-finflow-muted">Disponible / ingreso</p>
+          <p className="mt-2 font-serif text-xl font-medium text-finflow-dark">
             {data.savingsRate.toFixed(1)}%
           </p>
         </Card>
         <Card className="!rounded-[28px]">
           <div className="flex items-center gap-2">
-            <LineChartIcon className="h-4 w-4 text-[#5C7A99]" strokeWidth={2} />
-            <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Inversiones</p>
+            <LineChartIcon className="h-4 w-4 text-finflow-blue" strokeWidth={2} />
+            <p className="text-xs font-medium uppercase tracking-wide text-finflow-muted">Inversiones</p>
           </div>
-          <p className="mt-2 font-serif text-xl font-medium text-[#2C2A29]">
+          <p className="mt-2 font-serif text-xl font-medium text-finflow-dark">
             {currency(data.totalInvestments)}
           </p>
         </Card>
         <Card className="!rounded-[28px]">
           <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-[#D9A46B]" strokeWidth={2} />
-            <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">Pagos de deuda</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-finflow-muted">Pagos de deuda</p>
           </div>
-          <p className="mt-2 font-serif text-xl font-medium text-[#2C2A29]">
+          <p className="mt-2 font-serif text-xl font-medium text-finflow-dark">
             {currency(data.totalDebtPayments)}
           </p>
           {data.changes.debtPaymentsChange !== undefined && (

@@ -20,7 +20,7 @@ interface Props {
 }
 
 const selectClassName =
-  'w-full rounded-xl border border-[#EFEAE2] bg-white/70 px-3 py-2.5 text-sm text-[#2C2A29] backdrop-blur-sm transition-colors focus:border-[#5C7A99] focus:outline-none focus:ring-2 focus:ring-[#5C7A99]/20';
+  'w-full rounded-xl border border-[#EFEAE2] bg-white/70 px-3 py-2.5 text-sm text-finflow-dark backdrop-blur-sm transition-colors focus:border-finflow-blue focus:outline-none focus:ring-2 focus:ring-finflow-blue/20';
 
 export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
   const isEditMode = Boolean(expense);
@@ -119,7 +119,7 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-[#2C2A29]">Categoría</label>
+        <label className="text-sm font-medium text-finflow-dark">Categoría</label>
         {isLoadingCategories ? (
           <div className="flex h-[42px] items-center rounded-xl border border-[#EFEAE2] bg-white/70 px-3">
             <Spinner size="sm" />
@@ -132,7 +132,7 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
             ))}
           </select>
         )}
-        {errors.categoryId && <span className="text-xs text-[#C97B63]">{errors.categoryId.message}</span>}
+        {errors.categoryId && <span className="text-xs text-finflow-rust">{errors.categoryId.message}</span>}
       </div>
 
         <Input
@@ -149,7 +149,7 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
         <Input label="Fecha" type="date" error={errors.date?.message} {...register('date')} />
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-[#2C2A29]">Método de Pago</label>
+          <label className="text-sm font-medium text-finflow-dark">Método de Pago</label>
           <select {...register('paymentMethod')} className={selectClassName}>
             <option value="cash">Efectivo</option>
             <option value="debit_card">Tarjeta de Débito</option>
@@ -158,13 +158,13 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
             <option value="other">Otro</option>
           </select>
           {errors.paymentMethod && (
-            <span className="text-xs text-[#C97B63]">{errors.paymentMethod.message}</span>
+            <span className="text-xs text-finflow-rust">{errors.paymentMethod.message}</span>
           )}
         </div>
       </div>
       {paymentMethod === 'credit_card' ? (
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-[#2C2A29]">Tarjeta utilizada</label>
+          <label className="text-sm font-medium text-finflow-dark">Tarjeta utilizada</label>
           {isLoadingCreditCards ? (
             <div className="flex h-[42px] items-center rounded-xl border border-[#EFEAE2] bg-white/70 px-3"><Spinner size="sm" /></div>
           ) : (
@@ -173,12 +173,12 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
               {activeCreditCards.map((card) => <option key={card.id} value={card.id}>{card.name} · saldo {card.currentBalance.toFixed(2)}</option>)}
             </select>
           )}
-          {errors.creditCardId && <span className="text-xs text-[#C97B63]">{errors.creditCardId.message}</span>}
-          <p className="text-xs text-[#7C756E]">La compra aumenta gasto y pasivo; no descuenta efectivo.</p>
+          {errors.creditCardId && <span className="text-xs text-finflow-rust">{errors.creditCardId.message}</span>}
+          <p className="text-xs text-finflow-muted">La compra aumenta gasto y pasivo; no descuenta efectivo.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-[#2C2A29]">Pagado desde</label>
+          <label className="text-sm font-medium text-finflow-dark">Pagado desde</label>
           {isLoadingAccounts ? (
             <div className="flex h-[42px] items-center rounded-xl border border-[#EFEAE2] bg-white/70 px-3"><Spinner size="sm" /></div>
           ) : (
@@ -187,10 +187,10 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
                 <option value="">Selecciona una cuenta líquida...</option>
                 {cashAccounts.map((account) => <option key={account.id} value={account.id}>{account.name}{account.isDefault ? ' (predeterminada)' : ''}</option>)}
               </select>
-              <p className="text-xs text-[#7C756E]">La cuenta predeterminada se muestra seleccionada; puedes cambiarla antes de guardar.</p>
+              <p className="text-xs text-finflow-muted">La cuenta predeterminada se muestra seleccionada; puedes cambiarla antes de guardar.</p>
             </>
           )}
-          {errors.accountId && <span className="text-xs text-[#C97B63]">{errors.accountId.message}</span>}
+          {errors.accountId && <span className="text-xs text-finflow-rust">{errors.accountId.message}</span>}
         </div>
       )}
 
@@ -224,20 +224,20 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
             type="checkbox"
             id="isRecurring"
             {...register('isRecurring')}
-            className="h-4 w-4 rounded border-[#EFEAE2] accent-[#5C7A99] focus:ring-2 focus:ring-[#5C7A99]/30"
+            className="h-4 w-4 rounded border-[#EFEAE2] accent-finflow-blue focus:ring-2 focus:ring-finflow-blue/30"
             onChange={(e) => {
               setValue('isRecurring', e.target.checked);
               if (!e.target.checked) setValue('recurrenceType', null);
             }}
           />
-          <label htmlFor="isRecurring" className="text-sm font-medium text-[#2C2A29]">
+          <label htmlFor="isRecurring" className="text-sm font-medium text-finflow-dark">
             Este es un gasto recurrente
           </label>
         </div>
 
         {isRecurring && (
           <div className="mt-4 flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-[#2C2A29]">Frecuencia de repetición</label>
+            <label className="text-sm font-medium text-finflow-dark">Frecuencia de repetición</label>
             <select {...register('recurrenceType')} className={selectClassName}>
               <option value="">Selecciona la frecuencia...</option>
               <option value="daily">Diario</option>
@@ -247,7 +247,7 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
               <option value="yearly">Anual</option>
             </select>
             {errors.recurrenceType && (
-              <span className="text-xs text-[#C97B63]">{errors.recurrenceType.message}</span>
+              <span className="text-xs text-finflow-rust">{errors.recurrenceType.message}</span>
             )}
           </div>
         )}
@@ -257,13 +257,13 @@ export function ExpenseForm({ expense, onSuccess, onCancel }: Props) {
         {onCancel && (
           <Button
             type="button"
-            className="!border !border-[#EFEAE2] !bg-white !text-[#2C2A29] hover:!bg-[#F3F1EC]"
+            className="!border !border-[#EFEAE2] !bg-white !text-finflow-dark hover:!bg-[#F3F1EC]"
             onClick={onCancel}
           >
             Cancelar
           </Button>
         )}
-        <Button type="submit" isLoading={isPending} className="!bg-[#2C2A29] !text-[#FBF9F4] hover:!bg-[#1F1E1D]">
+        <Button type="submit" isLoading={isPending} className="!bg-finflow-dark !text-finflow-cream hover:!bg-[#1F1E1D]">
           {isEditMode ? 'Guardar Cambios' : 'Guardar Gasto'}
         </Button>
       </div>

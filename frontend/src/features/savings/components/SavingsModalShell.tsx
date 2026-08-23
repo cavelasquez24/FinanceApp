@@ -20,26 +20,26 @@ export function SavingsModalShell({
   maxWidth = "max-w-2xl",
 }: ShellProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2C2A29]/55 p-3 backdrop-blur-sm sm:p-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-finflow-dark/55 p-3 backdrop-blur-sm sm:p-5">
       <div
-        className={`max-h-[94vh] w-full ${maxWidth} overflow-y-auto rounded-[30px] border border-[#E8E1D8] bg-[#FBF9F4] shadow-2xl`}
+        className={`max-h-[94vh] w-full ${maxWidth} overflow-y-auto rounded-[30px] border border-[#E8E1D8] bg-finflow-cream shadow-2xl`}
       >
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#E8E1D8] bg-[#FBF9F4]/95 px-6 py-5 backdrop-blur sm:px-8">
+        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#E8E1D8] bg-finflow-cream/95 px-6 py-5 backdrop-blur sm:px-8">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#7A4B3A]">
               {eyebrow}
             </p>
-            <h2 className="font-serif text-2xl font-semibold text-[#2C2A29] sm:text-3xl">
+            <h2 className="font-serif text-2xl font-semibold text-finflow-dark sm:text-3xl">
               {title}
             </h2>
-            <p className="mt-1 max-w-2xl text-sm text-[#7C756E]">
+            <p className="mt-1 max-w-2xl text-sm text-finflow-muted">
               {description}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[#7C756E] transition hover:bg-[#EFEAE2]"
+            className="rounded-full p-2 text-finflow-muted transition hover:bg-[#EFEAE2]"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -71,12 +71,12 @@ export function SavingsModalSection({
           {icon}
         </span>
         <div>
-          <h3 className="font-semibold text-[#2C2A29]">
+          <h3 className="font-semibold text-finflow-dark">
             {number ? `${number}. ` : ""}
             {title}
           </h3>
           {description && (
-            <p className="mt-0.5 text-sm text-[#7C756E]">{description}</p>
+            <p className="mt-0.5 text-sm text-finflow-muted">{description}</p>
           )}
         </div>
       </div>
@@ -119,13 +119,13 @@ export function SavingsMetric({
   tone?: "default" | "warning" | "success";
 }) {
   const tones = {
-    default: "border-[#E8E1D8] bg-[#FBF9F4] text-[#2C2A29]",
+    default: "border-[#E8E1D8] bg-finflow-cream text-finflow-dark",
     warning: "border-amber-200 bg-amber-50 text-amber-900",
     success: "border-[#DDE7D8] bg-[#F3F7F0] text-[#304B38]",
   };
   return (
     <div className={`rounded-2xl border p-3 ${tones[tone]}`}>
-      <span className="block text-xs text-[#7C756E]">{label}</span>
+      <span className="block text-xs text-finflow-muted">{label}</span>
       <strong>{value}</strong>
     </div>
   );

@@ -1,7 +1,7 @@
 import { todayDateOnly } from '../utils/dateOnly';
 import { useEffect, useState, type FormEvent } from 'react';
 import { CreditCard as CreditCardIcon, Landmark, Plus, ReceiptText } from 'lucide-react';
-import { Button, Card, KpiCard, Modal, PageSpinner, Table, TableBody, TableEmpty, TableHead, Td, Th, Tr } from '../components/ui';
+import { Button, Card, KpiCard, Modal, PageHeader, PageSpinner, Table, TableBody, TableEmpty, TableHead, Td, Th, Tr } from '../components/ui';
 import { useAccounts } from '../features/accounts/hooks/useAccounts';
 import { useCategories } from '../features/categories/hooks/useCategories';
 import {
@@ -17,7 +17,7 @@ import type { CreditCard, CreditCardPayment } from '../types/credit-card.types';
 import { formatCurrency } from '../utils/formatCurrency';
 
 const today = () => todayDateOnly();
-const inputClass = 'w-full rounded-xl border border-[#EFEAE2] bg-white px-3 py-2.5 text-sm text-[#2C2A29] focus:border-[#5C7A99] focus:outline-none focus:ring-2 focus:ring-[#5C7A99]/20';
+const inputClass = 'w-full rounded-xl border border-[#EFEAE2] bg-white px-3 py-2.5 text-sm text-finflow-dark focus:border-finflow-blue focus:outline-none focus:ring-2 focus:ring-finflow-blue/20';
 const transactionLabels: Record<string, string> = {
   opening_balance: 'Saldo inicial', purchase: 'Compra', payment: 'Pago', payment_reversal: 'Anulación de pago',
   interest: 'Interés', fee: 'Comisión', refund: 'Reembolso', adjustment: 'Ajuste',
@@ -50,14 +50,13 @@ export default function CreditCardsPage() {
   if (isLoading) return <PageSpinner label="Cargando tarjetas..." />;
 
   return (
-    <div className="min-h-screen space-y-8 bg-[#FBF9F4] p-4 font-sans md:p-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-[#2C2A29]">Tarjetas de crédito</h1>
-          <p className="mt-1 text-sm text-[#7C756E]">Compras, pasivo y pagos sin contabilizar el gasto dos veces</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)} leftIcon={<Plus className="h-4 w-4" />}>Nueva tarjeta</Button>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Patrimonio"
+        title="Tarjetas de crédito"
+        description="Compras, pasivo y pagos sin contabilizar el gasto dos veces"
+        action={<Button onClick={() => setCreateOpen(true)} leftIcon={<Plus className="h-4 w-4" />}>Nueva tarjeta</Button>}
+      />
 
       <div className="grid gap-5 md:grid-cols-3">
         <KpiCard label="Pasivo de tarjetas" value={formatCurrency(totalBalance)} icon={<CreditCardIcon className="h-5 w-5" />} />
@@ -69,23 +68,23 @@ export default function CreditCardsPage() {
         {cards?.map((card) => (
           <Card
             key={card.id}
-            className={`cursor-pointer transition-shadow hover:shadow-md ${selectedId === card.id ? 'ring-2 ring-[#5C7A99]/30' : ''}`}
+            className={`cursor-pointer transition-shadow hover:shadow-md ${selectedId === card.id ? 'ring-2 ring-finflow-blue/30' : ''}`}
             onClick={() => setSelectedId(card.id)}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-semibold text-[#2C2A29]">{card.name}</p>
-                <p className="mt-1 text-xs text-[#7C756E]">Corte día {card.closingDay} · Vence día {card.dueDay}</p>
+                <p className="font-semibold text-finflow-dark">{card.name}</p>
+                <p className="mt-1 text-xs text-finflow-muted">Corte día {card.closingDay} · Vence día {card.dueDay}</p>
               </div>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${card.isActive ? 'bg-[#8FA888]/15 text-[#66805F]' : 'bg-[#EFEAE2] text-[#7C756E]'}`}>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${card.isActive ? 'bg-finflow-green/15 text-[#66805F]' : 'bg-[#EFEAE2] text-finflow-muted'}`}>
                 {card.isActive ? 'Activa' : 'Inactiva'}
               </span>
             </div>
             <div className="mt-6">
-              <p className="text-xs uppercase tracking-wide text-[#7C756E]">Saldo pendiente</p>
-              <p className="mt-1 text-3xl font-semibold text-[#2C2A29]">{formatCurrency(card.currentBalance)}</p>
+              <p className="text-xs uppercase tracking-wide text-finflow-muted">Saldo pendiente</p>
+              <p className="mt-1 text-3xl font-semibold text-finflow-dark">{formatCurrency(card.currentBalance)}</p>
               {card.creditLimit != null && (
-                <p className="mt-2 text-xs text-[#7C756E]">Disponible {formatCurrency(card.availableCredit ?? 0)} de {formatCurrency(card.creditLimit)}</p>
+                <p className="mt-2 text-xs text-finflow-muted">Disponible {formatCurrency(card.availableCredit ?? 0)} de {formatCurrency(card.creditLimit)}</p>
               )}
             </div>
             <div className="mt-6 flex gap-2" onClick={(event) => event.stopPropagation()}>
@@ -96,15 +95,15 @@ export default function CreditCardsPage() {
         ))}
         {!cards?.length && (
           <Card className="lg:col-span-2 xl:col-span-3">
-            <p className="text-center text-sm text-[#7C756E]">Registra tu primera tarjeta para asociarla a compras y controlar su pasivo.</p>
+            <p className="text-center text-sm text-finflow-muted">Registra tu primera tarjeta para asociarla a compras y controlar su pasivo.</p>
           </Card>
         )}
       </section>
 
       <Card noPadding>
         <div className="border-b border-[#EFEAE2] p-6">
-          <h2 className="text-lg font-semibold text-[#2C2A29]">Historial auditable</h2>
-          <p className="mt-1 text-xs text-[#7C756E]">El corte organiza compras; no aparece como movimiento económico.</p>
+          <h2 className="text-lg font-semibold text-finflow-dark">Historial auditable</h2>
+          <p className="mt-1 text-xs text-finflow-muted">El corte organiza compras; no aparece como movimiento económico.</p>
         </div>
         <Table>
           <TableHead><Th>Fecha</Th><Th>Tipo</Th><Th>Descripción</Th><Th className="text-right">Movimiento del pasivo</Th></TableHead>
@@ -114,7 +113,7 @@ export default function CreditCardsPage() {
                 <Td>{transaction.date}</Td>
                 <Td>{transactionLabels[transaction.type] ?? transaction.type}</Td>
                 <Td>{transaction.description}</Td>
-                <Td className={`text-right font-semibold ${transaction.amount < 0 ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
+                <Td className={`text-right font-semibold ${transaction.amount < 0 ? 'text-finflow-green' : 'text-finflow-rust'}`}>
                   {transaction.amount > 0 ? '+' : ''}{formatCurrency(transaction.amount)}
                 </Td>
               </Tr>
@@ -128,8 +127,8 @@ export default function CreditCardsPage() {
 
       <Card noPadding>
         <div className="border-b border-[#EFEAE2] p-6">
-          <h2 className="text-lg font-semibold text-[#2C2A29]">Pagos registrados</h2>
-          <p className="mt-1 text-xs text-[#7C756E]">Una corrección crea una reversión; el pago original permanece visible.</p>
+          <h2 className="text-lg font-semibold text-finflow-dark">Pagos registrados</h2>
+          <p className="mt-1 text-xs text-finflow-muted">Una corrección crea una reversión; el pago original permanece visible.</p>
         </div>
         <Table>
           <TableHead><Th>Fecha</Th><Th>Cuenta</Th><Th>Principal</Th><Th>Comisión</Th><Th>Estado</Th><Th className="text-right">Acción</Th></TableHead>
@@ -172,7 +171,7 @@ export default function CreditCardsPage() {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="flex flex-col gap-1.5 text-sm font-medium text-[#2C2A29]"><span>{label}</span>{children}</label>;
+  return <label className="flex flex-col gap-1.5 text-sm font-medium text-finflow-dark"><span>{label}</span>{children}</label>;
 }
 
 function CreateCardForm({ onDone }: { onDone: () => void }) {
@@ -200,7 +199,7 @@ function CreateCardForm({ onDone }: { onDone: () => void }) {
         <Field label="Día de vencimiento"><input required min="1" max="31" type="number" className={inputClass} value={form.dueDay} onChange={(e) => set('dueDay', e.target.value)} /></Field>
       </div>
       <Field label="Notas"><input maxLength={1000} className={inputClass} value={form.notes} onChange={(e) => set('notes', e.target.value)} /></Field>
-      <p className="text-xs text-[#7C756E]">El saldo inicial crea pasivo, no un gasto histórico.</p>
+      <p className="text-xs text-finflow-muted">El saldo inicial crea pasivo, no un gasto histórico.</p>
       <div className="flex justify-end"><Button type="submit" isLoading={isPending}>Registrar tarjeta</Button></div>
     </form>
   );
@@ -224,7 +223,7 @@ function PaymentForm({ card, onDone }: { card: CreditCard; onDone: () => void })
   };
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div className="rounded-xl bg-[#F3F1EC] p-3 text-sm text-[#7C756E]">Saldo actual: <strong className="text-[#2C2A29]">{formatCurrency(card.currentBalance)}</strong></div>
+      <div className="rounded-xl bg-[#F3F1EC] p-3 text-sm text-finflow-muted">Saldo actual: <strong className="text-finflow-dark">{formatCurrency(card.currentBalance)}</strong></div>
       <Field label="Cuenta bancaria origen"><select required className={inputClass} value={form.sourceAccountId} onChange={(e) => setForm({ ...form, sourceAccountId: e.target.value })}><option value="">Selecciona una cuenta...</option>{cashAccounts.map((account) => <option key={account.id} value={account.id}>{account.name} · {formatCurrency(account.currentBalance)}</option>)}</select></Field>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Principal"><input required min="0.01" max={card.currentBalance} step="0.01" type="number" className={inputClass} value={form.principal} onChange={(e) => setForm({ ...form, principal: e.target.value })} /></Field>
@@ -233,7 +232,7 @@ function PaymentForm({ card, onDone }: { card: CreditCard; onDone: () => void })
       {commission > 0 && <Field label="Categoría de la comisión"><select required className={inputClass} value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}><option value="">Selecciona una categoría...</option>{categories?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></Field>}
       <Field label="Fecha"><input required max={today()} type="date" className={inputClass} value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></Field>
       <Field label="Nota"><input maxLength={1000} className={inputClass} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
-      <p className="text-xs text-[#7C756E]">El principal reduce banco y pasivo. Solo la comisión crea un gasto nuevo.</p>
+      <p className="text-xs text-finflow-muted">El principal reduce banco y pasivo. Solo la comisión crea un gasto nuevo.</p>
       <div className="flex justify-end"><Button type="submit" isLoading={isPending}>Registrar pago</Button></div>
     </form>
   );
@@ -257,7 +256,7 @@ function ChargeForm({ card, onDone }: { card: CreditCard; onDone: () => void }) 
         <Field label="Fecha"><input required max={today()} type="date" className={inputClass} value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></Field>
       </div>
       <Field label="Descripción"><input maxLength={300} className={inputClass} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
-      <p className="text-xs text-[#7C756E]">Este cargo crea un gasto explícito y aumenta el pasivo de la tarjeta.</p>
+      <p className="text-xs text-finflow-muted">Este cargo crea un gasto explícito y aumenta el pasivo de la tarjeta.</p>
       <div className="flex justify-end"><Button type="submit" isLoading={isPending}>Registrar cargo</Button></div>
     </form>
   );
@@ -277,13 +276,13 @@ function VoidPaymentForm({ payment, onDone }: { payment: CreditCardPayment; onDo
   };
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div className="rounded-xl bg-[#C97B63]/10 p-3 text-sm text-[#7C756E]">
+      <div className="rounded-xl bg-finflow-rust/10 p-3 text-sm text-finflow-muted">
         Se restaurarán {formatCurrency(payment.principalAmount + payment.commissionAmount)} en la cuenta origen,
         el principal volverá al pasivo y la comisión dejará de contar como gasto.
       </div>
       <Field label="Fecha de corrección"><input required max={today()} type="date" className={inputClass} value={date} onChange={(event) => setDate(event.target.value)} /></Field>
       <Field label="Motivo"><input required maxLength={500} className={inputClass} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Ej: cuenta origen equivocada" /></Field>
-      <p className="text-xs text-[#7C756E]">El pago original no se elimina; quedará marcado como anulado junto con su reversión.</p>
+      <p className="text-xs text-finflow-muted">El pago original no se elimina; quedará marcado como anulado junto con su reversión.</p>
       <div className="flex justify-end"><Button type="submit" variant="danger" isLoading={isPending}>Anular y reversar</Button></div>
     </form>
   );

@@ -32,12 +32,12 @@ export function TagSelector({ value, onChange, label = 'Etiquetas' }: Props) {
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-[#2C2A29]">{label}</label>
+      <label className="text-sm font-medium text-finflow-dark">{label}</label>
       <div className="flex min-h-11 flex-wrap gap-2 rounded-xl border border-[#EFEAE2] bg-white/70 p-2">
         {selected.map((tag) => (
           <button key={tag.id} type="button" onClick={() => onChange(value.filter((id) => id !== tag.id))}
             className="flex items-center gap-1 rounded-full px-2.5 py-1 text-xs text-white"
-            style={{ backgroundColor: tag.color ?? '#5C7A99' }}>
+            style={{ backgroundColor: tag.color ?? 'var(--color-finflow-blue)' }}>
             {tag.name}<X className="h-3 w-3" />
           </button>
         ))}
@@ -51,17 +51,17 @@ export function TagSelector({ value, onChange, label = 'Etiquetas' }: Props) {
           {available.map((tag) => (
             <button key={tag.id} type="button" onClick={() => { onChange([...value, tag.id]); setSearch(''); }}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-[#F3F1EC]">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: tag.color ?? '#5C7A99' }} />{tag.name}
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: tag.color ?? 'var(--color-finflow-blue)' }} />{tag.name}
             </button>
           ))}
           {!exact && value.length < 10 && (
-            <button type="button" onClick={create} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#5C7A99] hover:bg-[#F3F1EC]">
+            <button type="button" onClick={create} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-finflow-blue hover:bg-[#F3F1EC]">
               <Plus className="h-4 w-4" />Crear “{search.trim()}”
             </button>
           )}
         </div>
       )}
-      <p className="text-xs text-[#7C756E]">{value.length}/10 · Puedes usar varias etiquetas.</p>
+      <p className="text-xs text-finflow-muted">{value.length}/10 · Puedes usar varias etiquetas.</p>
     </div>
   );
 }

@@ -189,9 +189,9 @@ export function TablePagination({
   const to = Math.min(page * pageSize, totalCount);
 
   return (
-    <div className="flex flex-col gap-3 border-t border-[#EFEAE2] bg-[#FBF9F4] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 border-t border-[#EFEAE2] bg-finflow-cream px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       {/* Count */}
-      <span className="text-xs text-[#7C756E]">
+      <span className="text-xs text-finflow-muted">
         {totalCount === 0
           ? 'Sin resultados'
           : `Mostrando ${from}–${to} de ${totalCount}`}
@@ -218,7 +218,7 @@ export function TablePagination({
           ‹
         </Button>
 
-        <span className="px-3 py-1 text-xs font-medium text-[#2C2A29]" aria-live="polite">
+        <span className="px-3 py-1 text-xs font-medium text-finflow-dark" aria-live="polite">
           P&aacute;gina {page} de {totalPages || 1}
         </span>
 

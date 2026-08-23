@@ -9,7 +9,7 @@ interface Props {
 function Delta({ value, pct }: { value: number; pct: number }) {
   const positive = value >= 0;
   return (
-    <span className={cn('text-xs font-medium', positive ? 'text-[#8FA888]' : 'text-[#C97B63]')}>
+    <span className={cn('text-xs font-medium', positive ? 'text-finflow-green' : 'text-finflow-rust')}>
       {positive ? '+' : ''}{pct.toFixed(1)}%
     </span>
   );
@@ -23,10 +23,10 @@ export function YearOverYearTable({ data }: Props) {
       <table className="w-full min-w-[540px] text-xs">
         <thead>
           <tr className="border-b border-[#EFEAE2]">
-            <th className="pb-2 text-left font-medium text-[#7C756E]">Mes</th>
-            <th className="pb-2 text-right font-medium text-[#7C756E]">{previousYear}</th>
-            <th className="pb-2 text-right font-medium text-[#7C756E]">{year}</th>
-            <th className="pb-2 text-right font-medium text-[#7C756E]">Δ</th>
+            <th className="pb-2 text-left font-medium text-finflow-muted">Mes</th>
+            <th className="pb-2 text-right font-medium text-finflow-muted">{previousYear}</th>
+            <th className="pb-2 text-right font-medium text-finflow-muted">{year}</th>
+            <th className="pb-2 text-right font-medium text-finflow-muted">Δ</th>
           </tr>
         </thead>
         <tbody>
@@ -34,15 +34,15 @@ export function YearOverYearTable({ data }: Props) {
             const incomeDiff = m.currentIncome - m.prevIncome;
             const incomePct = m.prevIncome !== 0 ? (incomeDiff / m.prevIncome) * 100 : 0;
             return (
-              <tr key={m.monthLabel} className="border-b border-[#EFEAE2]/50 hover:bg-[#FBF9F4]">
-                <td className="py-2 font-medium text-[#2C2A29]">{m.monthLabel}</td>
-                <td className="py-2 text-right text-[#7C756E]">
+              <tr key={m.monthLabel} className="border-b border-[#EFEAE2]/50 hover:bg-finflow-cream">
+                <td className="py-2 font-medium text-finflow-dark">{m.monthLabel}</td>
+                <td className="py-2 text-right text-finflow-muted">
                   <div>{formatCurrency(m.prevIncome)}</div>
-                  <div className="text-[#C97B63]">{formatCurrency(m.prevExpenses)}</div>
+                  <div className="text-finflow-rust">{formatCurrency(m.prevExpenses)}</div>
                 </td>
                 <td className="py-2 text-right">
-                  <div className="text-[#2C2A29]">{formatCurrency(m.currentIncome)}</div>
-                  <div className="text-[#C97B63]">{formatCurrency(m.currentExpenses)}</div>
+                  <div className="text-finflow-dark">{formatCurrency(m.currentIncome)}</div>
+                  <div className="text-finflow-rust">{formatCurrency(m.currentExpenses)}</div>
                 </td>
                 <td className="py-2 text-right">
                   <Delta value={incomeDiff} pct={incomePct} />
@@ -52,22 +52,22 @@ export function YearOverYearTable({ data }: Props) {
           })}
         </tbody>
         <tfoot>
-          <tr className="border-t-2 border-[#EFEAE2] bg-[#FBF9F4]">
-            <td className="py-2 font-semibold text-[#2C2A29]">Total ingr.</td>
+          <tr className="border-t-2 border-[#EFEAE2] bg-finflow-cream">
+            <td className="py-2 font-semibold text-finflow-dark">Total ingr.</td>
             <td className="py-2 text-right" colSpan={2} />
             <td className="py-2 text-right">
               <Delta value={totals.incomeChangeAbs} pct={totals.incomeChangePct} />
             </td>
           </tr>
-          <tr className="bg-[#FBF9F4]">
-            <td className="py-2 font-semibold text-[#2C2A29]">Total gast.</td>
+          <tr className="bg-finflow-cream">
+            <td className="py-2 font-semibold text-finflow-dark">Total gast.</td>
             <td className="py-2 text-right" colSpan={2} />
             <td className="py-2 text-right">
               <Delta value={-totals.expensesChangeAbs} pct={-totals.expensesChangePct} />
             </td>
           </tr>
-          <tr className="bg-[#FBF9F4]">
-            <td className="py-2 font-semibold text-[#2C2A29]">Ahorro neto</td>
+          <tr className="bg-finflow-cream">
+            <td className="py-2 font-semibold text-finflow-dark">Ahorro neto</td>
             <td className="py-2 text-right" colSpan={2} />
             <td className="py-2 text-right">
               <Delta value={totals.netSavingsChangeAbs} pct={totals.netSavingsChangePct} />

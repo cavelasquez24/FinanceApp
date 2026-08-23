@@ -7,10 +7,10 @@ import {
   useChangePassword,
   useUpdatePayday,
 } from '../features/profile/hooks/useProfile';
-import { Button, Card, CardHeader, Input, Spinner } from '../components/ui';
+import { Button, Card, CardHeader, Input, PageHeader, Spinner } from '../components/ui';
 
 const selectClassName =
-  'w-full max-w-xs rounded-xl border border-[#EFEAE2] bg-white/70 px-3 py-2.5 text-sm text-[#2C2A29] backdrop-blur-sm transition-colors focus:border-[#5C7A99] focus:outline-none focus:ring-2 focus:ring-[#5C7A99]/20';
+  'w-full max-w-xs rounded-xl border border-[#EFEAE2] bg-white/70 px-3 py-2.5 text-sm text-finflow-dark backdrop-blur-sm transition-colors focus:border-finflow-blue focus:outline-none focus:ring-2 focus:ring-finflow-blue/20';
 
 export default function ProfilePage() {
   const { data: profile, isLoading } = useProfile();
@@ -42,7 +42,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-[#7C756E]">
+        <div className="flex flex-col items-center gap-3 text-finflow-muted">
           <Spinner />
           <span className="text-sm">Cargando perfil...</span>
         </div>
@@ -99,7 +99,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <h1 className="font-serif text-2xl font-medium text-[#2C2A29]">Configuración de Perfil</h1>
+      <PageHeader eyebrow="Configuración" title="Perfil" />
 
       {/* Datos Personales */}
       <Card>
@@ -121,7 +121,7 @@ export default function ProfilePage() {
         <CardHeader title="Preferencias" />
         <form onSubmit={handleChangeCurrency} className="space-y-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-[#2C2A29]">Moneda Principal</label>
+            <label className="text-sm font-medium text-finflow-dark">Moneda Principal</label>
             <select value={currencyCode} onChange={(e) => setCurrencyCode(e.target.value)} className={selectClassName}>
               <option value="USD">USD - Dólar Estadounidense</option>
               <option value="EUR">EUR - Euro</option>

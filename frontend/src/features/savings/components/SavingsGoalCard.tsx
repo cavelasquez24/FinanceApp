@@ -45,13 +45,13 @@ export default function SavingsGoalCard({
 
   return (
     <article
-      className={`group relative flex flex-col rounded-[28px] border bg-[#FBF9F4]/95 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-md ${isEmergencyFund ? "border-[#D7E1D2]" : "border-[#EFEAE2]"}`}
+      className={`group relative flex flex-col rounded-[28px] border bg-finflow-cream/95 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-md ${isEmergencyFund ? "border-[#D7E1D2]" : "border-[#EFEAE2]"}`}
     >
       <div className="absolute right-5 top-5 flex items-center space-x-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
         <button
           type="button"
           onClick={onEdit}
-          className="rounded-full p-1.5 text-[#7C756E] transition-colors hover:bg-[#EFEAE2]"
+          className="rounded-full p-1.5 text-finflow-muted transition-colors hover:bg-[#EFEAE2]"
           title="Editar meta"
         >
           <Pencil className="h-4 w-4" />
@@ -77,7 +77,7 @@ export default function SavingsGoalCard({
             <ShieldCheck className="h-3.5 w-3.5" /> Fondo de emergencia
           </span>
         )}
-        <h3 className="text-xl font-semibold leading-tight text-[#2C2A29]">
+        <h3 className="text-xl font-semibold leading-tight text-finflow-dark">
           {goal.name}
         </h3>
         <p className="mt-1 text-xs font-medium text-[#5E7162]">
@@ -87,12 +87,12 @@ export default function SavingsGoalCard({
             : ""}
         </p>
         {goal.description && (
-          <p className="mt-2 line-clamp-2 text-sm text-[#7C756E]">
+          <p className="mt-2 line-clamp-2 text-sm text-finflow-muted">
             {goal.description}
           </p>
         )}
         {goal.targetDate && (
-          <p className="mt-2 text-xs text-[#7C756E]">
+          <p className="mt-2 text-xs text-finflow-muted">
             Objetivo: {formatPlanDate(goal.targetDate)}
           </p>
         )}
@@ -101,10 +101,10 @@ export default function SavingsGoalCard({
       <div className="mt-auto space-y-5">
         <div>
           <div className="mb-2 flex justify-between text-sm">
-            <span className="font-semibold text-[#2C2A29]">
+            <span className="font-semibold text-finflow-dark">
               {formatCurrency(goal.currentAmount)}
             </span>
-            <span className="text-[#7C756E]">
+            <span className="text-finflow-muted">
               de {formatCurrency(goal.targetAmount)}
             </span>
           </div>
@@ -178,7 +178,7 @@ export default function SavingsGoalCard({
             <button
               type="button"
               onClick={onViewRestorations}
-              className="flex-1 rounded-xl bg-[#2C2A29] py-2.5 font-medium text-[#FBF9F4] transition hover:bg-[#1A1918]"
+              className="flex-1 rounded-xl bg-finflow-dark py-2.5 font-medium text-finflow-cream transition hover:bg-[#1A1918]"
             >
               Ver restauración
             </button>
@@ -187,7 +187,7 @@ export default function SavingsGoalCard({
               type="button"
               onClick={onDeposit}
               disabled={isDepositDisabled}
-              className={`flex-1 rounded-xl py-2.5 font-medium transition-colors ${isDepositDisabled ? "cursor-not-allowed bg-[#EFEAE2] text-[#7C756E] opacity-60" : "bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#1A1918]"}`}
+              className={`flex-1 rounded-xl py-2.5 font-medium transition-colors ${isDepositDisabled ? "cursor-not-allowed bg-[#EFEAE2] text-finflow-muted opacity-60" : "bg-finflow-dark text-finflow-cream hover:bg-[#1A1918]"}`}
             >
               {goal.isCompleted ? "Completada" : "Aportar"}
             </button>
@@ -222,8 +222,8 @@ export default function SavingsGoalCard({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl bg-[#F3F0EA] p-3">
-      <span className="block text-[11px] text-[#7C756E]">{label}</span>
-      <strong className="mt-0.5 block text-sm text-[#2C2A29]">{value}</strong>
+      <span className="block text-[11px] text-finflow-muted">{label}</span>
+      <strong className="mt-0.5 block text-sm text-finflow-dark">{value}</strong>
     </div>
   );
 }

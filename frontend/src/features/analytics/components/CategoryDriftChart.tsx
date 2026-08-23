@@ -9,7 +9,7 @@ interface Props {
 export function CategoryDriftChart({ drift }: Props) {
   if (drift.length === 0) {
     return (
-      <p className="py-6 text-center text-xs text-[#7C756E]">Sin datos de deriva este período.</p>
+      <p className="py-6 text-center text-xs text-finflow-muted">Sin datos de deriva este período.</p>
     );
   }
 
@@ -26,18 +26,18 @@ export function CategoryDriftChart({ drift }: Props) {
               <div className="flex items-center gap-2 min-w-0">
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: d.categoryColor || '#7C756E' }}
+                  style={{ backgroundColor: d.categoryColor || 'var(--color-finflow-muted)' }}
                 />
-                <span className="truncate text-xs font-medium text-[#2C2A29]">
+                <span className="truncate text-xs font-medium text-finflow-dark">
                   {d.categoryName}
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-[#7C756E]">{formatCurrency(d.currentAmount)}</span>
+                <span className="text-xs text-finflow-muted">{formatCurrency(d.currentAmount)}</span>
                 <span
                   className={cn(
                     'text-xs font-semibold',
-                    isUp ? 'text-[#C97B63]' : 'text-[#8FA888]'
+                    isUp ? 'text-finflow-rust' : 'text-finflow-green'
                   )}
                 >
                   {isUp ? '+' : ''}{d.driftPct.toFixed(1)}%
@@ -49,14 +49,14 @@ export function CategoryDriftChart({ drift }: Props) {
               <div
                 className="absolute inset-y-0 left-0 rounded-full opacity-40"
                 style={{
-                  backgroundColor: d.categoryColor || '#7C756E',
+                  backgroundColor: d.categoryColor || 'var(--color-finflow-muted)',
                   width: `${Math.min((d.previousAmount / Math.max(d.currentAmount, d.previousAmount, 1)) * 100, 100)}%`,
                 }}
               />
               <div
                 className="absolute inset-y-0 left-0 rounded-full"
                 style={{
-                  backgroundColor: d.categoryColor || '#7C756E',
+                  backgroundColor: d.categoryColor || 'var(--color-finflow-muted)',
                   width: `${Math.min((d.currentAmount / Math.max(d.currentAmount, d.previousAmount, 1)) * 100, 100)}%`,
                   opacity: 0.8,
                 }}

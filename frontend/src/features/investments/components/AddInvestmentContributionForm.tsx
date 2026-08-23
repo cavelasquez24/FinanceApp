@@ -37,13 +37,13 @@ export function AddInvestmentContributionForm({ investment, onSuccess, onCancel 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-sm text-[#7C756E] leading-relaxed">
-        Registra el dinero nuevo que aportaste a <span className="font-semibold text-[#2C2A29]">{investment.name}</span>.
+      <p className="text-sm text-finflow-muted leading-relaxed">
+        Registra el dinero nuevo que aportaste a <span className="font-semibold text-finflow-dark">{investment.name}</span>.
         Esto sube tu capital base — distinto de "Añadir Registro", que solo actualiza el valor de mercado.
       </p>
 
       <div>
-        <label className="block text-sm font-medium text-[#7C756E] mb-1">
+        <label className="block text-sm font-medium text-finflow-muted mb-1">
           Fecha del Aporte
         </label>
         <input
@@ -51,12 +51,12 @@ export function AddInvestmentContributionForm({ investment, onSuccess, onCancel 
           required
           value={contributionDate}
           onChange={(e) => setContributionDate(e.target.value)}
-          className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] p-3 text-[#2C2A29] focus:border-[#7C756E] focus:outline-none focus:ring-1 focus:ring-[#7C756E] transition-all"
+          className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream p-3 text-finflow-dark focus:border-finflow-muted focus:outline-none focus:ring-1 focus:ring-finflow-muted transition-all"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#7C756E] mb-1">
+        <label className="block text-sm font-medium text-finflow-muted mb-1">
           Monto Aportado
         </label>
         <input
@@ -67,12 +67,12 @@ export function AddInvestmentContributionForm({ investment, onSuccess, onCancel 
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="0.00"
-          className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] p-3 text-[#2C2A29] focus:border-[#7C756E] focus:outline-none focus:ring-1 focus:ring-[#7C756E] transition-all"
+          className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream p-3 text-finflow-dark focus:border-finflow-muted focus:outline-none focus:ring-1 focus:ring-finflow-muted transition-all"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#7C756E] mb-1">
+        <label className="block text-sm font-medium text-finflow-muted mb-1">
           Notas (Opcional)
         </label>
         <textarea
@@ -80,15 +80,15 @@ export function AddInvestmentContributionForm({ investment, onSuccess, onCancel 
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Ej. Aporte mensual programado"
-          className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] p-3 text-[#2C2A29] focus:border-[#7C756E] focus:outline-none focus:ring-1 focus:ring-[#7C756E] transition-all"
+          className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream p-3 text-finflow-dark focus:border-finflow-muted focus:outline-none focus:ring-1 focus:ring-finflow-muted transition-all"
         />
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel} className="text-[#7C756E]">
+        <Button type="button" variant="ghost" onClick={onCancel} className="text-finflow-muted">
           Cancelar
         </Button>
-        <Button type="submit" isLoading={isPending} className="bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#2C2A29]/90 rounded-xl">
+        <Button type="submit" isLoading={isPending} className="bg-finflow-dark text-finflow-cream hover:bg-finflow-dark/90 rounded-xl">
           Registrar Aporte
         </Button>
       </div>

@@ -7,6 +7,8 @@ export * from './ConfirmDialog';
 
 export { Card, CardHeader, CardBody, CardFooter, KpiCard } from './Card';
 
+export { PageHeader } from './PageHeader';
+
 export {
   Modal,
   ModalHeader,
@@ -29,3 +31,5 @@ export {
 export { Badge, CategoryBadge, StatusBadge } from './Badge';
 
 export { Spinner, PageSpinner } from './Spinner';
+
+export { BottomSheet } from './BottomSheet';

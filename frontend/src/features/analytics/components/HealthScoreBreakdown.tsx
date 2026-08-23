@@ -6,9 +6,9 @@ interface Props {
 }
 
 const STATUS_STYLES = {
-  Good:     { bar: 'bg-[#8FA888]', badge: 'bg-[#8FA888]/15 text-[#5A7853]', label: 'Bien' },
+  Good:     { bar: 'bg-finflow-green', badge: 'bg-finflow-green/15 text-[#5A7853]', label: 'Bien' },
   Warning:  { bar: 'bg-[#D4A855]', badge: 'bg-[#D4A855]/15 text-[#8B6A1A]', label: 'Atención' },
-  Critical: { bar: 'bg-[#C97B63]', badge: 'bg-[#C97B63]/15 text-[#8B4A36]', label: 'Crítico' },
+  Critical: { bar: 'bg-finflow-rust', badge: 'bg-finflow-rust/15 text-[#8B4A36]', label: 'Crítico' },
 };
 
 function ComponentRow({ c }: { c: ScoreComponent }) {
@@ -16,12 +16,12 @@ function ComponentRow({ c }: { c: ScoreComponent }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-medium text-[#2C2A29]">{c.label}</span>
+        <span className="text-xs font-medium text-finflow-dark">{c.label}</span>
         <div className="flex items-center gap-2 shrink-0">
           <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-semibold', styles.badge)}>
             {styles.label}
           </span>
-          <span className="w-8 text-right text-xs font-semibold text-[#2C2A29]">{c.score}</span>
+          <span className="w-8 text-right text-xs font-semibold text-finflow-dark">{c.score}</span>
         </div>
       </div>
       <div className="h-2 w-full rounded-full bg-[#EFEAE2]">

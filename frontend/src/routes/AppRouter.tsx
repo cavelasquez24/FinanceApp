@@ -38,13 +38,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
-// Ruta pública — redirige al dashboard si ya está autenticado
+// Ruta pública — redirige al inicio si ya está autenticado
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) return null;
 
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
+  return isAuthenticated ? <Navigate to="/" replace /> : <>{children}</>;
 }
 
 export function AppRouter() {
@@ -63,26 +63,41 @@ export function AppRouter() {
         <Route path="/" element={
           <ProtectedRoute><AppLayout /></ProtectedRoute>
         }>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="analysis" element={<DashboardPage />} />
-          <Route path="accounts" element={<AccountsPage />} />
-          <Route path="dashboard" element={<CurrentDashboardPage />} />
+          {/* Raíz → resumen operativo del día */}
+          <Route index element={<CurrentDashboardPage />} />
+
+          {/* Análisis histórico */}
+          <Route path="tendencias" element={<DashboardPage />} />
+
+          {/* Diagnóstico / analytics unificado */}
+          <Route path="diagnostico" element={<AnalyticsPage />} />
+
+          {/* Redirects de rutas antiguas */}
+          <Route path="dashboard" element={<Navigate to="/" replace />} />
+          <Route path="analysis" element={<Navigate to="/tendencias" replace />} />
+          <Route path="analytics" element={<Navigate to="/diagnostico" replace />} />
+
+          {/* Movimientos */}
           <Route path="incomes" element={<IncomesPage />} />
           <Route path="expenses" element={<ExpensesPage />} />
-          <Route path="budget" element={<BudgetPage />} />
+          <Route path="reimbursements" element={<ReimbursementsPage />} />
+
+          {/* Patrimonio */}
+          <Route path="accounts" element={<AccountsPage />} />
           <Route path="investments" element={<InvestmentsPage />} />
           <Route path="savings" element={<SavingsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="categories" element={<CategoriesPage />} />
-          <Route path="tags" element={<TagsPage />} />
           <Route path="debts" element={<DebtsPage />} />
           <Route path="credit-cards" element={<CreditCardsPage />} />
-          <Route path="reimbursements" element={<ReimbursementsPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
+
+          {/* Configuración */}
+          <Route path="budget" element={<BudgetPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          <Route path="tags" element={<TagsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* Ruta por defecto */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

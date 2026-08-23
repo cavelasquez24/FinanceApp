@@ -29,10 +29,10 @@ function ContributionRow({ label, value, total, color, icon }: RowProps) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-[#2C2A29]">{label}</span>
-          <span className="text-right font-medium text-[#2C2A29]">
+          <span className="text-finflow-dark">{label}</span>
+          <span className="text-right font-medium text-finflow-dark">
             {currency(value)}
-            <span className="ml-2 text-xs font-normal text-[#7C756E]">{pct.toFixed(1)}%</span>
+            <span className="ml-2 text-xs font-normal text-finflow-muted">{pct.toFixed(1)}%</span>
           </span>
         </div>
         <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#EFEAE2]">
@@ -56,10 +56,10 @@ export function CashFlowStatementCard({ data }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">
+        <span className="text-xs font-medium uppercase tracking-wide text-finflow-muted">
           Ingreso del ciclo
         </span>
-        <span className="font-serif text-xl font-medium text-[#2C2A29]">
+        <span className="font-serif text-xl font-medium text-finflow-dark">
           {currency(data.income)}
         </span>
       </div>
@@ -127,9 +127,9 @@ export function CashFlowStatementCard({ data }: Props) {
 
       </div>
       {data.savingsWithdrawals > 0 && (
-        <p className="text-xs text-[#7C756E]">Incluye {currency(data.savingsWithdrawals)} liberados desde metas de ahorro.</p>
+        <p className="text-xs text-finflow-muted">Incluye {currency(data.savingsWithdrawals)} liberados desde metas de ahorro.</p>
       )}
-      <p className="text-xs text-[#7C756E]">
+      <p className="text-xs text-finflow-muted">
         Tasa de construcción patrimonial: {data.wealthBuildingRate.toFixed(1)}% del ingreso
       </p>
     </div>

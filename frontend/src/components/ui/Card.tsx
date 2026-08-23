@@ -12,7 +12,7 @@ export function Card({ noPadding = false, className, children, ...props }: CardP
   return (
     <div
       className={cn(
-        'rounded-[28px] border border-[#EFEAE2]/70 bg-white/60 shadow-[0_8px_30px_rgba(44,42,41,0.06)] backdrop-blur-xl',
+        'rounded-card border border-[#EFEAE2]/70 bg-white/60 shadow-[0_8px_30px_rgba(44,42,41,0.06)] backdrop-blur-xl',
         !noPadding && 'p-6',
         className
       )}
@@ -39,9 +39,9 @@ export function CardHeader({ title, subtitle, action, className, ...props }: Car
       {...props}
     >
       <div className="min-w-0">
-        <h3 className="truncate text-sm font-semibold text-[#2C2A29]">{title}</h3>
+        <h3 className="truncate text-sm font-semibold text-finflow-dark">{title}</h3>
         {subtitle && (
-          <p className="mt-0.5 truncate text-xs text-[#7C756E]">{subtitle}</p>
+          <p className="mt-0.5 truncate text-xs text-finflow-muted">{subtitle}</p>
         )}
       </div>
       {action && <div className="shrink-0">{action}</div>}
@@ -104,10 +104,10 @@ export function KpiCard({
 }: KpiCardProps) {
   const changeColor =
     changeDirection === 'up'
-      ? 'text-[#8FA888]'
+      ? 'text-finflow-green'
       : changeDirection === 'down'
-      ? 'text-[#C97B63]'
-      : 'text-[#7C756E]';
+      ? 'text-finflow-rust'
+      : 'text-finflow-muted';
 
   const Arrow =
     changeDirection === 'up' ? (
@@ -123,13 +123,13 @@ export function KpiCard({
   return (
     <Card className={cn('flex flex-col gap-3', className)}>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">
+        <span className="text-xs font-medium uppercase tracking-wide text-finflow-muted">
           {label}
         </span>
-        {icon && <span className="text-[#7C756E]">{icon}</span>}
+        {icon && <span className="text-finflow-muted">{icon}</span>}
       </div>
 
-      <span className="text-2xl font-semibold tracking-tight text-[#2C2A29]">{value}</span>
+      <span className="text-2xl font-semibold tracking-tight text-finflow-dark">{value}</span>
 
       {change && (
         <div className={cn('flex items-center gap-1 text-xs font-medium', changeColor)}>

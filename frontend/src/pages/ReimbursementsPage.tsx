@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { parseDateOnly } from '../utils/dateOnly';
 import { AlertCircle, ArrowLeftRight, Inbox, Plus, Trash2 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import { Button, Card, CardHeader, ConfirmDialog, Spinner } from '../components/ui';
+import { Button, Card, CardHeader, ConfirmDialog, PageHeader, Spinner } from '../components/ui';
 import { useAccounts } from '../features/accounts/hooks/useAccounts';
 import { useCreditCards } from '../features/credit-cards/hooks/useCreditCards';
 import { useExpenses } from '../features/expenses/hooks/useExpenses';
@@ -79,15 +79,16 @@ export default function ReimbursementsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-serif text-2xl font-medium text-[#2C2A29]">Reembolsos</h1>
-          <p className="text-sm text-[#7C756E]">Entradas que recuperan gasto, separadas de los ingresos ganados.</p>
-        </div>
-        <Button onClick={() => setIsFormOpen((open) => !open)} leftIcon={<Plus className="h-4 w-4" />}>
-          Registrar reembolso
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Movimientos"
+        title="Reembolsos"
+        description="Entradas que recuperan gasto, separadas de los ingresos ganados."
+        action={
+          <Button onClick={() => setIsFormOpen((open) => !open)} leftIcon={<Plus className="h-4 w-4" />}>
+            Registrar reembolso
+          </Button>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
         {[
@@ -96,7 +97,7 @@ export default function ReimbursementsPage() {
           ['Gasto neto personal', summary?.netPersonalExpenses ?? 0, '#2C2A29'],
         ].map(([label, value, color]) => (
           <Card key={String(label)} className="!rounded-[24px]">
-            <p className="text-xs uppercase tracking-wide text-[#7C756E]">{label}</p>
+            <p className="text-xs uppercase tracking-wide text-finflow-muted">{label}</p>
             <p className="mt-2 font-serif text-2xl" style={{ color: String(color) }}>{formatCurrency(Number(value))}</p>
           </Card>
         ))}
@@ -106,7 +107,7 @@ export default function ReimbursementsPage() {
         <Card>
           <CardHeader title="Registrar reembolso" subtitle="No se suma a salario ni a ingresos ganados." />
           <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
-            <label className="text-sm text-[#2C2A29]">Gasto relacionado (opcional)
+            <label className="text-sm text-finflow-dark">Gasto relacionado (opcional)
               <select value={expenseId} onChange={(event) => setExpenseId(event.target.value)}
                 className="mt-1 w-full rounded-xl border border-[#EFEAE2] px-3 py-2">
                 <option value="">Sin gasto relacionado</option>
@@ -117,26 +118,26 @@ export default function ReimbursementsPage() {
                 ))}
               </select>
             </label>
-            <label className="text-sm text-[#2C2A29]">Monto
+            <label className="text-sm text-finflow-dark">Monto
               <input required min="0.01" step="0.01" type="number" value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 className="mt-1 w-full rounded-xl border border-[#EFEAE2] px-3 py-2" />
-              {selectedExpense && <span className="mt-1 block text-xs text-[#7C756E]">
+              {selectedExpense && <span className="mt-1 block text-xs text-finflow-muted">
                 Bruto {formatCurrency(selectedExpense.amount)} · reembolsado {formatCurrency(selectedExpense.reimbursedAmount)} · neto {formatCurrency(selectedExpense.netPersonalAmount)}
               </span>}
             </label>
-            <label className="text-sm text-[#2C2A29]">Fecha de recepción
+            <label className="text-sm text-finflow-dark">Fecha de recepción
               <input required type="date" value={date} onChange={(event) => setDate(event.target.value)}
                 className="mt-1 w-full rounded-xl border border-[#EFEAE2] px-3 py-2" />
             </label>
-            <label className="text-sm text-[#2C2A29]">Destino
+            <label className="text-sm text-finflow-dark">Destino
               <select value={destinationType} onChange={(event) => { setDestinationType(event.target.value as ReimbursementDestinationType); setDestinationId(''); }}
                 className="mt-1 w-full rounded-xl border border-[#EFEAE2] px-3 py-2">
                 <option value="account">Cuenta receptora</option>
                 <option value="credit_card">Tarjeta de crédito</option>
               </select>
             </label>
-            <label className="text-sm text-[#2C2A29]">{
+            <label className="text-sm text-finflow-dark">{
               destinationType === 'account' ? 'Cuenta receptora' : 'Tarjeta a abonar'
             }
               <select required value={destinationId} onChange={(event) => setDestinationId(event.target.value)}
@@ -144,13 +145,13 @@ export default function ReimbursementsPage() {
                 <option value="">Selecciona una opción</option>
                 {destinations.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
               </select>
-              {destinationType === 'credit_card' && <span className="mt-1 block text-xs text-[#7C756E]">Si ya está pagada, el abono queda como saldo a favor; no se convierte en ingreso.</span>}
+              {destinationType === 'credit_card' && <span className="mt-1 block text-xs text-finflow-muted">Si ya está pagada, el abono queda como saldo a favor; no se convierte en ingreso.</span>}
             </label>
-            <label className="text-sm text-[#2C2A29]">Persona u origen (opcional)
+            <label className="text-sm text-finflow-dark">Persona u origen (opcional)
               <input value={person} maxLength={160} onChange={(event) => setPerson(event.target.value)}
                 className="mt-1 w-full rounded-xl border border-[#EFEAE2] px-3 py-2" />
             </label>
-            <label className="text-sm text-[#2C2A29] md:col-span-2">Nota (opcional)
+            <label className="text-sm text-finflow-dark md:col-span-2">Nota (opcional)
               <textarea value={notes} maxLength={1000} onChange={(event) => setNotes(event.target.value)}
                 className="mt-1 min-h-20 w-full rounded-xl border border-[#EFEAE2] px-3 py-2" />
             </label>
@@ -165,18 +166,18 @@ export default function ReimbursementsPage() {
       <Card noPadding className="overflow-hidden">
         <CardHeader title="Historial" subtitle="El gasto original siempre se conserva para auditoría." className="px-6 pt-6" />
         {isLoading ? <div className="flex justify-center p-10"><Spinner /></div>
-          : isError ? <div className="flex items-center gap-2 p-8 text-[#C97B63]"><AlertCircle className="h-5 w-5" />No se pudo cargar el historial.</div>
-          : reimbursements.length === 0 ? <div className="flex flex-col items-center gap-2 p-10 text-[#7C756E]"><Inbox className="h-6 w-6" />Aún no tienes reembolsos registrados.</div>
+          : isError ? <div className="flex items-center gap-2 p-8 text-finflow-rust"><AlertCircle className="h-5 w-5" />No se pudo cargar el historial.</div>
+          : reimbursements.length === 0 ? <div className="flex flex-col items-center gap-2 p-10 text-finflow-muted"><Inbox className="h-6 w-6" />Aún no tienes reembolsos registrados.</div>
           : <div className="overflow-x-auto"><table className="w-full text-left text-sm">
-            <thead className="bg-[#F3F1EC] text-xs uppercase tracking-wide text-[#7C756E]"><tr>
+            <thead className="bg-[#F3F1EC] text-xs uppercase tracking-wide text-finflow-muted"><tr>
               <th className="px-6 py-3">Fecha</th><th className="px-6 py-3">Gasto</th><th className="px-6 py-3">Destino</th><th className="px-6 py-3 text-right">Monto</th><th className="px-6 py-3" />
             </tr></thead>
             <tbody className="divide-y divide-[#EFEAE2]">{reimbursements.map((item) => <tr key={item.id}>
               <td className="px-6 py-4">{format(parseDateOnly(item.date), 'dd/MM/yyyy')}</td>
-              <td className="px-6 py-4 text-[#7C756E]">{item.expenseDescription || 'Sin gasto relacionado'}</td>
-              <td className="px-6 py-4"><span className="inline-flex items-center gap-1 text-[#7C756E]"><ArrowLeftRight className="h-3.5 w-3.5" />{item.accountName || item.creditCardName}</span></td>
-              <td className="px-6 py-4 text-right font-medium text-[#5C7A99]">+{formatCurrency(item.amount)}</td>
-              <td className="px-6 py-4 text-right"><button onClick={() => setDeletingId(item.id)} className="rounded-lg p-2 text-[#7C756E] hover:bg-[#C97B63]/10 hover:text-[#C97B63]" aria-label="Anular reembolso"><Trash2 className="h-4 w-4" /></button></td>
+              <td className="px-6 py-4 text-finflow-muted">{item.expenseDescription || 'Sin gasto relacionado'}</td>
+              <td className="px-6 py-4"><span className="inline-flex items-center gap-1 text-finflow-muted"><ArrowLeftRight className="h-3.5 w-3.5" />{item.accountName || item.creditCardName}</span></td>
+              <td className="px-6 py-4 text-right font-medium text-finflow-blue">+{formatCurrency(item.amount)}</td>
+              <td className="px-6 py-4 text-right"><button onClick={() => setDeletingId(item.id)} className="rounded-lg p-2 text-finflow-muted hover:bg-finflow-rust/10 hover:text-finflow-rust" aria-label="Anular reembolso"><Trash2 className="h-4 w-4" /></button></td>
             </tr>)}</tbody>
           </table></div>}
       </Card>

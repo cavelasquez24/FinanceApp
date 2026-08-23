@@ -162,7 +162,7 @@ export default function WithdrawModal({ goal, onClose }: Props) {
               </button>
             ))}
           </div>
-          <p className="mt-3 text-xs text-[#7C756E]">{selectedAction.hint}</p>
+          <p className="mt-3 text-xs text-finflow-muted">{selectedAction.hint}</p>
         </SavingsModalSection>
         <SavingsModalSection
           icon={

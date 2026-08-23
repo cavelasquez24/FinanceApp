@@ -85,13 +85,13 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2C2A29]/40 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-finflow-dark/40 p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[28px] border border-[#EFEAE2] bg-white/90 p-6 sm:p-8 shadow-xl backdrop-blur-xl animate-in zoom-in-95 duration-200 custom-scrollbar">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-serif text-xl font-semibold text-[#2C2A29]">
+          <h2 className="font-serif text-xl font-semibold text-finflow-dark">
             {isEditing ? 'Editar Categoría' : 'Nueva Categoría'}
           </h2>
-          <button onClick={onClose} className="rounded-full p-2 text-[#7C756E] hover:bg-[#EFEAE2]/60 transition-colors">
+          <button onClick={onClose} className="rounded-full p-2 text-finflow-muted hover:bg-[#EFEAE2]/60 transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -105,11 +105,11 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
                 className="!bg-white/60 focus:!bg-white"
                 {...register('name')}
               />
-              {errors.name && <span className="text-xs text-[#C97B63] mt-1 block">{errors.name.message}</span>}
+              {errors.name && <span className="text-xs text-finflow-rust mt-1 block">{errors.name.message}</span>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#2C2A29] mb-1.5">Tipo de Flujo</label>
+              <label className="block text-sm font-medium text-finflow-dark mb-1.5">Tipo de Flujo</label>
              <select
                 {...register('type')}
                 disabled={isEditing}
@@ -122,11 +122,11 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
                 <option value="income">Ingreso</option>
                 <option value="both">Ambos</option>
               </select>
-              {errors.type && <span className="text-xs text-[#C97B63] mt-1 block">{errors.type.message}</span>}
+              {errors.type && <span className="text-xs text-finflow-rust mt-1 block">{errors.type.message}</span>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#2C2A29] mb-2">Color Distintivo</label>
+              <label className="block text-sm font-medium text-finflow-dark mb-2">Color Distintivo</label>
               <div className="flex flex-wrap gap-3">
                 {PRESET_COLORS.map((color) => (
                   <button
@@ -135,19 +135,19 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
                     onClick={() => setValue('color', color, { shouldValidate: true })}
                     className={cn(
                       "h-8 w-8 rounded-full transition-all duration-200 hover:scale-110",
-                      selectedColor === color ? "ring-2 ring-offset-2 ring-[#5C7A99] scale-110" : "ring-1 ring-black/10"
+                      selectedColor === color ? "ring-2 ring-offset-2 ring-finflow-blue scale-110" : "ring-1 ring-black/10"
                     )}
                     style={{ backgroundColor: color }}
                     aria-label={`Seleccionar color ${color}`}
                   />
                 ))}
               </div>
-              {errors.color && <span className="text-xs text-[#C97B63] mt-1 block">{errors.color.message}</span>}
+              {errors.color && <span className="text-xs text-finflow-rust mt-1 block">{errors.color.message}</span>}
             </div>
 
             {/* Nueva sección de iconos */}
             <div>
-              <label className="block text-sm font-medium text-[#2C2A29] mb-2">Icono Representativo</label>
+              <label className="block text-sm font-medium text-finflow-dark mb-2">Icono Representativo</label>
               <div className="flex flex-wrap gap-2 rounded-2xl bg-white/50 p-3 border border-[#EFEAE2]/60">
                 {Object.entries(CATEGORY_ICONS).map(([key, IconComponent]) => (
                   <button
@@ -158,7 +158,7 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
                       "p-2.5 rounded-xl transition-all duration-200 flex items-center justify-center",
                       selectedIcon === key 
                         ? "bg-white shadow-sm ring-1 ring-[#EFEAE2] scale-105" 
-                        : "text-[#7C756E] hover:bg-white/60 hover:text-[#2C2A29]"
+                        : "text-finflow-muted hover:bg-white/60 hover:text-finflow-dark"
                     )}
                     style={selectedIcon === key ? { color: selectedColor } : {}}
                     title={key}
@@ -167,7 +167,7 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
                   </button>
                 ))}
               </div>
-              {errors.icon && <span className="text-xs text-[#C97B63] mt-1 block">{errors.icon.message}</span>}
+              {errors.icon && <span className="text-xs text-finflow-rust mt-1 block">{errors.icon.message}</span>}
             </div>
           </div>
 
@@ -175,7 +175,7 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full h-11 rounded-xl !bg-[#2C2A29] text-sm font-medium !text-[#FBF9F4] shadow-md transition-all hover:!bg-[#1F1E1D] hover:shadow-lg disabled:opacity-70"
+              className="w-full h-11 rounded-xl !bg-finflow-dark text-sm font-medium !text-finflow-cream shadow-md transition-all hover:!bg-[#1F1E1D] hover:shadow-lg disabled:opacity-70"
             >
               {isPending ? 'Guardando...' : 'Guardar Categoría'}
             </Button>

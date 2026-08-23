@@ -2,7 +2,7 @@ import { CATEGORY_ICONS, DEFAULT_ICON_KEY } from '../features/categories/utils/i
 import { useState } from 'react';
 import { useCategories } from '../features/categories/hooks/useCategories';
 import { type Category } from '../types/category.types';
-import { Button } from '../components/ui';
+import { Button, PageHeader } from '../components/ui';
 import { Plus, Edit2, Trash2, Shield, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { CategoryFormModal } from '../features/categories/components/CategoryFormModal';
@@ -22,8 +22,8 @@ export default function CategoriesPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#5C7A99] border-t-transparent" />
-        <span className="text-sm font-medium text-[#7C756E]">Cargando el catálogo visual...</span>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-finflow-blue border-t-transparent" />
+        <span className="text-sm font-medium text-finflow-muted">Cargando el catálogo visual...</span>
       </div>
     );
   }
@@ -51,23 +51,20 @@ export default function CategoriesPage() {
     <>
       <div className="space-y-8 animate-in fade-in duration-500">
         {/* Encabezado Principal */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="font-serif text-3xl font-semibold tracking-tight text-[#2C2A29]">
-              Gestión de Categorías
-            </h1>
-            <p className="mt-1 text-sm text-[#7C756E]">
-              Organiza las clasificaciones de tus flujos financieros.
-            </p>
-          </div>
-          <Button 
-            onClick={handleOpenCreate}
-            className="flex items-center justify-center gap-2 rounded-xl bg-[#2C2A29] px-5 py-2.5 text-sm font-medium text-[#FBF9F4] shadow-sm transition-all hover:bg-[#1F1E1D]"
-            leftIcon={<Plus className="h-4 w-4" />}
-          >
-            Nueva Categoría
-          </Button>
-        </div>
+        <PageHeader
+          eyebrow="Configuración"
+          title="Categorías"
+          description="Organiza las clasificaciones de tus flujos financieros."
+          action={
+            <Button
+              onClick={handleOpenCreate}
+              className="flex items-center justify-center gap-2 rounded-xl bg-finflow-dark px-5 py-2.5 text-sm font-medium text-finflow-cream shadow-sm transition-all hover:bg-[#1F1E1D]"
+              leftIcon={<Plus className="h-4 w-4" />}
+            >
+              Nueva Categoría
+            </Button>
+          }
+        />
 
         {/* Filtros */}
         <div className="flex gap-2 rounded-xl bg-[#EFEAE2]/40 p-1 w-max backdrop-blur-sm">
@@ -78,8 +75,8 @@ export default function CategoriesPage() {
               className={cn(
                 'rounded-lg px-4 py-1.5 text-xs font-semibold tracking-wide transition-all duration-200 uppercase',
                 activeFilter === filter
-                  ? 'bg-white text-[#2C2A29] shadow-sm'
-                  : 'text-[#7C756E] hover:text-[#2C2A29]'
+                  ? 'bg-white text-finflow-dark shadow-sm'
+                  : 'text-finflow-muted hover:text-finflow-dark'
               )}
             >
               {filter === 'all' ? 'Todas' : filter === 'income' ? 'Ingresos' : 'Gastos'}
@@ -118,35 +115,35 @@ export default function CategoriesPage() {
                   
                   <span className={cn(
                     'flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider',
-                    isIncome ? 'bg-[#5C7A99]/10 text-[#5C7A99]' : 'bg-[#C97B63]/10 text-[#C97B63]'
+                    isIncome ? 'bg-finflow-blue/10 text-finflow-blue' : 'bg-finflow-rust/10 text-finflow-rust'
                   )}>
                     {isIncome ? <><ArrowUpRight className="h-3 w-3" strokeWidth={2.5} /> Ingreso</> : <><ArrowDownLeft className="h-3 w-3" strokeWidth={2.5} /> Gasto</>}
                   </span>
                 </div>
 
                 <div className="my-6">
-                  <h3 className="font-serif text-lg font-medium tracking-tight text-[#2C2A29]">
+                  <h3 className="font-serif text-lg font-medium tracking-tight text-finflow-dark">
                     {category.name}
                   </h3>
                 </div>
 
                 <div className="border-t border-[#EFEAE2]/60 pt-4">
                   {category.isDefault ? (
-                    <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[#7C756E]/60 uppercase">
-                      <Shield className="h-3.5 w-3.5 text-[#5C7A99]" strokeWidth={2.5} />
+                    <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-finflow-muted/60 uppercase">
+                      <Shield className="h-3.5 w-3.5 text-finflow-blue" strokeWidth={2.5} />
                       Sistema Protegido
                     </div>
                   ) : (
                     <div className="flex items-center gap-4 transition-all duration-200">
                       <button 
                         onClick={() => handleOpenEdit(category)}
-                        className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#5C7A99] hover:text-[#4A6480] transition-colors"
+                        className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-finflow-blue hover:text-[#4A6480] transition-colors"
                       >
                         <Edit2 className="h-3.5 w-3.5" /> Editar
                       </button>
                       <button 
                         onClick={() => handleOpenDelete(category)}
-                        className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#C97B63] hover:text-[#A6604D] transition-colors"
+                        className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-finflow-rust hover:text-[#A6604D] transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" /> Eliminar
                       </button>

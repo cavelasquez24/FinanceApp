@@ -7,6 +7,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  type TooltipValueType,
 } from 'recharts';
 import { useMemo } from 'react';
 import type { NetWorthTimelineDto } from '../types/analytics.types';
@@ -34,15 +35,15 @@ export function NetWorthChart({ data }: Props) {
     <div className="space-y-4">
       {/* Delta badges */}
       <div className="flex flex-wrap gap-3">
-        <div className="flex items-center gap-1.5 rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] px-3 py-1.5 text-xs">
-          <span className="text-[#7C756E]">Cambio total</span>
-          <span className={`font-semibold ${isPositive ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
+        <div className="flex items-center gap-1.5 rounded-xl border border-[#EFEAE2] bg-finflow-cream px-3 py-1.5 text-xs">
+          <span className="text-finflow-muted">Cambio total</span>
+          <span className={`font-semibold ${isPositive ? 'text-finflow-green' : 'text-finflow-rust'}`}>
             {isPositive ? '+' : ''}{formatCurrency(data.netWorthChange)}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] px-3 py-1.5 text-xs">
-          <span className="text-[#7C756E]">%</span>
-          <span className={`font-semibold ${isPositive ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
+        <div className="flex items-center gap-1.5 rounded-xl border border-[#EFEAE2] bg-finflow-cream px-3 py-1.5 text-xs">
+          <span className="text-finflow-muted">%</span>
+          <span className={`font-semibold ${isPositive ? 'text-finflow-green' : 'text-finflow-rust'}`}>
             {isPositive ? '+' : ''}{data.netWorthChangePct.toFixed(1)}%
           </span>
         </div>
@@ -77,7 +78,10 @@ export function NetWorthChart({ data }: Props) {
                 boxShadow: '0 8px 30px rgba(44,42,41,0.08)',
                 fontSize: 12,
               }}
-              formatter={(value: number, name: string) => [formatCurrency(value), name]}
+              formatter={(value: TooltipValueType | undefined, name: string | number | undefined) => [
+                formatCurrency(Number(value ?? 0)),
+                name ?? '',
+              ]}
             />
             <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
             <Line

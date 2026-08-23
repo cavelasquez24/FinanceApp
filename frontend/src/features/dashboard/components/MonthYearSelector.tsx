@@ -39,13 +39,13 @@ export function MonthYearSelector({ month, year, onChange, paydayDay }: Props) {
       <button
         type="button"
         onClick={goToPrevious}
-        className="rounded-xl p-2 text-[#7C756E] transition-colors hover:bg-[#F3F1EC] hover:text-[#2C2A29]"
+        className="rounded-xl p-2 text-finflow-muted transition-colors hover:bg-[#F3F1EC] hover:text-finflow-dark"
         aria-label="Ciclo anterior"
       >
         <ChevronLeft className="h-4 w-4" strokeWidth={2} />
       </button>
 
-      <span className="min-w-[170px] text-center text-sm font-medium text-[#2C2A29]">
+      <span className="min-w-[170px] text-center text-sm font-medium text-finflow-dark">
         {label}
       </span>
 
@@ -53,7 +53,7 @@ export function MonthYearSelector({ month, year, onChange, paydayDay }: Props) {
         type="button"
         onClick={goToNext}
         disabled={isCurrentMonth}
-        className="rounded-xl p-2 text-[#7C756E] transition-colors hover:bg-[#F3F1EC] hover:text-[#2C2A29] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+        className="rounded-xl p-2 text-finflow-muted transition-colors hover:bg-[#F3F1EC] hover:text-finflow-dark disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
         aria-label="Ciclo siguiente"
       >
         <ChevronRight className="h-4 w-4" strokeWidth={2} />

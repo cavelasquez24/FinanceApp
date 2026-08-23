@@ -22,18 +22,18 @@ export function DashboardHeroRow({ netWorth, cashFlowResidual }: Props) {
       <Card className="!rounded-[28px] !p-7">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">
+            <p className="text-xs font-medium uppercase tracking-wide text-finflow-muted">
               Patrimonio registrado
             </p>
-            <p className="mt-2 font-serif text-4xl font-medium text-[#2C2A29]">
+            <p className="mt-2 font-serif text-4xl font-medium text-finflow-dark">
               {currency(netWorth)}
             </p>
-            <p className="mt-2 text-xs text-[#7C756E]">Inversiones y metas menos deuda; no presume efectivo no registrado.</p>
+            <p className="mt-2 text-xs text-finflow-muted">Inversiones y metas menos deuda; no presume efectivo no registrado.</p>
             {/* TODO: sparkline cuando exista GET /dashboard/net-worth-trend
                 (MonthlySnapshot.NetWorthAtClose, pendiente en backend —
                 resumen técnico sección 3.5). No se simula con mock data. */}
           </div>
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#2C2A29]/10 text-[#2C2A29]">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-finflow-dark/10 text-finflow-dark">
             <Landmark className="h-5 w-5" strokeWidth={2} />
           </div>
         </div>
@@ -41,22 +41,22 @@ export function DashboardHeroRow({ netWorth, cashFlowResidual }: Props) {
 
       <Card
         className={`!rounded-[28px] !p-7 ${
-          isResidualNegative ? '!border-[#C97B63]/40 !bg-[#C97B63]/5' : ''
+          isResidualNegative ? '!border-finflow-rust/40 !bg-finflow-rust/5' : ''
         }`}
       >
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">
+            <p className="text-xs font-medium uppercase tracking-wide text-finflow-muted">
               Disponible del ciclo
             </p>
             <p
               className={`mt-2 font-serif text-4xl font-medium ${
-                isResidualNegative ? 'text-[#C97B63]' : 'text-[#2C2A29]'
+                isResidualNegative ? 'text-finflow-rust' : 'text-finflow-dark'
               }`}
             >
               {hasResidual ? currency(cashFlowResidual!) : '—'}
             </p>
-            <p className={`mt-2 text-xs ${isResidualNegative ? 'text-[#C97B63]' : 'text-[#7C756E]'}`}>
+            <p className={`mt-2 text-xs ${isResidualNegative ? 'text-finflow-rust' : 'text-finflow-muted'}`}>
               {isResidualNegative
                 ? 'Gastando/asignando más de lo que ingresa este mes.'
                 : 'Caja tras gastos, aportes, inversión y capital de deuda.'}
@@ -64,7 +64,7 @@ export function DashboardHeroRow({ netWorth, cashFlowResidual }: Props) {
           </div>
           <div
             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
-              isResidualNegative ? 'bg-[#C97B63]/15 text-[#C97B63]' : 'bg-[#8FA888]/15 text-[#8FA888]'
+              isResidualNegative ? 'bg-finflow-rust/15 text-finflow-rust' : 'bg-finflow-green/15 text-finflow-green'
             }`}
           >
             <Wallet className="h-5 w-5" strokeWidth={2} />

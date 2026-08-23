@@ -33,9 +33,9 @@ export function AnalyticsSectionShell({
     >
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-[#2C2A29]">{title}</h2>
+          <h2 className="text-sm font-semibold text-finflow-dark">{title}</h2>
           {subtitle && (
-            <p className="mt-0.5 text-xs text-[#7C756E]">{subtitle}</p>
+            <p className="mt-0.5 text-xs text-finflow-muted">{subtitle}</p>
           )}
         </div>
         {action && <div className="shrink-0">{action}</div>}

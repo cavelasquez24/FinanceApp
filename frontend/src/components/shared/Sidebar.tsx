@@ -6,7 +6,7 @@ import {
   TrendingDown,
   Target,
   PiggyBank,
-  BarChart3,
+  LineChart,
   BrainCircuit,
   User,
   X,
@@ -24,26 +24,44 @@ import { cn } from '../../utils/cn';
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Optional — renders a "Cerrar sesión" action in the footer when provided */
   onLogout?: () => void;
 }
 
-const navItems = [
-  { to: '/dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
-  { to: '/analytics',   label: 'Analytics',   icon: BrainCircuit    },
-  { to: '/incomes',     label: 'Ingresos',    icon: TrendingUp      },
-  { to: '/expenses',    label: 'Gastos',      icon: TrendingDown    },
-  { to: '/reimbursements', label: 'Reembolsos', icon: Undo2 },
-  { to: '/analysis',    label: 'An\u00e1lisis', icon: BarChart3     },
-  { to: '/accounts',    label: 'Cuentas',     icon: Wallet          },
-  { to: '/budget',      label: 'Presupuesto', icon: Target          },
-  { to: '/investments', label: 'Inversiones', icon: BarChart3       },
-  { to: '/credit-cards', label: 'Tarjetas', icon: CreditCard },
-  { to: '/debts',     label: 'Deudas',       icon: BoneFracture       },
-  { to: '/savings',     label: 'Metas',       icon: PiggyBank       },
-  { to: '/categories',  label: 'Categorías',  icon: Folder          },
-  { to: '/tags',        label: 'Etiquetas',   icon: Tags            },
-  { to: '/profile',     label: 'Perfil',      icon: User            },
+const navGroups = [
+  {
+    label: 'Resumen',
+    items: [
+      { to: '/',           label: 'Inicio',       icon: LayoutDashboard, end: true },
+      { to: '/diagnostico', label: 'Diagnóstico',  icon: BrainCircuit,   end: false },
+    ],
+  },
+  {
+    label: 'Movimientos',
+    items: [
+      { to: '/incomes',        label: 'Ingresos',    icon: TrendingUp,  end: false },
+      { to: '/expenses',       label: 'Gastos',      icon: TrendingDown, end: false },
+      { to: '/reimbursements', label: 'Reembolsos',  icon: Undo2,       end: false },
+    ],
+  },
+  {
+    label: 'Patrimonio',
+    items: [
+      { to: '/accounts',     label: 'Cuentas',     icon: Wallet,      end: false },
+      { to: '/investments',  label: 'Inversiones', icon: LineChart,   end: false },
+      { to: '/savings',      label: 'Metas',       icon: PiggyBank,   end: false },
+      { to: '/debts',        label: 'Deudas',      icon: BoneFracture, end: false },
+      { to: '/credit-cards', label: 'Tarjetas',    icon: CreditCard,  end: false },
+    ],
+  },
+  {
+    label: 'Configuración',
+    items: [
+      { to: '/budget',      label: 'Presupuesto', icon: Target,  end: false },
+      { to: '/categories',  label: 'Categorías',  icon: Folder,  end: false },
+      { to: '/tags',        label: 'Etiquetas',   icon: Tags,    end: false },
+      { to: '/profile',     label: 'Perfil',      icon: User,    end: false },
+    ],
+  },
 ];
 
 export function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
@@ -52,7 +70,7 @@ export function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
       {/* Overlay móvil */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-20 bg-[#2C2A29]/40 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-20 bg-finflow-dark/40 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
@@ -69,41 +87,48 @@ export function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
         {/* Logo */}
         <div className="flex items-center justify-between border-b border-[#EFEAE2]/70 p-6">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2C2A29]">
-              <Skull className="h-4 w-4 text-[#FBF9F4]" strokeWidth={2} aria-hidden="true" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-finflow-dark">
+              <Skull className="h-4 w-4 text-finflow-cream" strokeWidth={2} aria-hidden="true" />
             </div>
-            <span className="text-lg font-semibold tracking-tight text-[#2C2A29]">
-              FinFlow
-            </span>
+            <span className="text-lg font-semibold tracking-tight text-finflow-dark">FinFlow</span>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-[#7C756E] transition-colors hover:bg-[#F3F1EC] hover:text-[#2C2A29] lg:hidden"
+            className="rounded-lg p-1 text-finflow-muted transition-colors hover:bg-[#F3F1EC] hover:text-finflow-dark lg:hidden"
             aria-label="Cerrar menú"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Navegación */}
-        <nav className="flex-1 space-y-1 p-4">
-          {navItems.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={onClose}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-[#5C7A99]/10 text-[#5C7A99]'
-                    : 'text-[#7C756E] hover:bg-[#F3F1EC] hover:text-[#2C2A29]'
-                )
-              }
-            >
-              <Icon className="h-5 w-5 shrink-0" strokeWidth={2} />
-              {label}
-            </NavLink>
+        {/* Navegación agrupada */}
+        <nav className="flex-1 overflow-y-auto p-4">
+          {navGroups.map((group, gi) => (
+            <div key={group.label} className={cn('space-y-1', gi > 0 && 'mt-4')}>
+              {gi > 0 && <hr className="mb-3 border-[#EFEAE2]" />}
+              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-finflow-muted/60">
+                {group.label}
+              </p>
+              {group.items.map(({ to, label, icon: Icon, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  onClick={onClose}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-finflow-blue/10 text-finflow-blue'
+                        : 'text-finflow-muted hover:bg-[#F3F1EC] hover:text-finflow-dark'
+                    )
+                  }
+                >
+                  <Icon className="h-5 w-5 shrink-0" strokeWidth={2} />
+                  {label}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
 
@@ -112,13 +137,13 @@ export function Sidebar({ isOpen, onClose, onLogout }: SidebarProps) {
           {onLogout && (
             <button
               onClick={onLogout}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#7C756E] transition-colors hover:bg-[#C97B63]/10 hover:text-[#C97B63]"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-finflow-muted transition-colors hover:bg-finflow-rust/10 hover:text-finflow-rust"
             >
               <LogOut className="h-5 w-5 shrink-0" strokeWidth={2} />
               Cerrar sesión
             </button>
           )}
-          <p className="mt-2 text-center text-xs text-[#7C756E]/60">FinFlow v1.0</p>
+          <p className="mt-2 text-center text-xs text-finflow-muted/60">FinFlow v1.0</p>
         </div>
       </aside>
     </>

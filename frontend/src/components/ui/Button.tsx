@@ -15,17 +15,17 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#1F1E1D] active:bg-[#141312] ' +
-    'focus-visible:ring-[#2C2A29]/30 disabled:bg-[#2C2A29]/30',
+    'bg-finflow-dark text-finflow-cream hover:bg-[#1F1E1D] active:bg-[#141312] ' +
+    'focus-visible:ring-finflow-dark/30 disabled:bg-finflow-dark/30',
   secondary:
-    'bg-white/70 text-[#2C2A29] border border-[#EFEAE2] backdrop-blur-sm hover:bg-[#F3F1EC] active:bg-[#EFEAE2] ' +
-    'focus-visible:ring-[#5C7A99]/30 disabled:text-[#7C756E]/50 disabled:border-[#EFEAE2]/60',
+    'bg-white/70 text-finflow-dark border border-[#EFEAE2] backdrop-blur-sm hover:bg-[#F3F1EC] active:bg-[#EFEAE2] ' +
+    'focus-visible:ring-finflow-blue/30 disabled:text-finflow-muted/50 disabled:border-[#EFEAE2]/60',
   danger:
-    'bg-[#C97B63] text-white hover:bg-[#B5684F] active:bg-[#9C5941] ' +
-    'focus-visible:ring-[#C97B63]/30 disabled:bg-[#C97B63]/30',
+    'bg-finflow-rust text-white hover:bg-[#B5684F] active:bg-[#9C5941] ' +
+    'focus-visible:ring-finflow-rust/30 disabled:bg-finflow-rust/30',
   ghost:
-    'bg-transparent text-[#7C756E] hover:bg-[#F3F1EC] active:bg-[#EFEAE2] ' +
-    'focus-visible:ring-[#5C7A99]/30 disabled:text-[#7C756E]/40',
+    'bg-transparent text-finflow-muted hover:bg-[#F3F1EC] active:bg-[#EFEAE2] ' +
+    'focus-visible:ring-finflow-blue/30 disabled:text-finflow-muted/40',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -83,7 +83,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           // Base
           'inline-flex items-center justify-center font-medium rounded-xl',
           'transition-colors duration-150',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#FBF9F4]',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-finflow-cream',
           'disabled:cursor-not-allowed',
           // Variant & size
           variantStyles[variant],

@@ -25,7 +25,7 @@ export function SavingsGoalsMiniWidget() {
         action={
           <Link
             to="/savings"
-            className="flex items-center gap-1 text-xs font-medium text-[#7C756E] transition-colors hover:text-[#2C2A29]"
+            className="flex items-center gap-1 text-xs font-medium text-finflow-muted transition-colors hover:text-finflow-dark"
           >
             Ver todas
             <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
@@ -34,14 +34,14 @@ export function SavingsGoalsMiniWidget() {
       />
 
       {isLoading ? (
-        <div className="flex flex-col items-center gap-3 py-8 text-[#7C756E]">
+        <div className="flex flex-col items-center gap-3 py-8 text-finflow-muted">
           <Spinner />
           <span className="text-sm">Cargando metas...</span>
         </div>
       ) : isError ? (
-        <p className="py-8 text-center text-sm text-[#C97B63]">Error al cargar metas.</p>
+        <p className="py-8 text-center text-sm text-finflow-rust">Error al cargar metas.</p>
       ) : topGoals.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-8 text-center text-[#7C756E]">
+        <div className="flex flex-col items-center gap-2 py-8 text-center text-finflow-muted">
           <Inbox className="h-5 w-5" strokeWidth={2} />
           <span className="text-sm">Aún no tienes metas activas.</span>
         </div>
@@ -50,19 +50,19 @@ export function SavingsGoalsMiniWidget() {
           {topGoals.map((goal) => (
             <div key={goal.id}>
               <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-1.5 text-[#2C2A29]">
-                  <PiggyBank className="h-3.5 w-3.5 text-[#8FA888]" strokeWidth={2} />
+                <span className="flex items-center gap-1.5 text-finflow-dark">
+                  <PiggyBank className="h-3.5 w-3.5 text-finflow-green" strokeWidth={2} />
                   {goal.name}
                 </span>
-                <span className="text-[#7C756E]">{goal.progressPercentage.toFixed(0)}%</span>
+                <span className="text-finflow-muted">{goal.progressPercentage.toFixed(0)}%</span>
               </div>
               <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[#EFEAE2]">
                 <div
-                  className="h-full rounded-full bg-[#8FA888] transition-all duration-500"
+                  className="h-full rounded-full bg-finflow-green transition-all duration-500"
                   style={{ width: `${Math.min(100, goal.progressPercentage)}%` }}
                 />
               </div>
-              <p className="mt-1 text-xs text-[#7C756E]">
+              <p className="mt-1 text-xs text-finflow-muted">
                 {formatCurrency(goal.currentAmount)} de {formatCurrency(goal.targetAmount)}
               </p>
             </div>

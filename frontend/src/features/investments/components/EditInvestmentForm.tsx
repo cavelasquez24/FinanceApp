@@ -49,8 +49,8 @@ export function EditInvestmentForm({ investment, onSuccess, onCancel }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Input label="Nombre de la Inversión" error={errors.name?.message} {...register('name')} />
         <div className="flex flex-col space-y-1.5">
-          <label className="text-sm font-medium text-[#7C756E]">Tipo de Activo</label>
-          <select {...register('type')} className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] px-4 py-2.5 text-sm text-[#2C2A29] outline-none">
+          <label className="text-sm font-medium text-finflow-muted">Tipo de Activo</label>
+          <select {...register('type')} className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream px-4 py-2.5 text-sm text-finflow-dark outline-none">
             <option value="etf">ETF</option>
             <option value="stock">Acción</option>
             <option value="mutualfund">Fondo Mutuo</option>
@@ -68,11 +68,11 @@ export function EditInvestmentForm({ investment, onSuccess, onCancel }: Props) {
 
       <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-[#EFEAE2]">
         {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel} className="text-[#7C756E] hover:bg-[#EFEAE2]">
+          <Button type="button" variant="ghost" onClick={onCancel} className="text-finflow-muted hover:bg-[#EFEAE2]">
             Cancelar
           </Button>
         )}
-        <Button type="submit" isLoading={isPending} className="bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#2C2A29]/90">
+        <Button type="submit" isLoading={isPending} className="bg-finflow-dark text-finflow-cream hover:bg-finflow-dark/90">
           Guardar Cambios
         </Button>
       </div>

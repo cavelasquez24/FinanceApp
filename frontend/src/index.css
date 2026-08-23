@@ -8,7 +8,7 @@
 
 @layer components {
   .input-restoration {
-    @apply w-full rounded-xl border border-[#DED8CF] bg-white p-2.5 text-[#2C2A29] outline-none transition focus:border-transparent focus:ring-2 focus:ring-[#9EAB98];
+    @apply w-full rounded-xl border border-[#DED8CF] bg-white p-2.5 text-finflow-dark outline-none transition focus:border-transparent focus:ring-2 focus:ring-[#9EAB98];
   }
 }
 
@@ -18,6 +18,15 @@
   --color-expense: #ef4444;
   --color-saving:  #3b82f6;
   --color-invest:  #8b5cf6;
+
+  /* Paleta unificada FinFlow (Sprint 4) — espejo de tailwind.config.js theme.extend.colors.finflow */
+  --color-finflow-dark:  #2C2A29;
+  --color-finflow-blue:  #5C7A99;
+  --color-finflow-green: #8FA888;
+  --color-finflow-rust:  #C97B63;
+  --color-finflow-amber: #B08040;
+  --color-finflow-cream: #FBF9F4;
+  --color-finflow-muted: #7C756E;
 }
 
 /* 4. Reset y estilos base */
@@ -25,11 +34,16 @@
   box-sizing: border-box;
 }
 
+html {
+  background-color: var(--color-finflow-cream);
+}
+
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #f9fafb;
-  color: #111827;
+  background-color: var(--color-finflow-cream);
+  color: var(--color-finflow-dark);
   margin: 0;
+  overscroll-behavior-y: none;
 }
 
 /* 5. Scrollbar personalizada */

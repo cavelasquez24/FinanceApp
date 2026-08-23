@@ -22,7 +22,7 @@ interface Props {
 }
 
 const selectClassName =
-  'w-full rounded-xl border border-[#EFEAE2] bg-white/70 px-3 py-2.5 text-sm text-[#2C2A29] backdrop-blur-sm transition-colors focus:border-[#5C7A99] focus:outline-none focus:ring-2 focus:ring-[#5C7A99]/20';
+  'w-full rounded-xl border border-[#EFEAE2] bg-white/70 px-3 py-2.5 text-sm text-finflow-dark backdrop-blur-sm transition-colors focus:border-finflow-blue focus:outline-none focus:ring-2 focus:ring-finflow-blue/20';
 
 export function EditBudgetForm({ budgetId, currentData, onSuccess }: Props) {
   const { data: categoriesResponse, isLoading: loadingCategories } = useExpenseCategories();
@@ -67,7 +67,7 @@ export function EditBudgetForm({ budgetId, currentData, onSuccess }: Props) {
     );
   };
 
-  if (loadingCategories) return <div className="text-sm text-[#7C756E]">Cargando categorías...</div>;
+  if (loadingCategories) return <div className="text-sm text-finflow-muted">Cargando categorías...</div>;
 
   // FIX: useExpenseCategories ya retorna Category[] desanidado (response.data.data dentro del hook).
   // El .data.data adicional aquí era el bug: siempre devolvía [] y dejaba el select vacío.
@@ -77,20 +77,20 @@ export function EditBudgetForm({ budgetId, currentData, onSuccess }: Props) {
     <Card className="max-w-2xl">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
-          <h2 className="font-serif text-xl font-medium text-[#2C2A29]">Editar Presupuesto</h2>
-          <p className="text-sm text-[#7C756E]">
+          <h2 className="font-serif text-xl font-medium text-finflow-dark">Editar Presupuesto</h2>
+          <p className="text-sm text-finflow-muted">
             Periodo: {currentData.month}/{currentData.year}
           </p>
         </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-medium text-[#2C2A29]">Categorías y Límites</h3>
+            <h3 className="text-base font-medium text-finflow-dark">Categorías y Límites</h3>
             <Button
               type="button"
               variant="ghost"
               onClick={() => append({ categoryId: '', amountLimit: 0 })}
-              className="!text-[#8FA888] hover:!bg-[#8FA888]/10"
+              className="!text-finflow-green hover:!bg-finflow-green/10"
             >
               <Plus className="mr-2 h-4 w-4" /> Agregar Rubro
             </Button>
@@ -112,7 +112,7 @@ export function EditBudgetForm({ budgetId, currentData, onSuccess }: Props) {
                   ))}
                 </select>
                 {errors.categories?.[index]?.categoryId && (
-                  <span className="text-xs text-[#C97B63]">
+                  <span className="text-xs text-finflow-rust">
                     {errors.categories[index]?.categoryId?.message}
                   </span>
                 )}
@@ -127,7 +127,7 @@ export function EditBudgetForm({ budgetId, currentData, onSuccess }: Props) {
                   {...register(`categories.${index}.amountLimit` as const, { valueAsNumber: true })}
                 />
                 {errors.categories?.[index]?.amountLimit && (
-                  <span className="text-xs text-[#C97B63]">
+                  <span className="text-xs text-finflow-rust">
                     {errors.categories[index]?.amountLimit?.message}
                   </span>
                 )}
@@ -151,7 +151,7 @@ export function EditBudgetForm({ budgetId, currentData, onSuccess }: Props) {
 
         <Button
           type="submit"
-          className="w-full !bg-[#2C2A29] !text-[#FBF9F4] hover:!bg-[#1F1E1D]"
+          className="w-full !bg-finflow-dark !text-finflow-cream hover:!bg-[#1F1E1D]"
           disabled={updateBudget.isPending}
         >
           {updateBudget.isPending ? 'Guardando...' : 'Guardar Cambios'}

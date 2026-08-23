@@ -57,12 +57,12 @@ export function CreateDebtForm({ onSuccess, onCancel }: Props) {
         />
 
         <div className="flex flex-col space-y-1.5">
-          <label className="text-sm font-medium text-[#2C2A29]">Tipo de Deuda</label>
+          <label className="text-sm font-medium text-finflow-dark">Tipo de Deuda</label>
           <select
             required
             value={type}
             onChange={(e) => setType(e.target.value as DebtType)}
-            className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] px-4 py-2.5 text-sm text-[#2C2A29] outline-none transition-all focus:border-[#D9A46B] focus:ring-1 focus:ring-[#D9A46B]"
+            className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream px-4 py-2.5 text-sm text-finflow-dark outline-none transition-all focus:border-[#D9A46B] focus:ring-1 focus:ring-[#D9A46B]"
           >
             <option value="credit_card">Tarjeta de Crédito</option>
             <option value="loan">Préstamo</option>

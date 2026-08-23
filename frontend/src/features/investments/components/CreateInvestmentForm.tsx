@@ -66,10 +66,10 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
         />
 
         <div className="flex flex-col space-y-1.5">
-          <label className="text-sm font-medium text-[#7C756E]">Tipo de Activo</label>
+          <label className="text-sm font-medium text-finflow-muted">Tipo de Activo</label>
           <select
             {...register('type')}
-            className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] px-4 py-2.5 text-sm text-[#2C2A29] outline-none transition-all focus:border-[#7C756E] focus:ring-1 focus:ring-[#7C756E]"
+            className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream px-4 py-2.5 text-sm text-finflow-dark outline-none transition-all focus:border-finflow-muted focus:ring-1 focus:ring-finflow-muted"
           >
             <option value="etf">ETF</option>
             <option value="stock">Acción</option>
@@ -78,7 +78,7 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
             <option value="bond">Bono</option>
             <option value="other">Otro</option>
           </select>
-          {errors.type && <span className="text-xs text-[#C97B63]">{errors.type.message}</span>}
+          {errors.type && <span className="text-xs text-finflow-rust">{errors.type.message}</span>}
         </div>
       </div>
 
@@ -101,12 +101,12 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#EFEAE2] bg-white/60 p-4 md:col-span-2">
           <input
             type="checkbox"
-            className="mt-1 rounded border-[#D8D1C7] text-[#2C2A29] focus:ring-[#7C756E]"
+            className="mt-1 rounded border-[#D8D1C7] text-finflow-dark focus:ring-finflow-muted"
             {...register('isHistoricalImport')}
           />
           <span>
-            <span className="block text-sm font-medium text-[#2C2A29]">Importar inversión histórica</span>
-            <span className="mt-1 block text-xs leading-relaxed text-[#7C756E]">
+            <span className="block text-sm font-medium text-finflow-dark">Importar inversión histórica</span>
+            <span className="mt-1 block text-xs leading-relaxed text-finflow-muted">
               Actívalo si la compra ocurrió antes de usar FinFlow. La importación establece el portafolio,
               pero no consume el disponible del ciclo.
             </span>
@@ -145,12 +145,12 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
           <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#EFEAE2] bg-white/60 p-4">
             <input
               type="checkbox"
-              className="mt-1 rounded border-[#D8D1C7] text-[#2C2A29] focus:ring-[#7C756E]"
+              className="mt-1 rounded border-[#D8D1C7] text-finflow-dark focus:ring-finflow-muted"
               {...register('isConsolidatedSnapshot')}
             />
             <span>
-              <span className="block text-sm font-medium text-[#2C2A29]">Snapshot consolidado</span>
-              <span className="mt-1 block text-xs leading-relaxed text-[#7C756E]">
+              <span className="block text-sm font-medium text-finflow-dark">Snapshot consolidado</span>
+              <span className="mt-1 block text-xs leading-relaxed text-finflow-muted">
                 Registra un valor de portafolio sin detallar aportes individuales. Útil cuando no tienes el historial completo.
               </span>
             </span>
@@ -160,14 +160,14 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
           {showHistoricalContributions && (
             <div className="rounded-2xl border border-[#EFEAE2] bg-white/40 p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-[#2C2A29]">Aportes Históricos</p>
+                <p className="text-sm font-semibold text-finflow-dark">Aportes Históricos</p>
                 {capitalTotal > 0 && (
-                  <span className="text-xs font-medium text-[#7C756E]">
-                    Total: <span className="font-bold text-[#2C2A29]">{formatCurrency(capitalTotal)}</span>
+                  <span className="text-xs font-medium text-finflow-muted">
+                    Total: <span className="font-bold text-finflow-dark">{formatCurrency(capitalTotal)}</span>
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#7C756E]">
+              <p className="text-xs text-finflow-muted">
                 Detalla cada aporte individual para tener trazabilidad completa del capital base.
               </p>
 
@@ -191,7 +191,7 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    className="mb-0.5 p-2 text-[#7C756E] hover:text-[#C97B63] hover:bg-[#C97B63]/10 rounded-xl transition-all"
+                    className="mb-0.5 p-2 text-finflow-muted hover:text-finflow-rust hover:bg-finflow-rust/10 rounded-xl transition-all"
                     title="Eliminar aporte"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -202,7 +202,7 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
               <button
                 type="button"
                 onClick={() => append({ contributionDate: todayDateOnly(), amount: 0 })}
-                className="flex items-center gap-2 text-sm text-[#7C756E] hover:text-[#2C2A29] transition-colors"
+                className="flex items-center gap-2 text-sm text-finflow-muted hover:text-finflow-dark transition-colors"
               >
                 <Plus className="h-4 w-4" />
                 Agregar aporte
@@ -221,11 +221,11 @@ export function CreateInvestmentForm({ onSuccess, onCancel }: Props) {
 
       <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-[#EFEAE2]">
         {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel} className="text-[#7C756E] hover:bg-[#EFEAE2]">
+          <Button type="button" variant="ghost" onClick={onCancel} className="text-finflow-muted hover:bg-[#EFEAE2]">
             Cancelar
           </Button>
         )}
-        <Button type="submit" isLoading={isPending} className="bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#2C2A29]/90">
+        <Button type="submit" isLoading={isPending} className="bg-finflow-dark text-finflow-cream hover:bg-finflow-dark/90">
           Guardar Inversión
         </Button>
       </div>

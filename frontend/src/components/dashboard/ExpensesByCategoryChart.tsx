@@ -12,7 +12,7 @@ const currency = (value: number) =>
 export function ExpensesByCategoryChart({ data }: Props) {
   if (!data.categories.length) {
     return (
-      <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-center text-[#7C756E]">
+      <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-center text-finflow-muted">
         <span className="text-sm">Sin gastos registrados este mes.</span>
       </div>
     );
@@ -55,8 +55,8 @@ export function ExpensesByCategoryChart({ data }: Props) {
 
         {/* Total centrado */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-xs text-[#7C756E]">Total gastado</span>
-          <span className="font-serif text-lg font-medium text-[#2C2A29]">
+          <span className="text-xs text-finflow-muted">Total gastado</span>
+          <span className="font-serif text-lg font-medium text-finflow-dark">
             {currency(data.totalAmount)}
           </span>
         </div>
@@ -71,9 +71,9 @@ export function ExpensesByCategoryChart({ data }: Props) {
                 className="h-2.5 w-2.5 rounded-full"
                 style={{ backgroundColor: cat.categoryColor }}
               />
-              <span className="text-[#2C2A29]">{cat.categoryName}</span>
+              <span className="text-finflow-dark">{cat.categoryName}</span>
             </div>
-            <div className="flex items-center gap-2 text-[#7C756E]">
+            <div className="flex items-center gap-2 text-finflow-muted">
               <span>{currency(cat.amount)}</span>
               <span className="text-xs">({cat.percentage.toFixed(0)}%)</span>
             </div>

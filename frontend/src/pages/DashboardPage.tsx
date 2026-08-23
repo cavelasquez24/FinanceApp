@@ -53,14 +53,14 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6 bg-[#FBF9F4] p-6">
+    <div className="space-y-6 bg-finflow-cream">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-medium text-[#2C2A29]">Análisis financiero</h1>
-          <p className="text-sm text-[#7C756E]">Reportes y tendencias por ciclo.</p>
+          <h1 className="font-serif text-2xl font-medium text-finflow-dark">Tendencias</h1>
+          <p className="text-sm text-finflow-muted">Reportes y tendencias por ciclo.</p>
           {cycleLabel && (
-            <span className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full border border-[#EFEAE2] bg-white/70 px-3 py-1 text-xs font-medium text-[#2C2A29] backdrop-blur-sm">
-              <CalendarClock className="h-3.5 w-3.5 text-[#5C7A99]" strokeWidth={2} aria-hidden="true" />
+            <span className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full border border-[#EFEAE2] bg-white/70 px-3 py-1 text-xs font-medium text-finflow-dark backdrop-blur-sm">
+              <CalendarClock className="h-3.5 w-3.5 text-finflow-blue" strokeWidth={2} aria-hidden="true" />
               Tu ciclo: {cycleLabel}
             </span>
           )}
@@ -70,12 +70,12 @@ export function DashboardPage() {
       </div>
 
       {isLoadingOverview ? (
-        <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
+        <div className="flex flex-col items-center gap-3 p-12 text-finflow-muted">
           <Spinner />
           <span className="text-sm">Cargando métricas...</span>
         </div>
       ) : isErrorOverview ? (
-        <div className="flex flex-col items-center gap-2 p-12 text-center text-[#C97B63]">
+        <div className="flex flex-col items-center gap-2 p-12 text-center text-finflow-rust">
           <AlertCircle className="h-6 w-6" strokeWidth={2} />
           <span className="text-sm font-medium">Error al cargar el resumen.</span>
         </div>
@@ -95,12 +95,12 @@ export function DashboardPage() {
           subtitle="Gastos, ahorro, inversión, deuda y disponible del ciclo seleccionado"
         />
         {isLoadingCashFlow ? (
-          <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
+          <div className="flex flex-col items-center gap-3 p-12 text-finflow-muted">
             <Spinner />
             <span className="text-sm">Cargando flujo de caja...</span>
           </div>
         ) : isErrorCashFlow ? (
-          <div className="flex flex-col items-center gap-2 p-12 text-center text-[#C97B63]">
+          <div className="flex flex-col items-center gap-2 p-12 text-center text-finflow-rust">
             <AlertCircle className="h-6 w-6" strokeWidth={2} />
             <span className="text-sm font-medium">Error al cargar el flujo de caja.</span>
           </div>
@@ -115,12 +115,12 @@ export function DashboardPage() {
             subtitle="Ingreso, gasto y caja restante después de todas las asignaciones (últimos 12 ciclos)"
           />
           {isLoadingTrend ? (
-            <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
+            <div className="flex flex-col items-center gap-3 p-12 text-finflow-muted">
               <Spinner />
               <span className="text-sm">Cargando tendencia...</span>
             </div>
           ) : isErrorTrend ? (
-            <div className="flex flex-col items-center gap-2 p-12 text-center text-[#C97B63]">
+            <div className="flex flex-col items-center gap-2 p-12 text-center text-finflow-rust">
               <AlertCircle className="h-6 w-6" strokeWidth={2} />
               <span className="text-sm font-medium">Error al cargar la tendencia.</span>
             </div>

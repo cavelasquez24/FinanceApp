@@ -17,6 +17,7 @@ import {
   Modal,
   Card,
   KpiCard,
+  PageHeader,
   Table,
   TableHead,
   TableBody,
@@ -49,17 +50,17 @@ export default function DebtsPage() {
   };
 
   return (
-    <div className="space-y-8 bg-[#FBF9F4] min-h-screen p-4 md:p-8 font-sans">
-      {/* Encabezado */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-[#2C2A29] tracking-tight">Deudas</h1>
-          <p className="text-sm text-[#7C756E] mt-1">Controla tus pasivos y su evolución de pago</p>
-        </div>
-        <Button onClick={() => setIsCreateOpen(true)} leftIcon={<Plus className="h-4 w-4" />}>
-          Nueva Deuda
-        </Button>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Patrimonio"
+        title="Deudas"
+        description="Controla tus pasivos y su evolución de pago"
+        action={
+          <Button onClick={() => setIsCreateOpen(true)} leftIcon={<Plus className="h-4 w-4" />}>
+            Nueva Deuda
+          </Button>
+        }
+      />
 
       {/* Resumen — Bento Grid */}
       {summary && (
@@ -70,27 +71,27 @@ export default function DebtsPage() {
               <Wallet className="w-6 h-6 stroke-[1.5]" />
             </div>
             <div>
-              <p className="text-sm font-medium text-[#7C756E] uppercase tracking-wider mb-2">
+              <p className="text-sm font-medium text-finflow-muted uppercase tracking-wider mb-2">
                 Saldo Total Pendiente
               </p>
-              <p className="text-5xl font-bold text-[#2C2A29] tracking-tight">
+              <p className="text-5xl font-bold text-finflow-dark tracking-tight">
                 {formatCurrency(summary.totalCurrentBalance)}
               </p>
             </div>
             <div className="mt-8">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-[#7C756E]">Progreso de Pago</p>
-                <span className="text-sm font-semibold text-[#8FA888]">
+                <p className="text-sm font-medium text-finflow-muted">Progreso de Pago</p>
+                <span className="text-sm font-semibold text-finflow-green">
                   {summary.totalPaidPercentage.toFixed(1)}%
                 </span>
               </div>
               <div className="h-2 w-full rounded-full bg-[#EFEAE2] overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-[#8FA888] transition-all"
+                  className="h-full rounded-full bg-finflow-green transition-all"
                   style={{ width: `${Math.min(summary.totalPaidPercentage, 100)}%` }}
                 />
               </div>
-              <p className="mt-2 text-xs text-[#7C756E]">
+              <p className="mt-2 text-xs text-finflow-muted">
                 {formatCurrency(summary.totalPaid)} pagado de {formatCurrency(summary.totalOriginal)}
               </p>
             </div>
@@ -105,19 +106,19 @@ export default function DebtsPage() {
 
           <Card className="md:col-span-2 flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-[#7C756E]">
+              <span className="text-xs font-medium uppercase tracking-wide text-finflow-muted">
                 Próximos Vencimientos
               </span>
-              <CalendarClock className="w-5 h-5 text-[#7C756E]" />
+              <CalendarClock className="w-5 h-5 text-finflow-muted" />
             </div>
             {summary.upcomingPayments.length === 0 ? (
-              <p className="text-sm text-[#7C756E]">Sin vencimientos próximos configurados.</p>
+              <p className="text-sm text-finflow-muted">Sin vencimientos próximos configurados.</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {summary.upcomingPayments.slice(0, 3).map((p) => (
                   <li key={p.debtId} className="flex items-center justify-between text-sm">
-                    <span className="text-[#2C2A29] font-medium truncate">{p.debtName}</span>
-                    <span className="text-[#7C756E] shrink-0 ml-2">
+                    <span className="text-finflow-dark font-medium truncate">{p.debtName}</span>
+                    <span className="text-finflow-muted shrink-0 ml-2">
                       Día {p.dueDay}
                       {p.minimumPayment ? ` · ${formatCurrency(p.minimumPayment)}` : ''}
                     </span>
@@ -132,7 +133,7 @@ export default function DebtsPage() {
       {/* Tabla de deudas */}
       <Card noPadding>
         <div className="p-6 border-b border-[#EFEAE2]">
-          <h2 className="text-lg font-semibold text-[#2C2A29]">Detalle de Deudas</h2>
+          <h2 className="text-lg font-semibold text-finflow-dark">Detalle de Deudas</h2>
         </div>
         <Table>
           <TableHead>
@@ -148,9 +149,9 @@ export default function DebtsPage() {
               <Tr key={debt.id}>
                 <Td>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-[#2C2A29]">{debt.name}</span>
+                    <span className="font-semibold text-finflow-dark">{debt.name}</span>
                     {debt.creditor && (
-                      <span className="text-xs text-[#7C756E] mt-0.5">{debt.creditor}</span>
+                      <span className="text-xs text-finflow-muted mt-0.5">{debt.creditor}</span>
                     )}
                   </div>
                 </Td>
@@ -159,22 +160,22 @@ export default function DebtsPage() {
                 </Td>
                 <Td>{formatCurrency(debt.originalAmount)}</Td>
                 <Td>
-                  <span className="font-bold text-[#2C2A29]">
+                  <span className="font-bold text-finflow-dark">
                     {formatCurrency(debt.currentBalance)}
                   </span>
                   {debt.isPaidOff && (
-                    <span className="ml-2 text-xs font-medium text-[#8FA888]">Liquidada</span>
+                    <span className="ml-2 text-xs font-medium text-finflow-green">Liquidada</span>
                   )}
                 </Td>
                 <Td>
                   <div className="flex items-center gap-2 w-32">
                     <div className="h-1.5 flex-1 rounded-full bg-[#EFEAE2] overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-[#8FA888]"
+                        className="h-full rounded-full bg-finflow-green"
                         style={{ width: `${Math.min(debt.paidPercentage, 100)}%` }}
                       />
                     </div>
-                    <span className="text-xs font-medium text-[#7C756E]">
+                    <span className="text-xs font-medium text-finflow-muted">
                       {debt.paidPercentage.toFixed(0)}%
                     </span>
                   </div>
@@ -185,21 +186,21 @@ export default function DebtsPage() {
                       onClick={() => setPayingDebt(debt)}
                       disabled={debt.isPaidOff}
                       title="Registrar Pago"
-                      className="p-2 text-[#7C756E] hover:text-[#8FA888] hover:bg-[#8FA888]/10 rounded-xl transition-all disabled:opacity-30 disabled:pointer-events-none"
+                      className="p-2 text-finflow-muted hover:text-finflow-green hover:bg-finflow-green/10 rounded-xl transition-all disabled:opacity-30 disabled:pointer-events-none"
                     >
                       <TrendingDown className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setEditingDebt(debt)}
                       title="Editar"
-                      className="p-2 text-[#7C756E] hover:text-[#2C2A29] hover:bg-[#EFEAE2] rounded-xl transition-all"
+                      className="p-2 text-finflow-muted hover:text-finflow-dark hover:bg-[#EFEAE2] rounded-xl transition-all"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setDeletingDebt(debt)}
                       title="Eliminar"
-                      className="p-2 text-[#7C756E] hover:text-[#C97B63] hover:bg-[#C97B63]/10 rounded-xl transition-all"
+                      className="p-2 text-finflow-muted hover:text-finflow-rust hover:bg-finflow-rust/10 rounded-xl transition-all"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

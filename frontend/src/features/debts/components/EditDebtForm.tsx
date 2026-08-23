@@ -100,7 +100,7 @@ export function EditDebtForm({ debt, onSuccess, onCancel }: Props) {
           onChange={(e) => setIsActive(e.target.checked)}
           className="h-4 w-4 rounded border-[#EFEAE2] text-[#D9A46B] focus:ring-[#D9A46B]"
         />
-        <label htmlFor="isActive" className="text-sm text-[#2C2A29]">
+        <label htmlFor="isActive" className="text-sm text-finflow-dark">
           Deuda activa
         </label>
       </div>

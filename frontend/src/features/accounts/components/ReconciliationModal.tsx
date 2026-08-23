@@ -64,7 +64,7 @@ export function ReconciliationModal({ account, onClose }: Props) {
       maxWidth="max-w-xl"
     >
       {isLoading ? (
-        <div className="flex items-center justify-center py-16 text-[#7C756E]">
+        <div className="flex items-center justify-center py-16 text-finflow-muted">
           Cargando saldo esperado...
         </div>
       ) : (
@@ -85,7 +85,7 @@ export function ReconciliationModal({ account, onClose }: Props) {
               />
             </div>
             {preview?.lastReconciliationDate && (
-              <p className="mt-3 text-xs text-[#7C756E]">
+              <p className="mt-3 text-xs text-finflow-muted">
                 Última conciliación: {preview.lastReconciliationDate} ·{" "}
                 {formatCurrency(preview.lastReconciliationActualBalance ?? 0)}
               </p>
@@ -103,7 +103,7 @@ export function ReconciliationModal({ account, onClose }: Props) {
               value={actualBalance}
               onChange={(e) => setActualBalance(e.target.value)}
               placeholder={formatCurrency(preview?.currentBalance ?? 0)}
-              className="mt-1 w-full rounded-xl border border-[#D8D0C5] bg-white px-4 py-2.5 text-[#2C2A29] focus:border-[#7A4B3A] focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-[#D8D0C5] bg-white px-4 py-2.5 text-finflow-dark focus:border-[#7A4B3A] focus:outline-none"
               required
             />
           </SavingsField>
@@ -137,12 +137,12 @@ export function ReconciliationModal({ account, onClose }: Props) {
                 )}
               </span>
               <div>
-                <p className="text-sm font-semibold text-[#2C2A29]">
+                <p className="text-sm font-semibold text-finflow-dark">
                   {!hasDifference
                     ? "Sin diferencia — cuenta cuadrada"
                     : `Diferencia: ${formatCurrency(difference)}`}
                 </p>
-                <p className="text-xs text-[#7C756E]">
+                <p className="text-xs text-finflow-muted">
                   {!hasDifference
                     ? "No se generará ningún ajuste."
                     : difference > 0
@@ -159,7 +159,7 @@ export function ReconciliationModal({ account, onClose }: Props) {
               type="date"
               value={reconciliationDate}
               onChange={(e) => setReconciliationDate(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-[#D8D0C5] bg-white px-4 py-2.5 text-[#2C2A29] focus:border-[#7A4B3A] focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-[#D8D0C5] bg-white px-4 py-2.5 text-finflow-dark focus:border-[#7A4B3A] focus:outline-none"
               required
             />
           </SavingsField>
@@ -174,7 +174,7 @@ export function ReconciliationModal({ account, onClose }: Props) {
               rows={2}
               maxLength={500}
               placeholder="Ej: comisión bancaria, transferencia pendiente..."
-              className="mt-1 w-full resize-none rounded-xl border border-[#D8D0C5] bg-white px-4 py-2.5 text-sm text-[#2C2A29] focus:border-[#7A4B3A] focus:outline-none"
+              className="mt-1 w-full resize-none rounded-xl border border-[#D8D0C5] bg-white px-4 py-2.5 text-sm text-finflow-dark focus:border-[#7A4B3A] focus:outline-none"
             />
           </SavingsField>
 

@@ -29,16 +29,16 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#FBF9F4] px-4 py-10 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md !rounded-[28px] border border-[#EFEAE2] bg-white/70 p-8 shadow-xl shadow-[#2C2A29]/5 backdrop-blur-md">
+    <div className="flex min-h-dvh items-center justify-center bg-finflow-cream px-4 py-10 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md !rounded-[28px] border border-[#EFEAE2] bg-white/70 p-8 shadow-xl shadow-finflow-dark/5 backdrop-blur-md">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2C2A29]">
-            <Wallet className="h-6 w-6 text-[#FBF9F4]" strokeWidth={2} />
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-finflow-dark">
+            <Wallet className="h-6 w-6 text-finflow-cream" strokeWidth={2} />
           </div>
-          <h1 className="font-serif text-2xl font-medium text-[#2C2A29]">
+          <h1 className="font-serif text-2xl font-medium text-finflow-dark">
             Crear Cuenta
           </h1>
-          <p className="mt-2 text-sm text-[#7C756E]">
+          <p className="mt-2 text-sm text-finflow-muted">
             Comienza a tomar el control de tus finanzas hoy
           </p>
         </div>
@@ -89,11 +89,11 @@ export function RegisterPage() {
         </form>
 
         <div className="mt-6 border-t border-[#EFEAE2] pt-6">
-          <p className="text-center text-sm text-[#7C756E]">
+          <p className="text-center text-sm text-finflow-muted">
             ¿Ya tienes una cuenta?{' '}
             <Link
               to="/login"
-              className="font-medium text-[#5C7A99] transition-colors hover:text-[#4D6884]"
+              className="font-medium text-finflow-blue transition-colors hover:text-[#4D6884]"
             >
               Inicia sesión aquí
             </Link>

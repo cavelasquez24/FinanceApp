@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   CardHeader,
+  PageHeader,
   Spinner,
   ConfirmDialog,
   TablePagination,
@@ -82,20 +83,20 @@ export function IncomesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-serif text-2xl font-medium text-[#2C2A29]">Ingresos</h1>
-          <p className="text-sm text-[#7C756E]">Gestiona y registra tus entradas de dinero.</p>
-        </div>
-        <Button
-          onClick={handleOpenCreate}
-          leftIcon={<PlusIcon className="h-4 w-4" strokeWidth={2.5} />}
-          className="!bg-[#2C2A29] !text-[#FBF9F4] hover:!bg-[#1F1E1D]"
-        >
-          Nuevo ingreso
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Movimientos"
+        title="Ingresos"
+        description="Gestiona y registra tus entradas de dinero."
+        action={
+          <Button
+            onClick={handleOpenCreate}
+            leftIcon={<PlusIcon className="h-4 w-4" strokeWidth={2.5} />}
+            className="!bg-finflow-dark !text-finflow-cream hover:!bg-[#1F1E1D]"
+          >
+            Nuevo ingreso
+          </Button>
+        }
+      />
 
       {/* Formulario (crear o editar) */}
       {isFormVisible && (
@@ -108,25 +109,25 @@ export function IncomesPage() {
       {/* Tabla de Resultados */}
       <Card noPadding className="overflow-hidden">
         {isLoading ? (
-          <div className="flex flex-col items-center gap-3 p-12 text-[#7C756E]">
+          <div className="flex flex-col items-center gap-3 p-12 text-finflow-muted">
             <Spinner />
             <span className="text-sm">Cargando ingresos...</span>
           </div>
         ) : isError ? (
-          <div className="flex flex-col items-center gap-2 p-12 text-center text-[#C97B63]">
+          <div className="flex flex-col items-center gap-2 p-12 text-center text-finflow-rust">
             <AlertCircle className="h-6 w-6" strokeWidth={2} />
             <span className="text-sm font-medium">Error al cargar los datos.</span>
           </div>
         ) : incomes.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 p-12 text-center text-[#7C756E]">
+          <div className="flex flex-col items-center gap-2 p-12 text-center text-finflow-muted">
             <Inbox className="h-6 w-6" strokeWidth={2} />
             <span className="text-sm">Aún no tienes ingresos registrados.</span>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-[#2C2A29]">
-              <thead className="bg-[#F3F1EC] text-xs uppercase tracking-wide text-[#7C756E]">
+            <table className="w-full text-left text-sm text-finflow-dark">
+              <thead className="bg-[#F3F1EC] text-xs uppercase tracking-wide text-finflow-muted">
                 <tr>
                   <th className="px-6 py-4 font-medium">Fecha</th>
                   <th className="px-6 py-4 font-medium">Categoría</th>
@@ -137,8 +138,8 @@ export function IncomesPage() {
               </thead>
               <tbody className="divide-y divide-[#EFEAE2]">
                 {incomes.map((income) => (
-                  <tr key={income.id} className="transition-colors hover:bg-[#FBF9F4]">
-                    <td className="px-6 py-4 text-[#7C756E]">
+                  <tr key={income.id} className="transition-colors hover:bg-finflow-cream">
+                    <td className="px-6 py-4 text-finflow-muted">
                       {format(parseDateOnly(income.date), 'dd/MM/yyyy')}
                     </td>
                     <td className="flex items-center gap-2 px-6 py-4">
@@ -148,8 +149,8 @@ export function IncomesPage() {
                       />
                       {income.categoryName}
                     </td>
-                    <td className="px-6 py-4 text-[#7C756E]">{income.description || '-'}</td>
-                    <td className="px-6 py-4 text-right font-medium text-[#5C7A99]">
+                    <td className="px-6 py-4 text-finflow-muted">{income.description || '-'}</td>
+                    <td className="px-6 py-4 text-right font-medium text-finflow-blue">
                       {new Intl.NumberFormat('es-US', { style: 'currency', currency: 'USD' }).format(income.amount)}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -157,7 +158,7 @@ export function IncomesPage() {
                         <button
                           type="button"
                           onClick={() => handleEdit(income)}
-                          className="rounded-lg p-2 text-[#7C756E] transition-colors hover:bg-[#EFEAE2] hover:text-[#5C7A99]"
+                          className="rounded-lg p-2 text-finflow-muted transition-colors hover:bg-[#EFEAE2] hover:text-finflow-blue"
                           aria-label="Editar ingreso"
                         >
                           <Pencil className="h-4 w-4" strokeWidth={2} />
@@ -165,7 +166,7 @@ export function IncomesPage() {
                         <button
                           type="button"
                           onClick={() => setDeletingIncome(income)}
-                          className="rounded-lg p-2 text-[#7C756E] transition-colors hover:bg-[#EFEAE2] hover:text-[#C97B63]"
+                          className="rounded-lg p-2 text-finflow-muted transition-colors hover:bg-[#EFEAE2] hover:text-finflow-rust"
                           aria-label="Eliminar ingreso"
                         >
                           <Trash2 className="h-4 w-4" strokeWidth={2} />

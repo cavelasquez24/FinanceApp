@@ -55,11 +55,11 @@ export function AddInvestmentRecordModal({
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalHeader>
-        <h2 className="text-xl font-serif font-medium text-[#2C2A29]">
+        <h2 className="text-xl font-serif font-medium text-finflow-dark">
           Añadir Registro
         </h2>
         {investmentName && (
-          <p className="text-sm text-[#7C756E]">
+          <p className="text-sm text-finflow-muted">
             Actualizando valor para <span className="font-semibold">{investmentName}</span>
           </p>
         )}
@@ -69,13 +69,13 @@ export function AddInvestmentRecordModal({
         <form id="investment-record-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           
           <div>
-            <label className="block text-sm font-medium text-[#2C2A29] mb-1">
+            <label className="block text-sm font-medium text-finflow-dark mb-1">
               Fecha del Registro
             </label>
             <input
               type="date"
               {...register('recordDate')}
-              className="w-full rounded-xl border border-[#EFEAE2] bg-white px-4 py-2 text-[#2C2A29] focus:border-[#8FA888] focus:outline-none focus:ring-1 focus:ring-[#8FA888] transition-shadow"
+              className="w-full rounded-xl border border-[#EFEAE2] bg-white px-4 py-2 text-finflow-dark focus:border-finflow-green focus:outline-none focus:ring-1 focus:ring-finflow-green transition-shadow"
             />
             {errors.recordDate && (
               <p className="mt-1 text-sm text-red-500">{errors.recordDate.message}</p>
@@ -84,14 +84,14 @@ export function AddInvestmentRecordModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[#2C2A29] mb-1">
+              <label className="block text-sm font-medium text-finflow-dark mb-1">
                 Valor Actual ($)
               </label>
               <input
                 type="number"
                 step="0.01"
                 {...register('value', { valueAsNumber: true })}
-                className="w-full rounded-xl border border-[#EFEAE2] bg-white px-4 py-2 text-[#2C2A29] focus:border-[#8FA888] focus:outline-none focus:ring-1 focus:ring-[#8FA888] transition-shadow"
+                className="w-full rounded-xl border border-[#EFEAE2] bg-white px-4 py-2 text-finflow-dark focus:border-finflow-green focus:outline-none focus:ring-1 focus:ring-finflow-green transition-shadow"
                 placeholder="0.00"
               />
               {errors.value && (
@@ -100,14 +100,14 @@ export function AddInvestmentRecordModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#2C2A29] mb-1">
+              <label className="block text-sm font-medium text-finflow-dark mb-1">
                 Dividendos ($)
               </label>
               <input
                 type="number"
                 step="0.01"
                 {...register('dividends', { valueAsNumber: true })}
-                className="w-full rounded-xl border border-[#EFEAE2] bg-white px-4 py-2 text-[#2C2A29] focus:border-[#8FA888] focus:outline-none focus:ring-1 focus:ring-[#8FA888] transition-shadow"
+                className="w-full rounded-xl border border-[#EFEAE2] bg-white px-4 py-2 text-finflow-dark focus:border-finflow-green focus:outline-none focus:ring-1 focus:ring-finflow-green transition-shadow"
                 placeholder="0.00"
               />
               {errors.dividends && (
@@ -117,13 +117,13 @@ export function AddInvestmentRecordModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-[#2C2A29] mb-1">
+            <label className="block text-sm font-medium text-finflow-dark mb-1">
               Notas (Opcional)
             </label>
             <textarea
               {...register('notes')}
               rows={3}
-              className="w-full rounded-xl border border-[#EFEAE2] bg-white px-4 py-2 text-[#2C2A29] focus:border-[#8FA888] focus:outline-none focus:ring-1 focus:ring-[#8FA888] transition-shadow resize-none"
+              className="w-full rounded-xl border border-[#EFEAE2] bg-white px-4 py-2 text-finflow-dark focus:border-finflow-green focus:outline-none focus:ring-1 focus:ring-finflow-green transition-shadow resize-none"
               placeholder="Ej. Aporte para estrategia a 10-20 años, reinversión en ETFs..."
             />
             {errors.notes && (
@@ -138,7 +138,7 @@ export function AddInvestmentRecordModal({
           type="button"
           onClick={handleClose}
           disabled={isPending}
-          className="rounded-xl px-4 py-2 text-sm font-medium text-[#7C756E] hover:bg-[#EFEAE2] transition-colors disabled:opacity-50"
+          className="rounded-xl px-4 py-2 text-sm font-medium text-finflow-muted hover:bg-[#EFEAE2] transition-colors disabled:opacity-50"
         >
           Cancelar
         </button>
@@ -146,7 +146,7 @@ export function AddInvestmentRecordModal({
           type="submit"
           form="investment-record-form"
           disabled={isPending}
-          className="rounded-xl bg-[#2C2A29] px-4 py-2 text-sm font-medium text-[#FBF9F4] hover:bg-[#2C2A29]/90 transition-colors shadow-md disabled:opacity-50 flex items-center justify-center min-w-[120px]"
+          className="rounded-xl bg-finflow-dark px-4 py-2 text-sm font-medium text-finflow-cream hover:bg-finflow-dark/90 transition-colors shadow-md disabled:opacity-50 flex items-center justify-center min-w-[120px]"
         >
           {isPending ? 'Guardando...' : 'Guardar Registro'}
         </button>

@@ -35,7 +35,7 @@ export default function SavingsPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-[#7C756E]">
+        <div className="flex flex-col items-center gap-3 text-finflow-muted">
           <Spinner />
           <span className="text-sm">Cargando metas...</span>
         </div>
@@ -91,22 +91,22 @@ export default function SavingsPage() {
   );
 
   return (
-    <div className="min-h-screen space-y-8 bg-[#FBF9F4]">
+    <div className="min-h-screen space-y-8 bg-finflow-cream">
       <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7FA083]">
             Planificación
           </p>
-          <h1 className="mt-1 font-serif text-3xl font-semibold text-[#2C2A29] sm:text-4xl">
+          <h1 className="mt-1 font-serif text-3xl font-semibold text-finflow-dark sm:text-4xl">
             Metas de ahorro
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#7C756E]">
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-finflow-muted">
             Distribuye el saldo real de tus cuentas de ahorro entre emergencia,
             viajes, compras y otros propósitos sin duplicar el patrimonio.
           </p>
         </div>
         <Button
-          className="flex items-center gap-2 rounded-xl bg-[#2C2A29] px-5 py-2.5 text-[#FBF9F4] transition-colors hover:bg-[#1A1918]"
+          className="flex items-center gap-2 rounded-xl bg-finflow-dark px-5 py-2.5 text-finflow-cream transition-colors hover:bg-[#1A1918]"
           onClick={() => setIsCreateModalOpen(true)}
           leftIcon={<Plus className="h-5 w-5" />}
         >
@@ -148,10 +148,10 @@ export default function SavingsPage() {
             <ShieldCheck className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="text-lg font-semibold text-[#2C2A29]">
+            <h2 className="text-lg font-semibold text-finflow-dark">
               Protección financiera
             </h2>
-            <p className="text-sm text-[#7C756E]">
+            <p className="text-sm text-finflow-muted">
               Tu fondo de emergencia, su mínimo protegido y cualquier reposición
               pendiente.
             </p>
@@ -187,10 +187,10 @@ export default function SavingsPage() {
             <Target className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="text-lg font-semibold text-[#2C2A29]">
+            <h2 className="text-lg font-semibold text-finflow-dark">
               Metas personales
             </h2>
-            <p className="text-sm text-[#7C756E]">
+            <p className="text-sm text-finflow-muted">
               Objetivos manuales para aportar, retirar o reasignar según tus
               planes.
             </p>
@@ -202,7 +202,7 @@ export default function SavingsPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center rounded-[28px] border border-dashed border-[#DED6CC] py-12 text-center">
-            <p className="text-[#7C756E]">
+            <p className="text-finflow-muted">
               No tienes metas personales configuradas.
             </p>
             <button
@@ -282,11 +282,11 @@ function Summary({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-4 ${warning ? "border-amber-200 bg-amber-50" : "border-[#E8E1D8] bg-white/60"}`}
+      className={`rounded-2xl border p-4 ${warning ? "border-finflow-amber/30 bg-finflow-amber/10" : "border-[#E8E1D8] bg-white/60"}`}
     >
-      <span className="text-xs text-[#7C756E]">{label}</span>
+      <span className="text-xs text-finflow-muted">{label}</span>
       <strong
-        className={`mt-1 block text-xl ${warning ? "text-amber-900" : "text-[#2C2A29]"}`}
+        className={`mt-1 block text-xl ${warning ? "text-finflow-amber" : "text-finflow-dark"}`}
       >
         {value}
       </strong>

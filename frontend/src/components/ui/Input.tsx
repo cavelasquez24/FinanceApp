@@ -37,8 +37,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <label
             htmlFor={inputId}
             className={cn(
-              'text-sm font-medium text-[#2C2A29]',
-              disabled && 'text-[#7C756E]/50'
+              'text-sm font-medium text-finflow-dark',
+              disabled && 'text-finflow-muted/50'
             )}
           >
             {label}
@@ -49,8 +49,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           {leftIcon && (
             <span
               className={cn(
-                'pointer-events-none absolute left-3.5 flex items-center text-[#7C756E]',
-                error && 'text-[#C97B63]'
+                'pointer-events-none absolute left-3.5 flex items-center text-finflow-muted',
+                error && 'text-finflow-rust'
               )}
             >
               {leftIcon}
@@ -62,8 +62,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             disabled={disabled}
             className={cn(
-              'w-full rounded-xl border bg-white/70 text-sm text-[#2C2A29] backdrop-blur-sm',
-              'placeholder:text-[#7C756E]/70',
+              'w-full rounded-xl border bg-white/70 text-sm text-finflow-dark backdrop-blur-sm',
+              'placeholder:text-finflow-muted/70',
               'transition-colors duration-150',
               'focus:outline-none focus:ring-2 focus:ring-offset-0',
               'py-2.5',
@@ -71,11 +71,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               rightIcon || rightAction ? 'pr-10' : 'pr-3.5',
 
               !error
-                ? 'border-[#EFEAE2] focus:border-[#5C7A99] focus:ring-[#5C7A99]/20'
-                : 'border-[#C97B63]/60 bg-[#FBEEEA]/60 focus:border-[#C97B63] focus:ring-[#C97B63]/20',
+                ? 'border-[#EFEAE2] focus:border-finflow-blue focus:ring-finflow-blue/20'
+                : 'border-finflow-rust/60 bg-[#FBEEEA]/60 focus:border-finflow-rust focus:ring-finflow-rust/20',
 
               disabled &&
-                'cursor-not-allowed border-[#EFEAE2] bg-[#F3F1EC] text-[#7C756E]/60',
+                'cursor-not-allowed border-[#EFEAE2] bg-[#F3F1EC] text-finflow-muted/60',
 
               className
             )}
@@ -83,7 +83,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {rightIcon && !rightAction && (
-            <span className="pointer-events-none absolute right-3.5 flex items-center text-[#7C756E]">
+            <span className="pointer-events-none absolute right-3.5 flex items-center text-finflow-muted">
               {rightIcon}
             </span>
           )}
@@ -108,7 +108,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {error}
           </p>
         ) : hint ? (
-          <p className="text-xs text-[#7C756E]">{hint}</p>
+          <p className="text-xs text-finflow-muted">{hint}</p>
         ) : null}
       </div>
     );

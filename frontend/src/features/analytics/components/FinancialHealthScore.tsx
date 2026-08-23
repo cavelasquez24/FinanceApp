@@ -102,7 +102,7 @@ export function FinancialHealthScore({ data }: Props) {
       {/* Recommendations */}
       {recommendations.length > 0 && (
         <div className="flex-1 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#7C756E]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-finflow-muted">
             Recomendaciones
           </p>
           <ul className="space-y-2">
@@ -110,10 +110,10 @@ export function FinancialHealthScore({ data }: Props) {
               <li
                 key={i}
                 className={cn(
-                  'flex items-start gap-2 rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] p-3 text-xs text-[#2C2A29]'
+                  'flex items-start gap-2 rounded-xl border border-[#EFEAE2] bg-finflow-cream p-3 text-xs text-finflow-dark'
                 )}
               >
-                <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full bg-[#5C7A99]/15 text-center text-[10px] font-bold leading-4 text-[#5C7A99]">
+                <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full bg-finflow-blue/15 text-center text-[10px] font-bold leading-4 text-finflow-blue">
                   {i + 1}
                 </span>
                 {rec}

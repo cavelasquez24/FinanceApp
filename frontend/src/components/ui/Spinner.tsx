@@ -20,7 +20,7 @@ export function Spinner({ size = 'md', className, label = 'Cargando...' }: Spinn
     <span role="status" aria-label={label} className="inline-flex">
       <span
         className={cn(
-          'rounded-full border-[#EFEAE2] border-t-[#5C7A99] animate-spin',
+          'rounded-full border-[#EFEAE2] border-t-finflow-blue animate-spin',
           sizeClasses[size],
           className
         )}
@@ -36,7 +36,7 @@ export function PageSpinner({ label }: { label?: string }) {
   return (
     <div className="flex min-h-[200px] flex-col items-center justify-center gap-3">
       <Spinner size="lg" label={label} />
-      {label && <p className="text-sm text-[#7C756E]">{label}</p>}
+      {label && <p className="text-sm text-finflow-muted">{label}</p>}
     </div>
   );
 }

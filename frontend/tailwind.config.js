@@ -25,6 +25,20 @@ export default {
         expense: '#ef4444',   // rojo para gastos
         saving:  '#3b82f6',   // azul para ahorros
         invest:  '#8b5cf6',   // violeta para inversiones
+        // Paleta unificada FinFlow (Sprint 4 — sistema de diseño)
+        finflow: {
+          dark:  '#2C2A29',
+          blue:  '#5C7A99',
+          green: '#8FA888',
+          rust:  '#C97B63',
+          amber: '#B08040',
+          cream: '#FBF9F4',
+          muted: '#7C756E',
+        },
+      },
+      borderRadius: {
+        card:    '28px',
+        'card-sm': '16px',
       },
       // Fuente del proyecto
       fontFamily: {

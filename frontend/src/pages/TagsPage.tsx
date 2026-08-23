@@ -1,6 +1,6 @@
 import { monthEndDateOnly } from '../utils/dateOnly';
 import { useState } from 'react';
-import { Card, CardHeader } from '../components/ui';
+import { Card, CardHeader, PageHeader } from '../components/ui';
 import { MonthYearSelector } from '../features/dashboard/components/MonthYearSelector';
 import { TagManager } from '../features/tags/components/TagManager';
 import { TagExpenseReport } from '../features/tags/components/TagExpenseReport';
@@ -14,12 +14,11 @@ export default function TagsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-semibold tracking-tight text-[#2C2A29]">Etiquetas</h1>
-        <p className="mt-1 max-w-3xl text-sm text-[#7C756E]">
-          Usa categorías para el tipo general del gasto y etiquetas para su contexto: personas, ocasión, lugar o propósito.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Configuración"
+        title="Etiquetas"
+        description="Usa categorías para el tipo general del gasto y etiquetas para su contexto: personas, ocasión, lugar o propósito."
+      />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Card>

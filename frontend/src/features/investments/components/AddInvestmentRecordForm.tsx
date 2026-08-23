@@ -41,7 +41,7 @@ export function AddInvestmentRecordForm({ investment, onSuccess, onCancel }: Pro
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-[#7C756E] mb-1">
+        <label className="block text-sm font-medium text-finflow-muted mb-1">
           Fecha de Registro
         </label>
         <input
@@ -49,12 +49,12 @@ export function AddInvestmentRecordForm({ investment, onSuccess, onCancel }: Pro
           required
           value={recordDate}
           onChange={(e) => setRecordDate(e.target.value)}
-          className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] p-3 text-[#2C2A29] focus:border-[#7C756E] focus:outline-none focus:ring-1 focus:ring-[#7C756E] transition-all"
+          className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream p-3 text-finflow-dark focus:border-finflow-muted focus:outline-none focus:ring-1 focus:ring-finflow-muted transition-all"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#7C756E] mb-1">
+        <label className="block text-sm font-medium text-finflow-muted mb-1">
           Valor Actual del Activo
         </label>
         <input
@@ -63,12 +63,12 @@ export function AddInvestmentRecordForm({ investment, onSuccess, onCancel }: Pro
           required
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] p-3 text-[#2C2A29] focus:border-[#7C756E] focus:outline-none focus:ring-1 focus:ring-[#7C756E] transition-all"
+          className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream p-3 text-finflow-dark focus:border-finflow-muted focus:outline-none focus:ring-1 focus:ring-finflow-muted transition-all"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#7C756E] mb-1">
+        <label className="block text-sm font-medium text-finflow-muted mb-1">
           Dividendos Recibidos (Opcional)
         </label>
         <input
@@ -76,27 +76,27 @@ export function AddInvestmentRecordForm({ investment, onSuccess, onCancel }: Pro
           step="0.01"
           value={dividends}
           onChange={(e) => setDividends(e.target.value)}
-          className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] p-3 text-[#2C2A29] focus:border-[#7C756E] focus:outline-none focus:ring-1 focus:ring-[#7C756E] transition-all"
+          className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream p-3 text-finflow-dark focus:border-finflow-muted focus:outline-none focus:ring-1 focus:ring-finflow-muted transition-all"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#7C756E] mb-1">
+        <label className="block text-sm font-medium text-finflow-muted mb-1">
           Notas (Opcional)
         </label>
         <textarea
           rows={2}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          className="w-full rounded-xl border border-[#EFEAE2] bg-[#FBF9F4] p-3 text-[#2C2A29] focus:border-[#7C756E] focus:outline-none focus:ring-1 focus:ring-[#7C756E] transition-all"
+          className="w-full rounded-xl border border-[#EFEAE2] bg-finflow-cream p-3 text-finflow-dark focus:border-finflow-muted focus:outline-none focus:ring-1 focus:ring-finflow-muted transition-all"
         />
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel} className="text-[#7C756E]">
+        <Button type="button" variant="ghost" onClick={onCancel} className="text-finflow-muted">
           Cancelar
         </Button>
-        <Button type="submit" isLoading={isPending} className="bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#2C2A29]/90 rounded-xl">
+        <Button type="submit" isLoading={isPending} className="bg-finflow-dark text-finflow-cream hover:bg-finflow-dark/90 rounded-xl">
           Guardar Registro
         </Button>
       </div>

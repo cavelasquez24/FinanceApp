@@ -34,19 +34,19 @@ function MonthYearPicker({
       <button
         type="button"
         onClick={prev}
-        className="rounded-xl p-2 text-[#7C756E] transition-colors hover:bg-[#F3F1EC] hover:text-[#2C2A29]"
+        className="rounded-xl p-2 text-finflow-muted transition-colors hover:bg-[#F3F1EC] hover:text-finflow-dark"
         aria-label="Mes anterior"
       >
         <ChevronLeft className="h-4 w-4" strokeWidth={2} />
       </button>
-      <span className="min-w-[150px] text-center text-sm font-medium text-[#2C2A29]">
+      <span className="min-w-[150px] text-center text-sm font-medium text-finflow-dark">
         {MESES[month - 1]} {year}
       </span>
       <button
         type="button"
         onClick={next}
         disabled={isCurrent}
-        className="rounded-xl p-2 text-[#7C756E] transition-colors hover:bg-[#F3F1EC] hover:text-[#2C2A29] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
+        className="rounded-xl p-2 text-finflow-muted transition-colors hover:bg-[#F3F1EC] hover:text-finflow-dark disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
         aria-label="Mes siguiente"
       >
         <ChevronRight className="h-4 w-4" strokeWidth={2} />
@@ -71,12 +71,12 @@ export function AnalyticsPage() {
   } = useAnalytics(month, year);
 
   return (
-    <div className="space-y-6 bg-[#FBF9F4] p-6">
+    <div className="space-y-6 bg-finflow-cream p-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-medium text-[#2C2A29]">Analytics</h1>
-          <p className="mt-0.5 text-sm text-[#7C756E]">
+          <h1 className="font-serif text-2xl font-medium text-finflow-dark">Analytics</h1>
+          <p className="mt-0.5 text-sm text-finflow-muted">
             Inteligencia financiera derivada de tu ledger
           </p>
         </div>
@@ -93,7 +93,7 @@ export function AnalyticsPage() {
           <div className="space-y-6">
             <FinancialHealthScore data={healthScore.data} />
             <div className="border-t border-[#EFEAE2] pt-4">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#7C756E]">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-finflow-muted">
                 Desglose por componente
               </p>
               <HealthScoreBreakdown components={healthScore.data.components} />
@@ -101,7 +101,7 @@ export function AnalyticsPage() {
           </div>
         )}
         {healthScore.isError && (
-          <p className="py-4 text-center text-xs text-[#C97B63]">No se pudo calcular el score.</p>
+          <p className="py-4 text-center text-xs text-finflow-rust">No se pudo calcular el score.</p>
         )}
       </AnalyticsSectionShell>
 
@@ -114,7 +114,7 @@ export function AnalyticsPage() {
         >
           {netWorthTimeline.data && <NetWorthChart data={netWorthTimeline.data} />}
           {netWorthTimeline.isError && (
-            <p className="py-4 text-center text-xs text-[#C97B63]">No hay snapshots disponibles.</p>
+            <p className="py-4 text-center text-xs text-finflow-rust">No hay snapshots disponibles.</p>
           )}
         </AnalyticsSectionShell>
 
@@ -125,7 +125,7 @@ export function AnalyticsPage() {
         >
           {yoy.data && <YearOverYearTable data={yoy.data} />}
           {yoy.isError && (
-            <p className="py-4 text-center text-xs text-[#C97B63]">Sin datos históricos YoY.</p>
+            <p className="py-4 text-center text-xs text-finflow-rust">Sin datos históricos YoY.</p>
           )}
         </AnalyticsSectionShell>
       </div>
@@ -140,7 +140,7 @@ export function AnalyticsPage() {
           <ExpenseIntelligencePanel data={expenseIntelligence.data} />
         )}
         {expenseIntelligence.isError && (
-          <p className="py-4 text-center text-xs text-[#C97B63]">No se pudo cargar la inteligencia de gastos.</p>
+          <p className="py-4 text-center text-xs text-finflow-rust">No se pudo cargar la inteligencia de gastos.</p>
         )}
       </AnalyticsSectionShell>
 
@@ -153,7 +153,7 @@ export function AnalyticsPage() {
         >
           {debtProjection.data && <DebtProjectionPanel data={debtProjection.data} />}
           {debtProjection.isError && (
-            <p className="py-4 text-center text-xs text-[#C97B63]">No se pudo calcular la proyección.</p>
+            <p className="py-4 text-center text-xs text-finflow-rust">No se pudo calcular la proyección.</p>
           )}
         </AnalyticsSectionShell>
 
@@ -164,7 +164,7 @@ export function AnalyticsPage() {
         >
           {savingsGoalEta.data && <SavingsGoalEtaList goals={savingsGoalEta.data} />}
           {savingsGoalEta.isError && (
-            <p className="py-4 text-center text-xs text-[#C97B63]">No se pudo cargar las metas.</p>
+            <p className="py-4 text-center text-xs text-finflow-rust">No se pudo cargar las metas.</p>
           )}
         </AnalyticsSectionShell>
       </div>
@@ -177,7 +177,7 @@ export function AnalyticsPage() {
       >
         {budgetVsActual.data && <BudgetVsActualChart data={budgetVsActual.data} />}
         {budgetVsActual.isError && (
-          <p className="py-4 text-center text-xs text-[#C97B63]">Sin períodos presupuestados.</p>
+          <p className="py-4 text-center text-xs text-finflow-rust">Sin períodos presupuestados.</p>
         )}
       </AnalyticsSectionShell>
     </div>

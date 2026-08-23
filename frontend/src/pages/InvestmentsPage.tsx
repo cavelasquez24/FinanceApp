@@ -1,6 +1,6 @@
 // src/pages/InvestmentsPage.tsx
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, TrendingUp, DollarSign, PieChart, Activity, PlusCircle, ArrowDownLeft } from 'lucide-react';
+import { Plus, Edit2, Trash2, TrendingUp, DollarSign, PieChart, Activity, PlusCircle, ArrowDownLeft, MoreHorizontal } from 'lucide-react';
 import { AddInvestmentContributionForm } from '../features/investments/components/AddInvestmentContributionForm';
 import { WithdrawalModal } from '../features/investments/components/WithdrawalModal';
 import { useInvestments, useInvestmentSummary, useDeleteInvestment } from '../features/investments/hooks/useInvestments';
@@ -9,7 +9,7 @@ import { EditInvestmentForm } from '../features/investments/components/EditInves
 import { AddInvestmentRecordForm } from '../features/investments/components/AddInvestmentRecordForm';
 import { formatCurrency } from '../utils/formatCurrency';
 import type { Investment } from '../types/investment.types';
-import { Button, Spinner, Modal } from '../components/ui';
+import { Button, Card, PageHeader, Spinner, Modal, BottomSheet } from '../components/ui';
 
 export default function InvestmentsPage() {
   const { data: summary, isLoading: loadingSummary } = useInvestmentSummary();
@@ -23,11 +23,12 @@ export default function InvestmentsPage() {
   const [addingRecordInvestment, setAddingRecordInvestment] = useState<Investment | null>(null);
   const [addingContributionInvestment, setAddingContributionInvestment] = useState<Investment | null>(null);
   const [withdrawingInvestment, setWithdrawingInvestment] = useState<Investment | null>(null);
+  const [actionSheetInvestment, setActionSheetInvestment] = useState<Investment | null>(null);
 
   if (loadingSummary || loadingInvestments) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-[#7C756E]">
+        <div className="flex flex-col items-center gap-3 text-finflow-muted">
           <Spinner />
           <span className="text-sm font-medium tracking-wide">Cargando portafolio...</span>
         </div>
@@ -44,88 +45,87 @@ export default function InvestmentsPage() {
   };
 
   return (
-    <div className="space-y-8 bg-[#FBF9F4] min-h-screen p-4 md:p-8 font-sans">
+    <div className="space-y-8">
 
-      {/* Encabezado */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-[#2C2A29] tracking-tight">Portafolio</h1>
-          <p className="text-sm text-[#7C756E] mt-1">Monitorea y gestiona tus activos financieros</p>
-        </div>
-        <Button
-          onClick={() => setIsCreateOpen(true)}
-          className="flex items-center gap-2 bg-[#2C2A29] text-[#FBF9F4] hover:bg-[#2C2A29]/90 rounded-2xl px-5 py-2.5 transition-all shadow-md"
-          leftIcon={<Plus className="h-4 w-4" />}
-        >
-          Nueva Inversión
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Patrimonio"
+        title="Portafolio de inversiones"
+        action={
+          <Button
+            onClick={() => setIsCreateOpen(true)}
+            className="flex items-center gap-2 bg-finflow-dark text-finflow-cream hover:bg-finflow-dark/90 rounded-2xl px-5 py-2.5 transition-all shadow-md"
+            leftIcon={<Plus className="h-4 w-4" />}
+          >
+            Nueva Inversión
+          </Button>
+        }
+      />
 
-      {/* Resumen del Portafolio - Diseño Bento Grid / Glassmorphism */}
+      {/* Resumen del Portafolio */}
       {summary && (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4 md:grid-rows-2">
 
-          {/* Bento Card: Valor Actual (Destacada) */}
-          <div className="md:col-span-2 md:row-span-2 rounded-[28px] border border-[#EFEAE2] bg-white/60 backdrop-blur-xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden group">
-            <div className="absolute top-6 right-6 p-3 bg-[#EFEAE2]/50 rounded-2xl text-[#2C2A29]">
+          {/* Card: Valor Actual (Destacada) */}
+          <Card className="md:col-span-2 md:row-span-2 !rounded-card !p-8 flex flex-col justify-between relative overflow-hidden group">
+            <div className="absolute top-6 right-6 p-3 bg-[#EFEAE2]/50 rounded-2xl text-finflow-dark">
               <DollarSign className="w-6 h-6 stroke-[1.5]" />
             </div>
             <div>
-              <p className="text-sm font-medium text-[#7C756E] uppercase tracking-wider mb-2">Balance Total</p>
-              <p className="text-5xl font-bold text-[#2C2A29] tracking-tight">
+              <p className="text-sm font-medium text-finflow-muted uppercase tracking-wider mb-2">Balance Total</p>
+              <p className="text-5xl font-bold text-finflow-dark tracking-tight">
                 {formatCurrency(summary.currentValue)}
               </p>
             </div>
             <div className="mt-8">
-              <p className="text-sm font-medium text-[#7C756E] mb-1">Rendimiento Histórico</p>
+              <p className="text-sm font-medium text-finflow-muted mb-1">Rendimiento Histórico</p>
               <div className="flex items-baseline gap-3">
-                <span className={`text-2xl font-semibold ${summary.totalGain >= 0 ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
+                <span className={`text-2xl font-semibold ${summary.totalGain >= 0 ? 'text-finflow-green' : 'text-finflow-rust'}`}>
                   {summary.totalGain >= 0 ? '+' : ''}{formatCurrency(summary.totalGain)}
                 </span>
-                <span className={`text-sm font-medium px-2.5 py-1 rounded-full ${summary.totalGain >= 0 ? 'bg-[#8FA888]/10 text-[#8FA888]' : 'bg-[#C97B63]/10 text-[#C97B63]'}`}>
+                <span className={`text-sm font-medium px-2.5 py-1 rounded-full ${summary.totalGain >= 0 ? 'bg-finflow-green/10 text-finflow-green' : 'bg-finflow-rust/10 text-finflow-rust'}`}>
                   {summary.totalGain >= 0 ? '+' : ''}{summary.totalGainPercentage.toFixed(2)}%
                 </span>
               </div>
             </div>
-          </div>
+          </Card>
 
-          {/* Bento Card: Total Invertido */}
-          <div className="md:col-span-2 rounded-[28px] border border-[#EFEAE2] bg-white/60 backdrop-blur-xl p-6 shadow-sm flex items-center justify-between">
+          {/* Card: Total Invertido */}
+          <Card className="md:col-span-2 !rounded-card-sm flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[#7C756E] uppercase tracking-wider mb-1">Capital Invertido</p>
-              <p className="text-2xl font-bold text-[#2C2A29]">
+              <p className="text-sm font-medium text-finflow-muted uppercase tracking-wider mb-1">Capital Invertido</p>
+              <p className="text-2xl font-bold text-finflow-dark">
                 {formatCurrency(summary.totalInvested)}
               </p>
             </div>
-            <div className="p-3 bg-[#EFEAE2]/50 rounded-2xl text-[#7C756E]">
+            <div className="p-3 bg-[#EFEAE2]/50 rounded-2xl text-finflow-muted">
               <PieChart className="w-5 h-5 stroke-[1.5]" />
             </div>
-          </div>
+          </Card>
 
-          {/* Bento Card: Total Dividendos */}
-          <div className="md:col-span-2 rounded-[28px] border border-[#EFEAE2] bg-white/60 backdrop-blur-xl p-6 shadow-sm flex items-center justify-between">
+          {/* Card: Total Dividendos */}
+          <Card className="md:col-span-2 !rounded-card-sm flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-[#7C756E] uppercase tracking-wider mb-1">Dividendos Generados</p>
-              <p className="text-2xl font-bold text-[#8FA888]">
+              <p className="text-sm font-medium text-finflow-muted uppercase tracking-wider mb-1">Dividendos Generados</p>
+              <p className="text-2xl font-bold text-finflow-green">
                 +{formatCurrency(summary.totalDividends)}
               </p>
             </div>
-            <div className="p-3 bg-[#8FA888]/10 rounded-2xl text-[#8FA888]">
+            <div className="p-3 bg-finflow-green/10 rounded-2xl text-finflow-green">
               <Activity className="w-5 h-5 stroke-[1.5]" />
             </div>
-          </div>
+          </Card>
         </div>
       )}
 
-      {/* Lista de Inversiones - Tarjeta Modular Estilizada */}
-      <div className="rounded-[28px] border border-[#EFEAE2] bg-white/60 backdrop-blur-xl shadow-sm overflow-hidden">
+      {/* Lista de Inversiones */}
+      <Card noPadding className="overflow-hidden">
         <div className="p-6 border-b border-[#EFEAE2]">
-          <h2 className="text-lg font-semibold text-[#2C2A29]">Detalle de Activos</h2>
+          <h2 className="text-lg font-semibold text-finflow-dark">Detalle de Activos</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#FBF9F4]/50 text-xs uppercase tracking-wider text-[#7C756E]">
+              <tr className="bg-finflow-cream/50 text-xs uppercase tracking-wider text-finflow-muted">
                 <th className="p-5 font-semibold">Activo</th>
                 <th className="p-5 font-semibold">Tipo</th>
                 <th className="p-5 font-semibold">Capital Base</th>
@@ -139,44 +139,54 @@ export default function InvestmentsPage() {
                 <tr key={inv.id} className="transition-all hover:bg-white/80 group">
                   <td className="p-5">
                     <div className="flex flex-col">
-                      <span className="font-semibold text-[#2C2A29]">{inv.name}</span>
-                      {inv.ticker && <span className="text-xs font-medium text-[#7C756E] mt-0.5">{inv.ticker}</span>}
+                      <span className="font-semibold text-finflow-dark">{inv.name}</span>
+                      {inv.ticker && <span className="text-xs font-medium text-finflow-muted mt-0.5">{inv.ticker}</span>}
                     </div>
                   </td>
                   <td className="p-5">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-[#EFEAE2]/50 text-[#7C756E] uppercase">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-[#EFEAE2]/50 text-finflow-muted uppercase">
                       {inv.type}
                     </span>
                   </td>
-                  <td className="p-5 text-sm font-medium text-[#7C756E]">
+                  <td className="p-5 text-sm font-medium text-finflow-muted">
                     {formatCurrency(inv.contributedCapital)}
                   </td>
-                  <td className="p-5 text-sm font-bold text-[#2C2A29]">
+                  <td className="p-5 text-sm font-bold text-finflow-dark">
                     {formatCurrency(inv.currentValue)}
                   </td>
                   <td className="p-5">
                     <div className="flex flex-col">
-                      <span className={`text-sm font-bold ${inv.unrealizedGainLoss >= 0 ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
+                      <span className={`text-sm font-bold ${inv.unrealizedGainLoss >= 0 ? 'text-finflow-green' : 'text-finflow-rust'}`}>
                         {inv.unrealizedGainLoss >= 0 ? '+' : ''}{formatCurrency(inv.unrealizedGainLoss)}
                       </span>
-                      <span className={`text-xs font-medium mt-0.5 ${inv.unrealizedGainLoss >= 0 ? 'text-[#8FA888]' : 'text-[#C97B63]'}`}>
+                      <span className={`text-xs font-medium mt-0.5 ${inv.unrealizedGainLoss >= 0 ? 'text-finflow-green' : 'text-finflow-rust'}`}>
                         ({inv.unrealizedGainLossPercentage >= 0 ? '+' : ''}{inv.unrealizedGainLossPercentage.toFixed(2)}%)
                       </span>
                     </div>
                   </td>
                   <td className="p-5 text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    {/* Mobile: always-visible ··· button */}
+                    <button
+                      onClick={() => setActionSheetInvestment(inv)}
+                      title="Acciones"
+                      aria-label="Acciones de inversión"
+                      className="rounded-xl p-2 text-finflow-muted transition-all hover:bg-[#EFEAE2] md:hidden"
+                    >
+                      <MoreHorizontal className="h-5 w-5" />
+                    </button>
+                    {/* Desktop: hover-reveal actions (keyboard-accessible via focus-visible) */}
+                    <div className="hidden items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 md:flex">
                       <button
                         onClick={() => setAddingRecordInvestment(inv)}
                         title="Actualizar valor de mercado"
-                        className="p-2 text-[#7C756E] hover:text-[#8FA888] hover:bg-[#8FA888]/10 rounded-xl transition-all"
+                        className="rounded-xl p-2 text-finflow-muted transition-all hover:bg-finflow-green/10 hover:text-finflow-green focus-visible:opacity-100"
                       >
                         <TrendingUp className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setAddingContributionInvestment(inv)}
                         title="Registrar aporte"
-                        className="p-2 text-[#7C756E] hover:text-[#5C7A99] hover:bg-[#5C7A99]/10 rounded-xl transition-all"
+                        className="rounded-xl p-2 text-finflow-muted transition-all hover:bg-finflow-blue/10 hover:text-finflow-blue focus-visible:opacity-100"
                       >
                         <PlusCircle className="h-4 w-4" />
                       </button>
@@ -184,7 +194,7 @@ export default function InvestmentsPage() {
                         <button
                           onClick={() => setWithdrawingInvestment(inv)}
                           title="Registrar retiro"
-                          className="p-2 text-[#7C756E] hover:text-[#C97B63] hover:bg-[#C97B63]/10 rounded-xl transition-all"
+                          className="rounded-xl p-2 text-finflow-muted transition-all hover:bg-finflow-rust/10 hover:text-finflow-rust focus-visible:opacity-100"
                         >
                           <ArrowDownLeft className="h-4 w-4" />
                         </button>
@@ -192,14 +202,14 @@ export default function InvestmentsPage() {
                       <button
                         onClick={() => setEditingInvestment(inv)}
                         title="Editar"
-                        className="p-2 text-[#7C756E] hover:text-[#2C2A29] hover:bg-[#EFEAE2] rounded-xl transition-all"
+                        className="rounded-xl p-2 text-finflow-muted transition-all hover:bg-[#EFEAE2] hover:text-finflow-dark focus-visible:opacity-100"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setDeletingInvestment(inv)}
                         title="Eliminar"
-                        className="p-2 text-[#7C756E] hover:text-[#C97B63] hover:bg-[#C97B63]/10 rounded-xl transition-all"
+                        className="rounded-xl p-2 text-finflow-muted transition-all hover:bg-finflow-rust/10 hover:text-finflow-rust focus-visible:opacity-100"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -212,10 +222,10 @@ export default function InvestmentsPage() {
                   <td colSpan={6} className="p-16 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <div className="p-4 bg-[#EFEAE2]/30 rounded-full mb-2">
-                        <Activity className="h-6 w-6 text-[#7C756E]/50" />
+                        <Activity className="h-6 w-6 text-finflow-muted/50" />
                       </div>
-                      <p className="text-sm font-medium text-[#7C756E]">No hay inversiones registradas.</p>
-                      <p className="text-xs text-[#7C756E]/70">Comienza añadiendo un nuevo activo a tu portafolio.</p>
+                      <p className="text-sm font-medium text-finflow-muted">No hay inversiones registradas.</p>
+                      <p className="text-xs text-finflow-muted/70">Comienza añadiendo un nuevo activo a tu portafolio.</p>
                     </div>
                   </td>
                 </tr>
@@ -223,7 +233,7 @@ export default function InvestmentsPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
       {/* Modales */}
       <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Nueva Inversión">
@@ -268,19 +278,80 @@ export default function InvestmentsPage() {
 
       <Modal isOpen={!!deletingInvestment} onClose={() => setDeletingInvestment(null)} title="Eliminar Inversión">
         <div className="space-y-4">
-          <p className="text-sm text-[#7C756E] leading-relaxed">
-            ¿Estás seguro que deseas eliminar la inversión <span className="font-bold text-[#2C2A29]">{deletingInvestment?.name}</span>? Esta acción también eliminará todo el historial de registros asociados y no se puede deshacer.
+          <p className="text-sm text-finflow-muted leading-relaxed">
+            ¿Estás seguro que deseas eliminar la inversión <span className="font-bold text-finflow-dark">{deletingInvestment?.name}</span>? Esta acción también eliminará todo el historial de registros asociados y no se puede deshacer.
           </p>
           <div className="flex justify-end gap-3 mt-6">
-            <Button variant="ghost" onClick={() => setDeletingInvestment(null)} className="text-[#7C756E] hover:bg-[#EFEAE2] rounded-xl">
+            <Button variant="ghost" onClick={() => setDeletingInvestment(null)} className="text-finflow-muted hover:bg-[#EFEAE2] rounded-xl">
               Cancelar
             </Button>
-            <Button isLoading={isDeleting} onClick={handleDelete} className="bg-[#C97B63] text-white hover:bg-[#C97B63]/90 rounded-xl">
+            <Button isLoading={isDeleting} onClick={handleDelete} className="bg-finflow-rust text-white hover:bg-finflow-rust/90 rounded-xl">
               Sí, eliminar
             </Button>
           </div>
         </div>
       </Modal>
+
+      {/* Mobile action sheet for investment row */}
+      <BottomSheet
+        open={actionSheetInvestment !== null}
+        onClose={() => setActionSheetInvestment(null)}
+        title={actionSheetInvestment?.name ?? 'Inversión'}
+      >
+        {actionSheetInvestment && (
+          <div className="flex flex-col gap-3 pb-4 pt-1">
+            <button
+              type="button"
+              onClick={() => { setActionSheetInvestment(null); setAddingContributionInvestment(actionSheetInvestment); }}
+              className="flex w-full items-center gap-4 rounded-[20px] bg-white/70 p-4 text-left shadow-sm transition-colors hover:bg-[#F3F1EC]"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-finflow-blue/10 text-finflow-blue">
+                <PlusCircle className="h-6 w-6" />
+              </span>
+              <span className="text-base font-medium text-finflow-dark">Aportar</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setActionSheetInvestment(null); setAddingRecordInvestment(actionSheetInvestment); }}
+              className="flex w-full items-center gap-4 rounded-[20px] bg-white/70 p-4 text-left shadow-sm transition-colors hover:bg-[#F3F1EC]"
+            >
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-finflow-green/10 text-finflow-green">
+                <TrendingUp className="h-6 w-6" />
+              </span>
+              <span className="text-base font-medium text-finflow-dark">Actualizar valor</span>
+            </button>
+
+            <div className="my-1 border-t border-[#EFEAE2]" />
+
+            <button
+              type="button"
+              onClick={() => { setActionSheetInvestment(null); setEditingInvestment(actionSheetInvestment); }}
+              className="flex w-full items-center gap-3 rounded-[16px] px-4 py-3 text-left transition-colors hover:bg-[#F3F1EC]"
+            >
+              <Edit2 className="h-5 w-5 text-finflow-muted" />
+              <span className="text-sm font-medium text-finflow-dark">Editar</span>
+            </button>
+            {actionSheetInvestment.isActive && (
+              <button
+                type="button"
+                onClick={() => { setActionSheetInvestment(null); setWithdrawingInvestment(actionSheetInvestment); }}
+                className="flex w-full items-center gap-3 rounded-[16px] px-4 py-3 text-left transition-colors hover:bg-[#F3F1EC]"
+              >
+                <ArrowDownLeft className="h-5 w-5 text-finflow-muted" />
+                <span className="text-sm font-medium text-finflow-dark">Retirar</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => { setActionSheetInvestment(null); setDeletingInvestment(actionSheetInvestment); }}
+              className="flex w-full items-center gap-3 rounded-[16px] px-4 py-3 text-left transition-colors hover:bg-finflow-rust/8"
+            >
+              <Trash2 className="h-5 w-5 text-finflow-rust" />
+              <span className="text-sm font-medium text-finflow-rust">Eliminar</span>
+            </button>
+          </div>
+        )}
+      </BottomSheet>
     </div>
   );
 }

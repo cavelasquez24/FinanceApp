@@ -42,19 +42,19 @@ export default function EmergencyFundRestorationsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2C2A29]/55 p-3 backdrop-blur-sm sm:p-5">
-      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[30px] border border-[#E8E1D8] bg-[#FBF9F4] shadow-2xl">
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#E8E1D8] bg-[#FBF9F4]/95 px-6 py-5 backdrop-blur sm:px-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-finflow-dark/55 p-3 backdrop-blur-sm sm:p-5">
+      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[30px] border border-[#E8E1D8] bg-finflow-cream shadow-2xl">
+        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[#E8E1D8] bg-finflow-cream/95 px-6 py-5 backdrop-blur sm:px-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5F8667]">
               Seguimiento
             </p>
-            <h2 className="mt-1 font-serif text-2xl font-semibold text-[#2C2A29]">
+            <h2 className="mt-1 font-serif text-2xl font-semibold text-finflow-dark">
               Restauraciones del fondo
             </h2>
-            <p className="mt-1 text-sm text-[#7C756E]">
+            <p className="mt-1 text-sm text-finflow-muted">
               Pendiente total:{" "}
-              <strong className="text-[#2C2A29]">
+              <strong className="text-finflow-dark">
                 {formatCurrency(goal.pendingRestorationAmount)}
               </strong>
             </p>
@@ -62,7 +62,7 @@ export default function EmergencyFundRestorationsModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[#7C756E] transition hover:bg-[#EFEAE2]"
+            className="rounded-full p-2 text-finflow-muted transition hover:bg-[#EFEAE2]"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -71,7 +71,7 @@ export default function EmergencyFundRestorationsModal({
 
         <div className="space-y-4 p-6 sm:p-8">
           {isLoading && (
-            <p className="py-8 text-center text-sm text-[#7C756E]">
+            <p className="py-8 text-center text-sm text-finflow-muted">
               Cargando restauraciones...
             </p>
           )}
@@ -91,10 +91,10 @@ export default function EmergencyFundRestorationsModal({
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-[#2C2A29]">
+                    <h3 className="text-lg font-semibold text-finflow-dark">
                       {restoration.description}
                     </h3>
-                    <p className="mt-1 text-xs text-[#7C756E]">
+                    <p className="mt-1 text-xs text-finflow-muted">
                       Uso registrado el{" "}
                       {formatPlanDate(restoration.acquisitionDate)}
                     </p>
@@ -119,13 +119,13 @@ export default function EmergencyFundRestorationsModal({
                       <button
                         type="button"
                         onClick={() => setSelected(restoration)}
-                        className="rounded-xl bg-[#2C2A29] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1A1918]"
+                        className="rounded-xl bg-finflow-dark px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1A1918]"
                       >
                         Registrar reposición
                       </button>
                     </div>
                   ) : (
-                    <span className="rounded-full bg-[#EFEAE2] px-3 py-1.5 text-sm text-[#7C756E]">
+                    <span className="rounded-full bg-[#EFEAE2] px-3 py-1.5 text-sm text-finflow-muted">
                       Cancelado
                     </span>
                   )}
@@ -175,7 +175,7 @@ export default function EmergencyFundRestorationsModal({
                         className={`mt-0.5 h-4 w-4 shrink-0 ${restoration.isOverdue ? "text-amber-700" : "text-[#5F8667]"}`}
                       />
                       <div>
-                        <span className="block text-xs text-[#7C756E]">
+                        <span className="block text-xs text-finflow-muted">
                           {restoration.isOverdue
                             ? "Aporte vencido"
                             : "Próximo aporte"}
@@ -195,7 +195,7 @@ export default function EmergencyFundRestorationsModal({
                     <div className="flex gap-2">
                       <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-[#5F8667]" />
                       <div>
-                        <span className="block text-xs text-[#7C756E]">
+                        <span className="block text-xs text-finflow-muted">
                           Finalización estimada
                         </span>
                         <strong className="text-[#304B38]">
@@ -211,7 +211,7 @@ export default function EmergencyFundRestorationsModal({
                 )}
 
                 {restoration.status === "open" && (
-                  <p className="mt-3 text-xs text-[#7C756E]">
+                  <p className="mt-3 text-xs text-finflow-muted">
                     Plan original:{" "}
                     {formatCurrency(restoration.scheduledContributionAmount)}{" "}
                     mensuales, con fecha máxima{" "}
@@ -224,10 +224,10 @@ export default function EmergencyFundRestorationsModal({
           {!isLoading && restorations?.length === 0 && (
             <div className="rounded-[24px] border border-dashed border-[#D8D0C6] px-6 py-12 text-center">
               <CheckCircle2 className="mx-auto h-7 w-7 text-[#7FA083]" />
-              <p className="mt-3 font-medium text-[#2C2A29]">
+              <p className="mt-3 font-medium text-finflow-dark">
                 No hay restauraciones registradas
               </p>
-              <p className="mt-1 text-sm text-[#7C756E]">
+              <p className="mt-1 text-sm text-finflow-muted">
                 Los usos futuros del fondo aparecerán aquí con su avance y fecha
                 estimada.
               </p>
@@ -257,11 +257,11 @@ function Metric({
 }) {
   return (
     <div className="rounded-2xl bg-[#F6F2EC] p-3">
-      <span className="block text-[11px] text-[#7C756E] sm:text-xs">
+      <span className="block text-[11px] text-finflow-muted sm:text-xs">
         {label}
       </span>
       <strong
-        className={`${strong ? "text-[#7A4B3A]" : "text-[#2C2A29]"} text-sm sm:text-base`}
+        className={`${strong ? "text-[#7A4B3A]" : "text-finflow-dark"} text-sm sm:text-base`}
       >
         {value}
       </strong>

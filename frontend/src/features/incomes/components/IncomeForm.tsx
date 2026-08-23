@@ -58,7 +58,7 @@ export function IncomeForm({ income, onSuccess, onCancel }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col space-y-1.5">
-          <label className="text-sm font-medium text-[#2C2A29]">Categoría</label>
+          <label className="text-sm font-medium text-finflow-dark">Categoría</label>
           <div className="relative">
             {isLoadingCategories ? (
               <div className="flex h-[42px] items-center rounded-xl border border-[#EFEAE2] bg-white/70 px-3">
@@ -72,12 +72,12 @@ export function IncomeForm({ income, onSuccess, onCancel }: Props) {
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7C756E]" strokeWidth={2} />
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-finflow-muted" strokeWidth={2} />
               </>
             )}
           </div>
           {errors.categoryId && (
-            <span className="text-xs text-[#C97B63]">{errors.categoryId.message}</span>
+            <span className="text-xs text-finflow-rust">{errors.categoryId.message}</span>
           )}
         </div>
 
@@ -121,7 +121,7 @@ export function IncomeForm({ income, onSuccess, onCancel }: Props) {
         <Button
           type="submit"
           isLoading={isPending}
-          className="!bg-[#5C7A99] !text-white hover:!bg-[#4D6884] focus-visible:!ring-[#5C7A99]/30"
+          className="!bg-finflow-blue !text-white hover:!bg-[#4D6884] focus-visible:!ring-finflow-blue/30"
         >
           {isEditMode ? 'Guardar Cambios' : 'Guardar Ingreso'}
         </Button>

@@ -39,9 +39,9 @@ export function AddDebtPaymentForm({ debt, onSuccess, onCancel }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-sm text-[#7C756E]">
+      <p className="text-sm text-finflow-muted">
         Saldo pendiente actual:{' '}
-        <span className="font-semibold text-[#2C2A29]">
+        <span className="font-semibold text-finflow-dark">
           {new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(debt.currentBalance)}
         </span>
       </p>

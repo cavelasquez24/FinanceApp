@@ -13,7 +13,7 @@ interface Props {
 }
 
 const selectClassName =
-  'w-full rounded-xl border border-[#EFEAE2] bg-white/60 px-3 py-2.5 text-sm text-[#2C2A29] backdrop-blur-sm transition-all focus:border-[#5C7A99] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5C7A99]/20';
+  'w-full rounded-xl border border-[#EFEAE2] bg-white/60 px-3 py-2.5 text-sm text-finflow-dark backdrop-blur-sm transition-all focus:border-finflow-blue focus:bg-white focus:outline-none focus:ring-2 focus:ring-finflow-blue/20';
 
 export function CreateBudgetForm({ month, year }: Props) {
   const { data: categoriesResponse, isLoading: loadingCategories } = useExpenseCategories();
@@ -61,14 +61,14 @@ export function CreateBudgetForm({ month, year }: Props) {
         
         {/* Header Block */}
         <div className="flex items-start gap-4 border-b border-[#EFEAE2]/70 pb-6">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#5C7A99]/10 text-[#5C7A99]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-finflow-blue/10 text-finflow-blue">
             <Wallet className="h-6 w-6" strokeWidth={2} />
           </div>
           <div>
-            <h2 className="font-serif text-2xl font-semibold text-[#2C2A29]">
+            <h2 className="font-serif text-2xl font-semibold text-finflow-dark">
               Configurar Presupuesto
             </h2>
-            <p className="mt-1 text-sm font-medium text-[#7C756E]">
+            <p className="mt-1 text-sm font-medium text-finflow-muted">
               Periodo: {String(month).padStart(2, '0')}/{year}
             </p>
           </div>
@@ -77,14 +77,14 @@ export function CreateBudgetForm({ month, year }: Props) {
         {/* Dynamic Fields Block */}
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-medium text-[#2C2A29]">Categorías y Límites</h3>
+            <h3 className="text-base font-medium text-finflow-dark">Categorías y Límites</h3>
             <Button
               type="button"
               variant="ghost"
               onClick={() => append({ categoryId: '', amountLimit: 0 })}
               className={cn(
-                "h-9 px-3 text-sm font-medium text-[#5C7A99]",
-                "hover:bg-[#5C7A99]/10 hover:text-[#4A6480] transition-colors rounded-xl"
+                "h-9 px-3 text-sm font-medium text-finflow-blue",
+                "hover:bg-finflow-blue/10 hover:text-[#4A6480] transition-colors rounded-xl"
               )}
             >
               <Plus className="mr-2 h-4 w-4" /> Agregar Rubro
@@ -111,7 +111,7 @@ export function CreateBudgetForm({ month, year }: Props) {
                     ))}
                   </select>
                   {errors.categories?.[index]?.categoryId && (
-                    <span className="mt-1 block text-xs font-medium text-[#C97B63]">
+                    <span className="mt-1 block text-xs font-medium text-finflow-rust">
                       {errors.categories[index]?.categoryId?.message}
                     </span>
                   )}
@@ -127,7 +127,7 @@ export function CreateBudgetForm({ month, year }: Props) {
                     {...register(`categories.${index}.amountLimit` as const, { valueAsNumber: true })}
                   />
                   {errors.categories?.[index]?.amountLimit && (
-                    <span className="mt-1 block text-xs font-medium text-[#C97B63]">
+                    <span className="mt-1 block text-xs font-medium text-finflow-rust">
                       {errors.categories[index]?.amountLimit?.message}
                     </span>
                   )}
@@ -138,7 +138,7 @@ export function CreateBudgetForm({ month, year }: Props) {
                   variant="ghost"
                   onClick={() => remove(index)}
                   disabled={fields.length === 1}
-                  className="h-[42px] px-3 text-[#C97B63] hover:bg-[#C97B63]/10 disabled:opacity-40 rounded-xl"
+                  className="h-[42px] px-3 text-finflow-rust hover:bg-finflow-rust/10 disabled:opacity-40 rounded-xl"
                   aria-label="Eliminar rubro"
                 >
                   <Trash2 className="h-5 w-5" />
@@ -148,7 +148,7 @@ export function CreateBudgetForm({ month, year }: Props) {
           </div>
           
           {errors.categories && typeof errors.categories.message === 'string' && (
-            <p className="rounded-xl bg-[#C97B63]/10 px-4 py-2.5 text-sm font-medium text-[#C97B63]">
+            <p className="rounded-xl bg-finflow-rust/10 px-4 py-2.5 text-sm font-medium text-finflow-rust">
               {errors.categories.message}
             </p>
           )}
@@ -164,7 +164,7 @@ export function CreateBudgetForm({ month, year }: Props) {
 
           <Button
             type="submit"
-            className="w-full h-12 rounded-xl !bg-[#2C2A29] text-base font-medium !text-[#FBF9F4] shadow-md transition-all hover:!bg-[#1F1E1D] hover:shadow-lg disabled:opacity-70"
+            className="w-full h-12 rounded-xl !bg-finflow-dark text-base font-medium !text-finflow-cream shadow-md transition-all hover:!bg-[#1F1E1D] hover:shadow-lg disabled:opacity-70"
             disabled={createBudget.isPending}
           >
             {createBudget.isPending ? 'Guardando Presupuesto...' : 'Crear Presupuesto'}

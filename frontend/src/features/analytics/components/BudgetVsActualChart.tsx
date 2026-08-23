@@ -6,8 +6,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ReferenceLine,
   ResponsiveContainer,
+  type TooltipValueType,
 } from 'recharts';
 import { useMemo } from 'react';
 import type { BudgetVsActualHistoryDto } from '../types/analytics.types';
@@ -31,7 +31,7 @@ export function BudgetVsActualChart({ data }: Props) {
 
   if (data.periods.length === 0) {
     return (
-      <p className="py-6 text-center text-xs text-[#7C756E]">Sin períodos presupuestados.</p>
+      <p className="py-6 text-center text-xs text-finflow-muted">Sin períodos presupuestados.</p>
     );
   }
 
@@ -46,8 +46,8 @@ export function BudgetVsActualChart({ data }: Props) {
               key={p.label}
               className={`rounded-xl border px-2.5 py-1 text-[10px] font-semibold ${
                 ok
-                  ? 'border-[#8FA888]/30 bg-[#8FA888]/10 text-[#5A7853]'
-                  : 'border-[#C97B63]/30 bg-[#C97B63]/10 text-[#8B4A36]'
+                  ? 'border-finflow-green/30 bg-finflow-green/10 text-[#5A7853]'
+                  : 'border-finflow-rust/30 bg-finflow-rust/10 text-[#8B4A36]'
               }`}
             >
               {p.label}: {p.adherencePct.toFixed(0)}%
@@ -84,7 +84,10 @@ export function BudgetVsActualChart({ data }: Props) {
                 boxShadow: '0 8px 30px rgba(44,42,41,0.08)',
                 fontSize: 12,
               }}
-              formatter={(value: number, name: string) => [formatCurrency(value), name]}
+              formatter={(value: TooltipValueType | undefined, name: string | number | undefined) => [
+                formatCurrency(Number(value ?? 0)),
+                name ?? '',
+              ]}
             />
             <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
             <Bar dataKey="Presupuesto" fill="#5C7A99" opacity={0.5} radius={[4, 4, 0, 0]} />
