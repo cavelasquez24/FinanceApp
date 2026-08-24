@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { accountsApi } from '../../../api/accounts.api';
-import type { CreateAccountDto, CreateAccountTransferDto, UpdateAccountDto } from '../../../types/account.types';
+import type { CreateAccountDto, UpdateAccountDto } from '../../../types/account.types';
 
 export function useAccounts() {
   return useQuery({ queryKey: ['accounts'], queryFn: accountsApi.getAll });
@@ -38,22 +38,5 @@ export function useUpdateAccount() {
       queryClient.invalidateQueries({ queryKey: ['dashboard-current'] });
     },
     onError: () => toast.error('No se pudo actualizar la cuenta'),
-  });
-}
-
-export function useCreateAccountTransfer() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (dto: CreateAccountTransferDto) => accountsApi.transfer(dto),
-    onSuccess: () => {
-      toast.success('Transferencia registrada');
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-current'] });
-    },
-    onError: (error: unknown) => {
-      const message = (error as { response?: { data?: { error?: { message?: string } } } })
-        .response?.data?.error?.message;
-      toast.error(message ?? 'No se pudo registrar la transferencia');
-    },
   });
 }

@@ -8,9 +8,11 @@ import {
   useAccountTransactions,
   useCreateAccount,
   useUpdateAccount,
-  useCreateAccountTransfer,
 } from '../features/accounts/hooks/useAccounts';
+import { useTransfers } from '../features/accounts/hooks/useTransfers';
 import { ReconciliationModal } from '../features/accounts/components/ReconciliationModal';
+import { TransferModal } from '../features/accounts/components/TransferModal';
+import { TransferHistoryPanel } from '../features/accounts/components/TransferHistoryPanel';
 import type { FinancialAccount, FinancialAccountType } from '../types/account.types';
 
 const money = (value: number) =>
@@ -19,9 +21,9 @@ const money = (value: number) =>
 export function AccountsPage() {
   const { data: accounts, isLoading } = useAccounts();
   const { data: transactions } = useAccountTransactions(12);
+  const { data: transfers, isLoading: isLoadingTransfers } = useTransfers();
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
-  const createTransfer = useCreateAccountTransfer();
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<FinancialAccountType>('cash');
@@ -29,12 +31,6 @@ export function AccountsPage() {
   const [openingDate, setOpeningDate] = useState(() => todayDateOnly());
   const [reconcileAccount, setReconcileAccount] = useState<FinancialAccount | null>(null);
   const [showTransfer, setShowTransfer] = useState(false);
-  const [fromAccountId, setFromAccountId] = useState('');
-  const [toAccountId, setToAccountId] = useState('');
-  const [transferAmount, setTransferAmount] = useState('');
-  const [transferDate, setTransferDate] = useState(() => todayDateOnly());
-  const [transferDescription, setTransferDescription] = useState('');
-  const [transferKey, setTransferKey] = useState<string | null>(null);
 
   const create = (event: FormEvent) => {
     event.preventDefault();
@@ -52,30 +48,6 @@ export function AccountsPage() {
     );
   };
 
-  const transfer = (event: FormEvent) => {
-    event.preventDefault();
-    const idempotencyKey = transferKey ?? crypto.randomUUID();
-    setTransferKey(idempotencyKey);
-    createTransfer.mutate({
-      fromAccountId,
-      toAccountId,
-      amount: Number(transferAmount),
-      date: transferDate,
-      description: transferDescription || undefined,
-      idempotencyKey,
-    }, {
-      onSuccess: () => {
-        setShowTransfer(false);
-        setFromAccountId('');
-        setToAccountId('');
-        setTransferDate(todayDateOnly());
-        setTransferAmount('');
-        setTransferDescription('');
-        setTransferKey(null);
-      },
-    });
-
-  };
   const closeCreate = () => {
     if (createAccount.isPending) return;
     setShowCreate(false);
@@ -85,23 +57,9 @@ export function AccountsPage() {
     setOpeningDate(todayDateOnly());
   };
 
-  const closeTransfer = () => {
-    if (createTransfer.isPending) return;
-    setShowTransfer(false);
-    setFromAccountId('');
-    setToAccountId('');
-    setTransferAmount('');
-    setTransferDate(todayDateOnly());
-    setTransferDescription('');
-    setTransferKey(null);
-  };
   if (isLoading) {
     return <div className="flex h-64 items-center justify-center"><Spinner /></div>;
   }
-  const activeAccounts = accounts?.filter((account) => account.isActive) ?? [];
-  const fromAccount = activeAccounts.find((account) => account.id === fromAccountId);
-  const toAccount = activeAccounts.find((account) => account.id === toAccountId);
-
 
   return (
     <div className="space-y-6 p-6">
@@ -179,6 +137,8 @@ export function AccountsPage() {
         })}
       </div>
 
+      <TransferHistoryPanel transfers={transfers ?? []} isLoading={isLoadingTransfers} />
+
       <Card className="!rounded-[24px]">
         <h2 className="font-serif text-lg font-medium text-finflow-dark">Movimientos recientes</h2>
         <div className="mt-4 divide-y divide-[#EFEAE2]">
@@ -205,6 +165,13 @@ export function AccountsPage() {
         <ReconciliationModal
           account={reconcileAccount}
           onClose={() => setReconcileAccount(null)}
+        />
+      )}
+
+      {showTransfer && (
+        <TransferModal
+          accounts={accounts ?? []}
+          onClose={() => setShowTransfer(false)}
         />
       )}
 
@@ -274,112 +241,6 @@ export function AccountsPage() {
           </ModalFooter>
         </form>
       </Modal>
-
-      <Modal isOpen={showTransfer} onClose={closeTransfer} title="Transferir entre cuentas" className="!max-w-2xl">
-        <form onSubmit={transfer} className="space-y-5">
-          <p className="text-sm leading-relaxed text-finflow-muted">
-            Mueve dinero entre tus cuentas. Esta operación no se registra como ingreso ni como gasto.
-          </p>
-
-          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-end">
-            <AccountSelect label="Cuenta de origen" value={fromAccountId} onChange={setFromAccountId} accounts={activeAccounts} required />
-            <span className="mx-auto hidden rounded-full border border-[#E4DED5] bg-white p-2.5 text-finflow-blue sm:block">
-              <ArrowRightLeft className="h-4 w-4" />
-            </span>
-            <AccountSelect label="Cuenta de destino" value={toAccountId} onChange={setToAccountId} accounts={activeAccounts} required />
-          </div>
-
-          {fromAccount && toAccount && fromAccount.id !== toAccount.id && (
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-[#E5E0D8] bg-white/60 p-4">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-finflow-dark">{fromAccount.name}</p>
-                <p className="mt-1 text-xs text-finflow-muted">Disponible: {money(fromAccount.currentBalance)}</p>
-              </div>
-              <ArrowRightLeft className="h-4 w-4 text-finflow-blue" />
-              <div className="min-w-0 text-right">
-                <p className="truncate text-sm font-medium text-finflow-dark">{toAccount.name}</p>
-                <p className="mt-1 text-xs text-finflow-muted">Saldo: {money(toAccount.currentBalance)}</p>
-              </div>
-            </div>
-          )}
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              label="Monto"
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={transferAmount}
-              onChange={(event) => setTransferAmount(event.target.value)}
-              hint={fromAccount ? `Máximo disponible: ${money(fromAccount.currentBalance)}` : 'Selecciona una cuenta de origen.'}
-              required
-            />
-            <Input
-              label="Fecha"
-              type="date"
-              value={transferDate}
-              onChange={(event) => setTransferDate(event.target.value)}
-              required
-            />
-          </div>
-
-          <Input
-            label="Nota"
-            placeholder="Ej. Fondos para gastos del mes"
-            value={transferDescription}
-            maxLength={300}
-            onChange={(event) => setTransferDescription(event.target.value)}
-            hint="Opcional · máximo 300 caracteres."
-          />
-
-          {fromAccountId === toAccountId && fromAccountId && (
-            <p className="rounded-xl bg-[#FBEEEA] px-3.5 py-2.5 text-sm text-[#B5573F]">
-              La cuenta de origen y la cuenta de destino deben ser distintas.
-            </p>
-          )}
-
-          <ModalFooter>
-            <Button type="button" variant="secondary" onClick={closeTransfer} disabled={createTransfer.isPending}>
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              isLoading={createTransfer.isPending}
-              disabled={!fromAccountId || !toAccountId || fromAccountId === toAccountId || Number(transferAmount) <= 0}
-              leftIcon={<ArrowRightLeft className="h-4 w-4" />}
-            >
-              Confirmar transferencia
-            </Button>
-          </ModalFooter>
-        </form>
-      </Modal>
     </div>
-  );
-}
-
-function AccountSelect({ label, value, onChange, accounts, required }: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  accounts: { id: string; name: string; currentBalance: number; isActive: boolean }[];
-  required?: boolean;
-}) {
-  return (
-    <label className="flex min-w-0 flex-col gap-1.5 text-sm font-medium text-finflow-dark">
-      <span>{label}</span>
-      <select
-        value={value}
-        required={required}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-[#EFEAE2] bg-white/70 px-3.5 py-2.5 text-sm text-finflow-dark outline-none transition focus:border-finflow-blue focus:ring-2 focus:ring-finflow-blue/20"
-      >
-        <option value="">Selecciona una cuenta</option>
-        {accounts.map((account) => (
-          <option key={account.id} value={account.id}>
-            {account.name} · {money(account.currentBalance)}
-          </option>
-        ))}
-      </select>
-    </label>
   );
 }

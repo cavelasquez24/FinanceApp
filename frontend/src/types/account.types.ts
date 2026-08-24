@@ -22,26 +22,6 @@ export interface AccountTransaction {
   transferId?: string;
 }
 
-export interface CreateAccountTransferDto {
-  fromAccountId: string;
-  toAccountId: string;
-  amount: number;
-  date: string;
-  description?: string;
-  idempotencyKey: string;
-}
-
-export interface AccountTransfer {
-  transferId: string;
-  fromAccountId: string;
-  fromAccountName: string;
-  toAccountId: string;
-  toAccountName: string;
-  amount: number;
-  date: string;
-  description: string;
-}
-
 export interface CreateAccountDto {
   name: string;
   type: FinancialAccountType;

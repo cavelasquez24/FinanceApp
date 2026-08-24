@@ -2,8 +2,6 @@ import { apiClient } from './client';
 import type { ApiResponse } from '../types/api.types';
 import type {
   AccountTransaction,
-  AccountTransfer,
-  CreateAccountTransferDto,
   CreateAccountDto,
   FinancialAccount,
   UpdateAccountDto,
@@ -29,10 +27,6 @@ export const accountsApi = {
   },
   update: async (id: string, dto: UpdateAccountDto) => {
     const response = await apiClient.put<ApiResponse<FinancialAccount>>(`/accounts/${id}`, dto);
-    return response.data.data;
-  },
-  transfer: async (dto: CreateAccountTransferDto) => {
-    const response = await apiClient.post<ApiResponse<AccountTransfer>>('/accounts/transfers', dto);
     return response.data.data;
   },
 
