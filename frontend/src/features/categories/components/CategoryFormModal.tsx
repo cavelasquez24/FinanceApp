@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { categorySchema, type CategoryFormValues } from '../schemas/category.schema';
@@ -45,6 +45,11 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
 
   const selectedColor = watch('color');
   const selectedIcon = watch('icon') || DEFAULT_ICON_KEY;
+  const [iconQuery, setIconQuery] = useState('');
+
+  const filteredIcons = Object.entries(CATEGORY_ICONS).filter(([key]) =>
+    key.toLowerCase().includes(iconQuery.trim().toLowerCase())
+  );
 
   useEffect(() => {
     if (categoryToEdit && isOpen) {
@@ -62,6 +67,7 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
         icon: DEFAULT_ICON_KEY,
       });
     }
+    setIconQuery('');
   }, [categoryToEdit, isOpen, reset]);
 
   if (!isOpen) return null;
@@ -127,19 +133,24 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
 
             <div>
               <label className="block text-sm font-medium text-finflow-dark mb-2">Color Distintivo</label>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2">
                 {PRESET_COLORS.map((color) => (
                   <button
                     key={color}
                     type="button"
                     onClick={() => setValue('color', color, { shouldValidate: true })}
-                    className={cn(
-                      "h-8 w-8 rounded-full transition-all duration-200 hover:scale-110",
-                      selectedColor === color ? "ring-2 ring-offset-2 ring-finflow-blue scale-110" : "ring-1 ring-black/10"
-                    )}
-                    style={{ backgroundColor: color }}
+                    className="flex h-11 w-11 items-center justify-center"
                     aria-label={`Seleccionar color ${color}`}
-                  />
+                    aria-pressed={selectedColor === color}
+                  >
+                    <span
+                      className={cn(
+                        "h-8 w-8 rounded-full transition-all duration-200",
+                        selectedColor === color ? "ring-2 ring-offset-2 ring-finflow-blue scale-110" : "ring-1 ring-black/10"
+                      )}
+                      style={{ backgroundColor: color }}
+                    />
+                  </button>
                 ))}
               </div>
               {errors.color && <span className="text-xs text-finflow-rust mt-1 block">{errors.color.message}</span>}
@@ -148,20 +159,32 @@ export function CategoryFormModal({ isOpen, onClose, categoryToEdit }: Props) {
             {/* Nueva sección de iconos */}
             <div>
               <label className="block text-sm font-medium text-finflow-dark mb-2">Icono Representativo</label>
-              <div className="flex flex-wrap gap-2 rounded-2xl bg-white/50 p-3 border border-[#EFEAE2]/60">
-                {Object.entries(CATEGORY_ICONS).map(([key, IconComponent]) => (
+              <Input
+                placeholder="Buscar icono..."
+                value={iconQuery}
+                onChange={(e) => setIconQuery(e.target.value)}
+                className="!bg-white/60 focus:!bg-white mb-2"
+                aria-label="Buscar icono"
+              />
+              <div className="flex flex-wrap gap-2 rounded-2xl bg-white/50 p-3 border border-[#EFEAE2]/60 max-h-48 overflow-y-auto custom-scrollbar">
+                {filteredIcons.length === 0 && (
+                  <p className="text-xs text-finflow-muted py-2">Sin resultados para "{iconQuery}"</p>
+                )}
+                {filteredIcons.map(([key, IconComponent]) => (
                   <button
                     key={key}
                     type="button"
                     onClick={() => setValue('icon', key, { shouldValidate: true })}
                     className={cn(
-                      "p-2.5 rounded-xl transition-all duration-200 flex items-center justify-center",
-                      selectedIcon === key 
-                        ? "bg-white shadow-sm ring-1 ring-[#EFEAE2] scale-105" 
+                      "h-11 w-11 rounded-xl transition-all duration-200 flex items-center justify-center",
+                      selectedIcon === key
+                        ? "bg-white shadow-sm ring-1 ring-[#EFEAE2] scale-105"
                         : "text-finflow-muted hover:bg-white/60 hover:text-finflow-dark"
                     )}
                     style={selectedIcon === key ? { color: selectedColor } : {}}
                     title={key}
+                    aria-label={`Icono ${key}`}
+                    aria-pressed={selectedIcon === key}
                   >
                     <IconComponent className="h-5 w-5" strokeWidth={2} />
                   </button>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useCategories } from '../features/categories/hooks/useCategories';
 import { type Category } from '../types/category.types';
 import { Button, PageHeader } from '../components/ui';
-import { Plus, Edit2, Trash2, Shield, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Plus, Edit2, Trash2, Shield, ArrowUpRight, ArrowDownLeft, FolderOpen } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { CategoryFormModal } from '../features/categories/components/CategoryFormModal';
 import { DeleteCategoryModal } from '../features/categories/components/DeleteCategoryModal';
@@ -67,13 +67,15 @@ export default function CategoriesPage() {
         />
 
         {/* Filtros */}
-        <div className="flex gap-2 rounded-xl bg-[#EFEAE2]/40 p-1 w-max backdrop-blur-sm">
+        <div className="flex gap-2 rounded-xl bg-[#EFEAE2]/40 p-1 w-max backdrop-blur-sm" role="tablist">
           {(['all', 'income', 'expense'] as const).map((filter) => (
             <button
               key={filter}
+              role="tab"
+              aria-selected={activeFilter === filter}
               onClick={() => setActiveFilter(filter)}
               className={cn(
-                'rounded-lg px-4 py-1.5 text-xs font-semibold tracking-wide transition-all duration-200 uppercase',
+                'rounded-lg px-4 py-2 min-h-[44px] text-xs font-semibold tracking-wide transition-all duration-200 uppercase',
                 activeFilter === filter
                   ? 'bg-white text-finflow-dark shadow-sm'
                   : 'text-finflow-muted hover:text-finflow-dark'
@@ -83,6 +85,32 @@ export default function CategoriesPage() {
             </button>
           ))}
         </div>
+
+        {/* Estado vacío */}
+        {filteredCategories.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-[#EFEAE2] bg-white/50 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#EFEAE2]/60">
+              <FolderOpen className="h-6 w-6 text-finflow-muted" strokeWidth={1.5} />
+            </div>
+            <p className="text-sm font-medium text-finflow-dark">
+              {activeFilter === 'all'
+                ? 'Aún no tienes categorías'
+                : activeFilter === 'income'
+                  ? 'No tienes categorías de ingreso'
+                  : 'No tienes categorías de gasto'}
+            </p>
+            <p className="max-w-xs text-xs text-finflow-muted">
+              Crea una categoría para empezar a clasificar tus movimientos.
+            </p>
+            <Button
+              onClick={handleOpenCreate}
+              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-finflow-dark px-5 py-2.5 text-sm font-medium text-finflow-cream shadow-sm transition-all hover:bg-[#1F1E1D]"
+              leftIcon={<Plus className="h-4 w-4" />}
+            >
+              Nueva Categoría
+            </Button>
+          </div>
+        )}
 
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -129,21 +157,21 @@ export default function CategoriesPage() {
 
                 <div className="border-t border-[#EFEAE2]/60 pt-4">
                   {category.isDefault ? (
-                    <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-finflow-muted/60 uppercase">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-finflow-muted uppercase">
                       <Shield className="h-3.5 w-3.5 text-finflow-blue" strokeWidth={2.5} />
                       Sistema Protegido
                     </div>
                   ) : (
-                    <div className="flex items-center gap-4 transition-all duration-200">
-                      <button 
+                    <div className="flex items-center gap-2 -mx-2 transition-all duration-200">
+                      <button
                         onClick={() => handleOpenEdit(category)}
-                        className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-finflow-blue hover:text-[#4A6480] transition-colors"
+                        className="flex min-h-[44px] items-center gap-1.5 rounded-lg px-2 text-xs font-bold uppercase tracking-wider text-finflow-blue hover:bg-finflow-blue/10 hover:text-[#4A6480] transition-colors"
                       >
                         <Edit2 className="h-3.5 w-3.5" /> Editar
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleOpenDelete(category)}
-                        className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-finflow-rust hover:text-[#A6604D] transition-colors"
+                        className="flex min-h-[44px] items-center gap-1.5 rounded-lg px-2 text-xs font-bold uppercase tracking-wider text-finflow-rust hover:bg-finflow-rust/10 hover:text-[#A6604D] transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" /> Eliminar
                       </button>

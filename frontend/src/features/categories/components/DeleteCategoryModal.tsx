@@ -31,7 +31,7 @@ export function DeleteCategoryModal({ isOpen, onClose, category }: Props) {
           ¿Eliminar Categoría?
         </h2>
         <p className="text-sm text-finflow-muted mb-6">
-          Estás a punto de eliminar <strong>{category.name}</strong>. Esta acción no se puede deshacer y podría afectar el historial visual de tus transacciones.
+          Estás a punto de eliminar <strong>{category.name}</strong>. Dejará de estar disponible para nuevos movimientos, pero el historial de transacciones existentes se conserva intacto.
         </p>
 
         <div className="flex flex-col gap-3">
