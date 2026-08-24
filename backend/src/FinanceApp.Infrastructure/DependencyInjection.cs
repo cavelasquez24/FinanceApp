@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<ISavingsReplenishmentRepository, SavingsReplenishmentRepository>();
         services.AddScoped<IAccountReconciliationRepository, AccountReconciliationRepository>();
         services.AddScoped<INetWorthSnapshotRepository, NetWorthSnapshotRepository>();
+        services.AddScoped<IAccountTransferRepository, AccountTransferRepository>();
         services.AddScoped<IDebtService, DebtService>();
 
 
