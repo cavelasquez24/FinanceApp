@@ -37,6 +37,7 @@ public class AppDbContext : DbContext
     public DbSet<SavingsGoalWithdrawal> SavingsGoalWithdrawals => Set<SavingsGoalWithdrawal>();
     public DbSet<FinancialAccount> FinancialAccounts => Set<FinancialAccount>();
     public DbSet<AccountTransaction> AccountTransactions => Set<AccountTransaction>();
+    public DbSet<AccountTransfer> AccountTransfers => Set<AccountTransfer>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<DebtWithdrawal> DebtWithdrawals => Set<DebtWithdrawal>();
     public DbSet<EmergencyFundRestoration> EmergencyFundRestorations => Set<EmergencyFundRestoration>();

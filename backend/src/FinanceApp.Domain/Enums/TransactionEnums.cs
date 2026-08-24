@@ -46,3 +46,13 @@ public enum InvestmentType
     Bond,           // Bonos
     Other
 }
+
+/// <summary>
+/// Estado de una transferencia entre cuentas propias del usuario.
+/// </summary>
+public enum TransferStatus
+{
+    Pending,
+    Completed,
+    Cancelled
+}
