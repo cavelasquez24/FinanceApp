@@ -9,6 +9,8 @@ import { type SavingsGoal } from "../../../types/savings.types";
 import { formatCurrency } from "../../../utils/formatCurrency";
 import { formatPlanDate } from "../utils/restorationPlan";
 import { useEmergencyFundRestorations } from "../hooks/useEmergencyFundRestorations";
+import { useSavingsReplenishmentsByGoal } from "../hooks/useSavingsReplenishments";
+import { ReplenishmentPanel } from "./ReplenishmentPanel";
 
 interface Props {
   goal: SavingsGoal;
@@ -42,6 +44,11 @@ export default function SavingsGoalCard({
   const overdue = restorations?.find(
     (item) => item.status === "open" && item.isOverdue,
   );
+  const { data: replenishments } = useSavingsReplenishmentsByGoal(goal.id);
+  const activeReplenishments =
+    replenishments?.filter(
+      (item) => item.status === "Active" || item.status === "Paused",
+    ) ?? [];
 
   return (
     <article
@@ -123,6 +130,14 @@ export default function SavingsGoalCard({
             </p>
           )}
         </div>
+
+        {activeReplenishments.length > 0 && (
+          <div className="space-y-2">
+            {activeReplenishments.map((replenishment) => (
+              <ReplenishmentPanel key={replenishment.id} replenishment={replenishment} />
+            ))}
+          </div>
+        )}
 
         {isEmergencyFund && (
           <div className="grid grid-cols-2 gap-2">

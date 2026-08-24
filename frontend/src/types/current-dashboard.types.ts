@@ -23,6 +23,7 @@ export interface CurrentDashboard {
   cycleAvailable: number;
   percentageUsed: number | null;
   isOverBudget: boolean | null;
+  cycleReplenishmentCommitment: number;
   suggestedDailyAvailable: number;
   daysRemaining: number;
 }

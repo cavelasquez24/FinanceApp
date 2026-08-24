@@ -9,6 +9,7 @@ import { todayDateOnly } from "../../../utils/dateOnly";
 import { formatCurrency } from "../../../utils/formatCurrency";
 import { useAccounts } from "../../accounts/hooks/useAccounts";
 import { useCategories } from "../../categories/hooks/useCategories";
+import { ReplenishmentCreateForm } from "./ReplenishmentCreateForm";
 import {
   SavingsField,
   SavingsMetric,
@@ -28,7 +29,8 @@ type WithdrawalAction =
   | "expense"
   | "reassign"
   | "release"
-  | "correction";
+  | "correction"
+  | "loan";
 
 const actions: Array<{
   value: WithdrawalAction;
@@ -39,6 +41,11 @@ const actions: Array<{
     value: "transfer",
     label: "Transferir a otra cuenta",
     hint: "Reduce la meta y mueve el dinero desde la cuenta de ahorro.",
+  },
+  {
+    value: "loan",
+    label: "Préstamo temporal a mí mismo",
+    hint: "Mueve el dinero a una cuenta operativa y programa un plan de reposición automática.",
   },
   {
     value: "expense",
@@ -71,6 +78,9 @@ export default function WithdrawModal({ goal, onClose }: Props) {
   const [expenseDescription, setExpenseDescription] = useState("");
   const [notes, setNotes] = useState("");
   const [withdrawalDate, setWithdrawalDate] = useState(todayDateOnly());
+  const [loanWithdrawal, setLoanWithdrawal] = useState<
+    { amount: number; destinationAccountId: string } | null
+  >(null);
   const { data: goals } = useSavingsGoals();
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories("expense");
@@ -97,11 +107,14 @@ export default function WithdrawModal({ goal, onClose }: Props) {
         ? "ReallocatedToOtherGoal"
         : action === "correction"
           ? "Correction"
-          : "ReallocatedToLiquid";
+          : action === "loan"
+            ? "TemporaryLoan"
+            : "ReallocatedToLiquid";
   const isValid =
     numericAmount > 0 &&
     numericAmount <= goal.currentAmount &&
     (action !== "transfer" || Boolean(destinationAccountId)) &&
+    (action !== "loan" || Boolean(destinationAccountId)) &&
     (action !== "expense" ||
       (Boolean(expenseCategoryId) && Boolean(expenseDescription.trim()))) &&
     (action !== "reassign" || Boolean(targetGoalId)) &&
@@ -119,16 +132,52 @@ export default function WithdrawModal({ goal, onClose }: Props) {
           reason,
           withdrawalDate,
           targetGoalId: reason === "ReallocatedToOtherGoal" ? targetGoalId : undefined,
-          destinationAccountId: action === "transfer" ? destinationAccountId : undefined,
+          destinationAccountId:
+            action === "transfer" || action === "loan"
+              ? destinationAccountId
+              : undefined,
           expenseCategoryId: action === "expense" ? expenseCategoryId : undefined,
           expenseDescription: action === "expense" ? expenseDescription.trim() : undefined,
           idempotencyKey: crypto.randomUUID(),
           notes: notes.trim() || undefined,
         },
       },
-      { onSuccess: onClose },
+      {
+        onSuccess: () => {
+          if (action === "loan") {
+            // Segundo paso: programar la reposición en el mismo modal,
+            // en vez de cerrarlo — el retiro ya se registró.
+            setLoanWithdrawal({ amount: numericAmount, destinationAccountId });
+          } else {
+            onClose();
+          }
+        },
+      },
     );
   };
+
+  if (loanWithdrawal) {
+    return (
+      <SavingsModalShell
+        eyebrow="Movimiento de meta"
+        title="¿Cómo quieres reponer este dinero?"
+        description="El retiro ya se registró. Programa un débito automático por ciclo hasta saldar el pendiente."
+        onClose={onClose}
+      >
+        <div className="p-6 sm:p-8">
+          <ReplenishmentCreateForm
+            goalId={goal.id}
+            goalName={goal.name}
+            savingsAccountId={goal.savingsAccountId}
+            amountTaken={loanWithdrawal.amount}
+            defaultSourceAccountId={loanWithdrawal.destinationAccountId}
+            onSuccess={onClose}
+            onCancel={onClose}
+          />
+        </div>
+      </SavingsModalShell>
+    );
+  }
 
   return (
     <SavingsModalShell
@@ -201,7 +250,7 @@ export default function WithdrawModal({ goal, onClose }: Props) {
                 className={savingsInputClass}
               />
             </SavingsField>
-            {action === "transfer" && (
+            {(action === "transfer" || action === "loan") && (
               <SavingsField label="Cuenta destino" className="sm:col-span-2">
                 <select
                   required

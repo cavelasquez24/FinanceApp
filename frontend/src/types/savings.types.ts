@@ -55,7 +55,11 @@ export interface ArchiveSavingsGoalDto {
 }
 
 export type SavingsWithdrawalReason =
-  "Consumed" | "ReallocatedToOtherGoal" | "ReallocatedToLiquid" | "Correction";
+  | "Consumed"
+  | "ReallocatedToOtherGoal"
+  | "ReallocatedToLiquid"
+  | "Correction"
+  | "TemporaryLoan";
 
 export interface SavingsGoalWithdrawal {
   id: string;

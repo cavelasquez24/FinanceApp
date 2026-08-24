@@ -161,6 +161,15 @@ export function CurrentDashboardPage() {
           </div>
         )}
 
+        {data.cycleReplenishmentCommitment > 0 && (
+          <p className="mt-3 text-xs text-white/65">
+            Comprometido en reposiciones este ciclo:{" "}
+            <span className="font-medium text-white/90">
+              {money(data.cycleReplenishmentCommitment)}
+            </span>
+          </p>
+        )}
+
         <div className="mt-6 grid grid-cols-2 gap-4 border-t border-white/10 pt-5">
           <div>
             <p className="text-xs text-white/55">Sugerencia diaria</p>
