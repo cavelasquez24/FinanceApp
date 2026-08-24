@@ -76,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<ISavingsReplenishmentService, SavingsReplenishmentService>();
         services.AddScoped<IAccountReconciliationService, AccountReconciliationService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
+        services.AddScoped<ITransferService, TransferService>();
 
         return services;
     }
