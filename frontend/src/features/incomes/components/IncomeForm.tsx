@@ -15,6 +15,10 @@ interface Props {
   onCancel?: () => void;
 }
 
+// Valores de un formulario en blanco. Se recalculan en cada llamada para que
+// `date` sea el día actual y no el de la primera vez que se montó el form.
+const emptyIncomeDefaults = () => ({ date: todayDateOnly() });
+
 export function IncomeForm({ income, onSuccess, onCancel }: Props) {
   const isEditMode = Boolean(income);
 
@@ -27,6 +31,7 @@ export function IncomeForm({ income, onSuccess, onCancel }: Props) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<IncomeFormData>({
     resolver: zodResolver(incomeSchema),
@@ -38,9 +43,7 @@ export function IncomeForm({ income, onSuccess, onCancel }: Props) {
           date: income.date,
           source: income.source ?? '',
         }
-      : {
-          date: todayDateOnly(),
-        },
+      : emptyIncomeDefaults(),
   });
 
   const onSubmit = (data: IncomeFormData) => {
@@ -50,7 +53,15 @@ export function IncomeForm({ income, onSuccess, onCancel }: Props) {
         { onSuccess: () => onSuccess?.() }
       );
     } else {
-      createIncome(data, { onSuccess: () => onSuccess?.() });
+      createIncome(data, {
+        onSuccess: () => {
+          // El form de creación no siempre se desmonta al cerrarse (en móvil
+          // vive dentro de un BottomSheet que solo se oculta con CSS), así que
+          // se limpia explícitamente en vez de confiar en el remontaje.
+          reset(emptyIncomeDefaults());
+          onSuccess?.();
+        },
+      });
     }
   };
 

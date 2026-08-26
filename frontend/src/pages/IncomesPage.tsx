@@ -12,9 +12,11 @@ import {
   Spinner,
   ConfirmDialog,
   TablePagination,
+  BottomSheet,
 } from '../components/ui';
 import { Plus as PlusIcon, AlertCircle, Inbox, Pencil, Trash2 } from 'lucide-react';
 import type { Income } from '../types/income.types';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export function IncomesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -79,6 +81,7 @@ export function IncomesPage() {
     });
   };
 
+  const isMobile = useIsMobile();
   const isFormVisible = isFormOpen || editingIncome !== null;
 
   return (
@@ -98,13 +101,18 @@ export function IncomesPage() {
         }
       />
 
-      {/* Formulario (crear o editar) */}
-      {isFormVisible && (
+      {/* Desktop: card inline para crear y editar. Móvil: solo para editar */}
+      {isFormVisible && (!isMobile || editingIncome !== null) && (
         <Card key={editingIncome?.id ?? 'new'}>
           <CardHeader title={editingIncome ? 'Editar Ingreso' : 'Registrar Nuevo Ingreso'} />
           <IncomeForm income={editingIncome ?? undefined} onSuccess={closeForm} onCancel={closeForm} />
         </Card>
       )}
+
+      {/* Móvil: formulario de creación dentro del BottomSheet */}
+      <BottomSheet open={isFormOpen && isMobile} onClose={closeForm} title="Nuevo ingreso">
+        <IncomeForm onSuccess={closeForm} onCancel={closeForm} />
+      </BottomSheet>
 
       {/* Tabla de Resultados */}
       <Card noPadding className="overflow-hidden">
