@@ -12,6 +12,34 @@
   }
 }
 
+@layer utilities {
+  /*
+   * Alto del shell de la app.
+   *
+   * En iOS Safari `100vh` NO es el área visible: es la altura que tendría la
+   * pantalla con las barras del navegador retraídas, así que un contenedor de
+   * 100vh se desborda por debajo de la barra inferior. `100dvh` sigue el área
+   * realmente visible.
+   *
+   * En escritorio ambas unidades resuelven al mismo valor — no hay chrome
+   * retráctil — así que este cambio es un no-op fuera de móvil.
+   *
+   * El fallback va en un @supports y no como declaración duplicada: esbuild
+   * (minificador de CSS de Vite) colapsa `height: 100vh; height: 100dvh;` a
+   * solo la última y el fallback se pierde en el build de producción.
+   * Navegadores sin `dvh`: anteriores a Chrome 108 / Safari 15.4 / Firefox 101.
+   */
+  .h-screen-dynamic {
+    height: 100vh;
+  }
+
+  @supports (height: 100dvh) {
+    .h-screen-dynamic {
+      height: 100dvh;
+    }
+  }
+}
+
 /* 3. Variables CSS globales */
 :root {
   --color-income:  #22c55e;

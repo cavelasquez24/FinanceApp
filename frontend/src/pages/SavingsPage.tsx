@@ -91,7 +91,7 @@ export default function SavingsPage() {
   );
 
   return (
-    <div className="min-h-screen space-y-8 bg-finflow-cream">
+    <div className="space-y-8 bg-finflow-cream">
       <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7FA083]">

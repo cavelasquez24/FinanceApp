@@ -11,7 +11,7 @@ export function AppLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-finflow-cream">
+    <div className="flex h-screen-dynamic bg-finflow-cream">
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -31,7 +31,12 @@ export function AppLayout() {
           <span className="text-sm font-semibold text-finflow-dark">FinFlow</span>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 pb-24 md:pb-6 lg:p-8">
+        {/*
+          El padding inferior reserva el alto de la BottomNav (solo en móvil).
+          Se le suma el safe-area inset para que el último elemento no quede
+          bajo el indicador de inicio del iPhone. En escritorio manda md:pb-6.
+        */}
+        <main className="flex-1 overflow-y-auto p-6 pb-[calc(6rem_+_env(safe-area-inset-bottom))] md:pb-6 lg:p-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>
