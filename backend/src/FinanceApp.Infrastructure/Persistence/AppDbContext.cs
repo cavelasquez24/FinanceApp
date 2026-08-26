@@ -41,7 +41,6 @@ public class AppDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<DebtWithdrawal> DebtWithdrawals => Set<DebtWithdrawal>();
     public DbSet<EmergencyFundRestoration> EmergencyFundRestorations => Set<EmergencyFundRestoration>();
-    public DbSet<SavingsReplenishment> SavingsReplenishments => Set<SavingsReplenishment>();
 
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<ExpenseTag> ExpenseTags => Set<ExpenseTag>();
