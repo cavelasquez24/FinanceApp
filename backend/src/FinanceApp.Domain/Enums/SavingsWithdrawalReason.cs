@@ -14,8 +14,14 @@ public enum SavingsWithdrawalReason
 
     /// <summary>
     /// Préstamo temporal a sí mismo — el dinero sale hacia una cuenta
-    /// líquida (DestinationAccountId obligatorio) con la intención de
-    /// reponerlo vía un SavingsReplenishment. Neutro en patrimonio.
+    /// líquida (DestinationAccountId obligatorio) con el compromiso de
+    /// reponerlo. Neutro en patrimonio.
+    ///
+    /// Solo válido cuando SavingsGoal.Purpose == EmergencyFund.
+    /// La validación se aplica en SavingsGoalService.WithdrawAsync.
+    ///
+    /// El compromiso de devolución se modela exclusivamente con
+    /// EmergencyFundRestoration; las metas generales nunca prestan.
     /// </summary>
     TemporaryLoan
 }
