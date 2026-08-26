@@ -17,6 +17,7 @@ import {
 import { Plus as PlusIcon, AlertCircle, Inbox, Pencil, Trash2 } from 'lucide-react';
 import type { Income } from '../types/income.types';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { IncomeCard } from '../components/incomes/IncomeCard';
 
 export function IncomesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -133,7 +134,8 @@ export function IncomesPage() {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Tabla en escritorio */}
+            <div className="hidden overflow-x-auto md:block">
             <table className="w-full text-left text-sm text-finflow-dark">
               <thead className="bg-[#F3F1EC] text-xs uppercase tracking-wide text-finflow-muted">
                 <tr>
@@ -186,6 +188,19 @@ export function IncomesPage() {
               </tbody>
             </table>
             </div>
+
+            {/* Tarjetas en móvil */}
+            <div className="block space-y-2 p-4 md:hidden">
+              {incomes.map((income) => (
+                <IncomeCard
+                  key={income.id}
+                  income={income}
+                  onEdit={handleEdit}
+                  onDelete={setDeletingIncome}
+                />
+              ))}
+            </div>
+
             {pagedData && (
               <TablePagination
                 page={pagedData.page}
