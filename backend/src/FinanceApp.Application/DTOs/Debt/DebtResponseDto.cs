@@ -19,5 +19,4 @@ public class DebtResponseDto
     public bool IsPaidOff { get; set; }
     public string? Notes { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
-    public Guid? LinkedSavingsGoalId { get; set; }
 }

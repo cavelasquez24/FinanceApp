@@ -315,6 +315,9 @@ public class SavingsGoalService : ISavingsGoalService
                 return MapWithdrawal(consumedWithdrawal, goal.CurrentAmount);
             }
 
+            if (dto.Reason == SavingsWithdrawalReason.TemporaryLoan && goal.Purpose != SavingsGoalPurpose.EmergencyFund)
+                throw new DomainException("LOAN_ONLY_FROM_EMERGENCY_FUND", "Solo el fondo de emergencia admite préstamos temporales; una meta general se gasta en su propósito o se reasigna.");
+
             if (dto.Reason == SavingsWithdrawalReason.TemporaryLoan && !dto.DestinationAccountId.HasValue)
                 throw new DomainException("DESTINATION_ACCOUNT_REQUIRED", "Un préstamo temporal requiere la cuenta que recibirá el dinero.");
 

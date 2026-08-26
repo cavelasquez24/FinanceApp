@@ -1,5 +1,4 @@
 ﻿using FinanceApp.Application.DTOs.Debt;
-using FinanceApp.Application.DTOs.SavingsGoal;
 using FinanceApp.Application.Interfaces;
 using FinanceApp.Domain.Entities;
 using FinanceApp.Domain.Enums;
@@ -11,13 +10,11 @@ namespace FinanceApp.Application.Services;
 public class DebtService : IDebtService
 {
     private readonly IDebtRepository _debtRepository;
-    private readonly ISavingsGoalService _savingsGoalService;
     private readonly IFinancialAccountService _accountService;
 
-    public DebtService(IDebtRepository debtRepository, ISavingsGoalService savingsGoalService, IFinancialAccountService accountService)
+    public DebtService(IDebtRepository debtRepository, IFinancialAccountService accountService)
     {
         _debtRepository = debtRepository;
-        _savingsGoalService = savingsGoalService;
         _accountService = accountService;
     }
 
@@ -184,14 +181,6 @@ public class DebtService : IDebtService
         if (dto.PrincipalAmount <= 0)
             throw new DomainException("INVALID_PRINCIPAL_AMOUNT", "El monto a capital debe ser mayor a 0.");
 
-        if (debt.LinkedSavingsGoalId.HasValue)
-        {
-            await _savingsGoalService.DepositAsync(
-                debt.LinkedSavingsGoalId.Value, userId,
-                new DepositDto { Amount = dto.PrincipalAmount, Notes = $"Auto: abono deuda '{debt.Name}'" },
-                cancellationToken);
-        }
-
         var payment = new DebtPayment
         {
             DebtId = debtId,
@@ -206,11 +195,10 @@ public class DebtService : IDebtService
         debt.CurrentBalance = Math.Max(0, debt.CurrentBalance - dto.PrincipalAmount);
 
         await _debtRepository.UpdateAsync(debt, cancellationToken);
-        if (!debt.LinkedSavingsGoalId.HasValue)
-            await _accountService.SyncMovementAsync(
-                userId, null, FinancialAccountType.Cash, -payment.Amount,
-                payment.PaymentDate, "debt-payment", payment.Id,
-                $"Pago: {debt.Name}", cancellationToken);
+        await _accountService.SyncMovementAsync(
+            userId, null, FinancialAccountType.Cash, -payment.Amount,
+            payment.PaymentDate, "debt-payment", payment.Id,
+            $"Pago: {debt.Name}", cancellationToken);
         return MapPaymentToResponseDto(payment);
     }
 
@@ -223,20 +211,6 @@ public class DebtService : IDebtService
             throw new NotFoundException("Deuda", debtId);
         if (dto.Amount <= 0)
             throw new DomainException("INVALID_WITHDRAWAL_AMOUNT", "El monto debe ser mayor a 0.");
-
-        if (debt.LinkedSavingsGoalId.HasValue)
-        {
-            await _savingsGoalService.WithdrawAsync(
-                debt.LinkedSavingsGoalId.Value, userId,
-                new SavingsGoalWithdrawalCreateDto
-                {
-                    Amount = dto.Amount,
-                    WithdrawalDate = dto.WithdrawalDate,
-                    Reason = SavingsWithdrawalReason.ReallocatedToLiquid,
-                    Notes = $"Auto: préstamo contra fondo, deuda '{debt.Name}'"
-                },
-                cancellationToken);
-        }
 
         debt.OriginalAmount += dto.Amount;
         debt.CurrentBalance += dto.Amount;
@@ -251,11 +225,10 @@ public class DebtService : IDebtService
         debt.Withdrawals.Add(withdrawal);
 
         await _debtRepository.UpdateAsync(debt, cancellationToken);
-        if (!debt.LinkedSavingsGoalId.HasValue)
-            await _accountService.SyncMovementAsync(
-                userId, null, FinancialAccountType.Cash, withdrawal.Amount,
-                withdrawal.WithdrawalDate, "debt-withdrawal", withdrawal.Id,
-                $"Desembolso: {debt.Name}", cancellationToken);
+        await _accountService.SyncMovementAsync(
+            userId, null, FinancialAccountType.Cash, withdrawal.Amount,
+            withdrawal.WithdrawalDate, "debt-withdrawal", withdrawal.Id,
+            $"Desembolso: {debt.Name}", cancellationToken);
 
         return new DebtWithdrawalResponseDto
         {

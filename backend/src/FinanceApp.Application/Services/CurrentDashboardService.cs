@@ -16,7 +16,7 @@ public class CurrentDashboardService : ICurrentDashboardService
     private readonly IUserRepository _userRepository;
     private readonly IFinancialPositionService _financialPositionService;
     private readonly IBudgetService _budgetService;
-    private readonly ISavingsReplenishmentRepository _replenishmentRepository;
+    private readonly IEmergencyFundRestorationRepository _restorationRepository;
     private readonly IBusinessDateProvider _businessDateProvider;
 
     public CurrentDashboardService(
@@ -30,7 +30,7 @@ public class CurrentDashboardService : ICurrentDashboardService
         IUserRepository userRepository,
         IFinancialPositionService financialPositionService,
         IBudgetService budgetService,
-        ISavingsReplenishmentRepository replenishmentRepository,
+        IEmergencyFundRestorationRepository restorationRepository,
         IBusinessDateProvider businessDateProvider)
     {
         _incomeRepository = incomeRepository;
@@ -43,7 +43,7 @@ public class CurrentDashboardService : ICurrentDashboardService
         _userRepository = userRepository;
         _financialPositionService = financialPositionService;
         _budgetService = budgetService;
-        _replenishmentRepository = replenishmentRepository;
+        _restorationRepository = restorationRepository;
         _businessDateProvider = businessDateProvider;
     }
 
@@ -82,9 +82,10 @@ public class CurrentDashboardService : ICurrentDashboardService
         var budgetAvailable = budgetStatus?.TotalRemaining ?? 0m;
         var daysRemaining = Math.Max(0, end.DayNumber - today.DayNumber + 1);
 
-        var activeReplenishments = await _replenishmentRepository.GetActiveForAutoDebitAsync(userId, cancellationToken);
-        var cycleReplenishmentCommitment = activeReplenishments
-            .Sum(r => Math.Min(r.MonthlyDebitAmount, r.PendingAmount));
+        // Único compromiso interno de devolución que sobrevive: restaurar el
+        // fondo de emergencia. Las metas generales ya no admiten préstamos.
+        var cycleReplenishmentCommitment = await _restorationRepository
+            .GetScheduledCommitmentByCycleAsync(userId, end, cancellationToken);
 
         return new CurrentDashboardDto
         {

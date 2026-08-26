@@ -45,6 +45,27 @@ public class EmergencyFundRestorationRepository
                 && r.DeletedAt == null)
             .SumAsync(r => r.OriginalAmount - r.RestoredAmount, cancellationToken);
 
+    public async Task<decimal> GetScheduledCommitmentByCycleAsync(
+        Guid userId, DateOnly cycleEnd, CancellationToken cancellationToken = default)
+    {
+        // Proyecta primero y agrega en memoria: el tope por pendiente no es
+        // traducible a SQL de forma portable y el volumen por usuario es mínimo.
+        var scheduled = await _context.EmergencyFundRestorations
+            .Where(r => r.UserId == userId
+                && r.Status == EmergencyFundRestorationStatus.Open
+                && r.NextScheduledDate <= cycleEnd
+                && r.DeletedAt == null)
+            .Select(r => new
+            {
+                r.ScheduledContributionAmount,
+                Outstanding = r.OriginalAmount - r.RestoredAmount
+            })
+            .ToListAsync(cancellationToken);
+
+        return scheduled.Sum(r => Math.Max(
+            Math.Min(r.ScheduledContributionAmount, r.Outstanding), 0));
+    }
+
     public Task<decimal> GetRestoredByDateRangeAsync(
         Guid userId, DateOnly start, DateOnly end, CancellationToken cancellationToken = default) =>
         _context.SavingsGoalContributions

@@ -11,5 +11,4 @@ public class DebtUpdateDto
     public DateOnly? TargetPayoffDate { get; set; }
     public bool IsActive { get; set; } = true;
     public string? Notes { get; set; }
-    public Guid? LinkedSavingsGoalId { get; set; }
 }

@@ -36,10 +36,11 @@ public class CurrentDashboardDto
     public int DaysRemaining { get; set; }
 
     /// <summary>
-    /// Suma de Min(MonthlyDebitAmount, PendingAmount) de los planes de
-    /// reposición Active + AutoDebitEnabled + no pausados del usuario.
-    /// Se muestra como compromiso separado — NO se resta de
-    /// BudgetAvailable, que sigue siendo únicamente lo que calcula
+    /// Compromiso de restauración del fondo de emergencia imputable al ciclo:
+    /// suma de Min(ScheduledContributionAmount, OutstandingAmount) de las
+    /// EmergencyFundRestoration abiertas cuya cuota vence dentro del ciclo
+    /// (incluidas las vencidas). Se muestra como compromiso separado — NO se
+    /// resta de BudgetAvailable, que sigue siendo únicamente lo que calcula
     /// BudgetService.
     /// </summary>
     public decimal CycleReplenishmentCommitment { get; set; }
