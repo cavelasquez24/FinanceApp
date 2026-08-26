@@ -6,11 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#FBF9F4" />
 
-    <!-- Permite "Agregar a inicio" en iPad/iPhone con pantalla completa,
-         sin manifest ni service worker (no es una PWA instalable). -->
+    <!-- Pantalla completa al "Agregar a inicio". El manifest con
+         display:standalone es la vía que iOS 16.4+ honra; los meta de Apple
+         se mantienen como respaldo para versiones anteriores, donde siguen
+         siendo el único mecanismo. Sigue sin haber service worker: no es una
+         PWA instalable ni funciona offline. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="FinFlow" />
+    <!-- TODO: falta public/apple-touch-icon.png (180x180). Sin él iOS usa una
+         miniatura de la página como icono de la pantalla de inicio. -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <title>FinFlow</title>
