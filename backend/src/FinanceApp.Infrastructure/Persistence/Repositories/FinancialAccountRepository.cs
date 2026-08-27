@@ -19,16 +19,21 @@ public class FinancialAccountRepository
             .ThenBy(a => a.Name)
             .ToListAsync(cancellationToken);
 
+    // El orden explícito evita que PostgreSQL devuelva una cuenta distinta entre
+    // ejecuciones cuando el usuario tiene más de una predeterminada por tipo. Se
+    // ordena por Id porque es estable en cualquier proveedor; cuál de las duplicadas
+    // conserva la marca lo decide la migración de normalización, no esta consulta.
     public Task<FinancialAccount?> GetDefaultAsync(
         Guid userId, FinancialAccountType type,
         CancellationToken cancellationToken = default) =>
-        _context.FinancialAccounts.FirstOrDefaultAsync(
-            a => a.UserId == userId
+        _context.FinancialAccounts
+            .Where(a => a.UserId == userId
                 && a.Type == type
                 && a.IsDefault
                 && a.IsActive
-                && a.DeletedAt == null,
-            cancellationToken);
+                && a.DeletedAt == null)
+            .OrderBy(a => a.Id)
+            .FirstOrDefaultAsync(cancellationToken);
 
     public Task<AccountTransaction?> GetTransactionBySourceAsync(
         Guid userId, string sourceType, Guid sourceId,

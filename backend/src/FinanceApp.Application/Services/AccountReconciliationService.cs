@@ -13,15 +13,18 @@ public class AccountReconciliationService : IAccountReconciliationService
     private readonly IAccountReconciliationRepository _reconciliationRepository;
     private readonly IFinancialAccountRepository _accountRepository;
     private readonly IBusinessDateProvider _businessDateProvider;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AccountReconciliationService(
         IAccountReconciliationRepository reconciliationRepository,
         IFinancialAccountRepository accountRepository,
-        IBusinessDateProvider businessDateProvider)
+        IBusinessDateProvider businessDateProvider,
+        IUnitOfWork unitOfWork)
     {
         _reconciliationRepository = reconciliationRepository;
         _accountRepository = accountRepository;
         _businessDateProvider = businessDateProvider;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<ReconciliationPreviewDto> GetPreviewAsync(
@@ -53,51 +56,56 @@ public class AccountReconciliationService : IAccountReconciliationService
         if (dto.ReconciliationDate == default)
             throw new DomainException("INVALID_DATE", "La fecha de conciliación es obligatoria.");
 
-        var account = await GetAccountOrThrowAsync(accountId, userId, cancellationToken);
-
-        var expectedBalance = await _reconciliationRepository.GetLedgerBalanceAsync(
-            accountId, cancellationToken);
-
-        var difference = dto.ActualBalance - expectedBalance;
-
-        AccountTransaction? adjustment = null;
-
-        if (difference != 0)
+        // El ajuste, el saldo de la cuenta y la conciliación viajan juntos: si algo
+        // falla a mitad no puede quedar un ajuste sin su conciliación.
+        return await _unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-            adjustment = new AccountTransaction
+            var account = await GetAccountOrThrowAsync(accountId, userId, ct);
+
+            var expectedBalance = await _reconciliationRepository.GetLedgerBalanceAsync(
+                accountId, ct);
+
+            var difference = dto.ActualBalance - expectedBalance;
+
+            AccountTransaction? adjustment = null;
+
+            if (difference != 0)
+            {
+                adjustment = new AccountTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    AccountId = accountId,
+                    Amount = difference,
+                    Date = dto.ReconciliationDate,
+                    Description = $"Ajuste de conciliación ({(difference > 0 ? "+" : "")}{difference:F2})",
+                    SourceType = "account-adjustment",
+                    SourceId = Guid.NewGuid()
+                };
+
+                await _accountRepository.SaveTransactionAsync(adjustment, ct);
+                account.CurrentBalance = dto.ActualBalance;
+                await _accountRepository.UpdateAsync(account, ct);
+            }
+
+            var reconciliation = new AccountReconciliation
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 AccountId = accountId,
-                Amount = difference,
-                Date = dto.ReconciliationDate,
-                Description = $"Ajuste de conciliación ({(difference > 0 ? "+" : "")}{difference:F2})",
-                SourceType = "account-adjustment",
-                SourceId = Guid.NewGuid()
+                ReconciliationDate = dto.ReconciliationDate,
+                ExpectedBalance = expectedBalance,
+                ActualBalance = dto.ActualBalance,
+                Difference = difference,
+                AdjustmentTransactionId = adjustment?.Id,
+                Notes = dto.Notes?.Trim(),
+                Status = ReconciliationStatus.Reconciled
             };
 
-            await _accountRepository.SaveTransactionAsync(adjustment, cancellationToken);
-            account.CurrentBalance = dto.ActualBalance;
-            await _accountRepository.UpdateAsync(account, cancellationToken);
-        }
+            await _reconciliationRepository.CreateAsync(reconciliation, ct);
 
-        var reconciliation = new AccountReconciliation
-        {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            AccountId = accountId,
-            ReconciliationDate = dto.ReconciliationDate,
-            ExpectedBalance = expectedBalance,
-            ActualBalance = dto.ActualBalance,
-            Difference = difference,
-            AdjustmentTransactionId = adjustment?.Id,
-            Notes = dto.Notes?.Trim(),
-            Status = ReconciliationStatus.Reconciled
-        };
-
-        await _reconciliationRepository.CreateAsync(reconciliation, cancellationToken);
-
-        return MapToDto(reconciliation, account.Name);
+            return MapToDto(reconciliation, account.Name);
+        }, cancellationToken);
     }
 
     public async Task<IReadOnlyList<ReconciliationResponseDto>> GetHistoryAsync(

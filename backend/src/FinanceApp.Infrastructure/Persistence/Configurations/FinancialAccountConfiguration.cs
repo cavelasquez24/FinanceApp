@@ -27,6 +27,15 @@ public class FinancialAccountConfiguration : IEntityTypeConfiguration<FinancialA
         builder.Ignore(a => a.IsDeleted);
 
         builder.HasIndex(a => new { a.UserId, a.Type });
+
+        // Una sola cuenta predeterminada por usuario y tipo entre las cuentas vivas.
+        // Se declara por nombre para que conviva con el índice de búsqueda anterior.
+        builder
+            .HasIndex(
+                new[] { nameof(FinancialAccount.UserId), nameof(FinancialAccount.Type) },
+                "ux_financial_accounts_default_per_type")
+            .IsUnique()
+            .HasFilter("is_default AND deleted_at IS NULL");
         builder.HasOne(a => a.User)
             .WithMany()
             .HasForeignKey(a => a.UserId)

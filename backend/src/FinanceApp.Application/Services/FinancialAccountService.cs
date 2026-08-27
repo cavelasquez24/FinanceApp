@@ -125,27 +125,17 @@ public class FinancialAccountService : IFinancialAccountService
                 cancellationToken);
         }
 
-        var balanceDifference = dto.CurrentBalance - account.CurrentBalance;
+        // Editar una cuenta no mueve saldo: la única vía para cambiarlo es una
+        // conciliación explícita, que deja constancia de la diferencia.
+        if (dto.CurrentBalance != account.CurrentBalance)
+            throw new DomainException(
+                "BALANCE_CHANGE_REQUIRES_RECONCILIATION",
+                "El saldo de una cuenta solo puede cambiar mediante una conciliación.");
+
         account.Name = dto.Name.Trim();
-        account.CurrentBalance = dto.CurrentBalance;
         account.IsDefault = dto.IsDefault;
         account.IsActive = dto.IsActive;
         await _accountRepository.UpdateAsync(account, cancellationToken);
-
-        if (balanceDifference != 0)
-        {
-            await _accountRepository.SaveTransactionAsync(new AccountTransaction
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                AccountId = account.Id,
-                Amount = balanceDifference,
-                Date = _businessDateProvider.Today,
-                Description = "Ajuste de saldo",
-                SourceType = "account-adjustment",
-                SourceId = Guid.NewGuid()
-            }, cancellationToken);
-        }
 
         return Map(account);
     }
@@ -363,16 +353,17 @@ public class FinancialAccountService : IFinancialAccountService
         if (existing != null)
             return existing;
 
-        var initialBalance = type switch
-        {
-            FinancialAccountType.Savings => 0,
-            FinancialAccountType.Investment =>
-                await _investmentRepository.GetTotalCurrentValueAsync(userId, cancellationToken),
-            _ => 0
-        };
+        // Puede quedar alguna predeterminada inactiva del mismo tipo: liberarla antes
+        // de crear la nueva mantiene una sola marca por tipo (índice único en BD).
+        var accounts = await _accountRepository.GetByUserIdAsync(userId, cancellationToken);
+        await ClearDefaultAsync(accounts.Where(a => a.Type == type), cancellationToken);
 
+        var openingDate = _businessDateProvider.Today;
         var account = new FinancialAccount
         {
+            // Id explícito: la fila de apertura lo necesita antes de que la BD
+            // pueda devolver el suyo.
+            Id = Guid.NewGuid(),
             UserId = userId,
             Name = type switch
             {
@@ -381,12 +372,29 @@ public class FinancialAccountService : IFinancialAccountService
                 _ => "Portafolio de inversión"
             },
             Type = type,
-            CurrentBalance = initialBalance,
+            // Sin saldo sembrado: el saldo de una cuenta nace del ledger, no de un
+            // agregado calculado que nadie respalda con movimientos.
+            CurrentBalance = 0m,
+            OpeningBalance = 0m,
+            OpeningDate = openingDate,
             IsDefault = true,
             IsSystem = true,
             IsActive = true
         };
         await _accountRepository.CreateAsync(account, cancellationToken);
+
+        await _accountRepository.SaveTransactionAsync(new AccountTransaction
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            AccountId = account.Id,
+            Amount = 0m,
+            Date = openingDate,
+            Description = "Apertura de cuenta (no es un ingreso)",
+            SourceType = "account-opening",
+            SourceId = account.Id
+        }, cancellationToken);
+
         return account;
     }
 
