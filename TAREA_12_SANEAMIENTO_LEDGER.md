@@ -1,8 +1,9 @@
 # Tarea 12 — Saneamiento del Ledger y Cuentas Predeterminadas
 
-> Estado: **bloque A hecho** (código + migración, 2026-08-27). Diagnóstico cerrado
-> el 2026-08-26. Los datos de producción (Neon) siguen sin tocarse y la migración
-> todavía **no se ha aplicado**.
+> Estado: **bloque A cerrado y desplegado** el 2026-08-27 (commit `7111678`). La
+> migración `EnforceSingleDefaultAccountPerType` ya corrió contra Neon en el deploy
+> de Render: queda una sola cuenta predeterminada por tipo y el índice único está
+> en su sitio. Diagnóstico cerrado el 2026-08-26. **Pendiente: bloque B (datos).**
 
 ## Defectos confirmados
 
@@ -110,24 +111,44 @@ escrita y default único al crear la cuenta, rechazo del ajuste silencioso, y
 conciliación con y sin fallo (rollback del ajuste y del saldo). `dotnet test`:
 125/125 en verde.
 
-**Pendiente inmediato:** aplicar la migración. Contra Neon conviene revisar antes
-qué cuenta gana cada `(user_id, type)` con el mismo criterio del `ROW_NUMBER()`,
-porque de las 4 predeterminadas por tipo solo una conservará la marca.
+**Aplicado el 2026-08-27** vía push a master (Render ejecuta `Database.Migrate()`
+al arrancar, `Program.cs:109`). Deploy correcto. De las 4 predeterminadas por tipo
+sobrevivió la que eligió el `ROW_NUMBER()`; si alguna no fuera la cuenta que de
+verdad opera, se corrige desde la app con "Usar como cuenta predeterminada" y el
+índice se encarga de que la otra pierda la marca.
 
 ---
+
+## Cómo consultar Neon
+
+La cadena de conexión **no está en el repo** (`appsettings.json` apunta a
+localhost) y no hay `psql` instalado. Se lee de la variable de entorno
+`FINFLOW_DB`, que se fija con `setx FINFLOW_DB "Host=...neon.tech;..."`.
+
+Para leer hay un pequeño runner en el scratchpad de la sesión
+(`scratchpad/dbq`, proyecto .NET con Npgsql): `dotnet run --project dbq
+<archivo.sql>`. Rechaza cualquier SQL que escriba salvo que se le pase
+`--write`. Si el scratchpad ya no existe, se rehace en dos minutos.
 
 ## Prompt para reanudar
 
 ```
-Lee TAREA_12_SANEAMIENTO_LEDGER.md en la raíz del repo. El bloque A ya está
-hecho en el código; la migración EnforceSingleDefaultAccountPerType todavía no
-se ha aplicado.
+Lee TAREA_12_SANEAMIENTO_LEDGER.md en la raíz del repo. El bloque A está hecho
+y desplegado; toca el bloque B (datos en Neon).
 
-Antes de aplicarla: haz backup de Neon y muéstrame, con el mismo criterio del
-ROW_NUMBER() de la migración, qué cuenta ganaría el is_default en cada
-(user_id, type). Si el resultado es razonable, aplica la migración.
+Orden acordado:
+1. Diagnóstico de solo lectura: descuadre por cuenta, composición del ledger por
+   source_type y las filas *-opening huérfanas. El diagnóstico del 26 de agosto
+   es de antes de la migración, así que hay que rehacer la foto.
+2. Backup de Neon antes de cualquier escritura.
+3. Consolidar cuentas gemelas: las vacías se desactivan; si alguna tiene
+   movimientos, se pasa a la superviviente con una transferencia real, no con un
+   UPDATE.
+4. Normalizar los savings-opening / investment-opening huérfanos a
+   account-opening, para que FinancialPositionService los cuente como saldo
+   inicial y no como flujo. Enséñame los números antes de escribir.
+5. Reparar los descuadres con conciliaciones explícitas desde la app (ya son
+   atómicas), no con SQL, para que quede el rastro en account_reconciliations.
 
-Después arrancamos el bloque B (puntos 6 a 8): consolidar cuentas gemelas,
-normalizar los *-opening huérfanos y reparar los descuadres con conciliaciones
-explícitas.
+Muéstrame cada paso antes de pasar al siguiente. Nada de escrituras sin backup.
 ```
