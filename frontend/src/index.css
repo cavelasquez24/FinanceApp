@@ -87,3 +87,25 @@ body {
   background: #cbd5e1;
   border-radius: 3px;
 }
+
+/*
+ * 6. Anti auto-zoom de iOS en campos de formulario.
+ *
+ * Safari/iOS hace zoom automático al enfocar un input cuyo font-size es menor
+ * a 16px (aquí, `text-sm` = 14px). Ese zoom descoloca los modales y hojas
+ * inferiores, y al deshacerlo con pinch el gesto se confundía con un swipe de
+ * cierre. `maximum-scale` / `user-scalable=no` en el viewport NO son
+ * alternativa: iOS los ignora desde iOS 10 y romperían el zoom accesible.
+ *
+ * Lleva `!important` a propósito: tiene que ganar a las utilidades de tamaño
+ * de Tailwind (`text-sm`, `text-xs`) aplicadas campo a campo, que como clases
+ * superan en especificidad a un selector de elemento. Solo aplica por debajo
+ * del breakpoint `md` (768px); en escritorio los tamaños no cambian.
+ */
+@media (max-width: 767px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
