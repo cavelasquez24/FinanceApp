@@ -59,7 +59,7 @@ public class InvestmentCashFlowTests
     }
 
     [Fact]
-    public async Task LaterContribution_IncreasesContributedCapital_NotMarketValue()
+    public async Task LaterContribution_RaisesCapitalAndValue_WithoutTouchingUnrealizedGain()
     {
         var investment = NewInvestment(initialAmount: 50m, currentValue: 49.20m);
         var repository = new FakeInvestmentRepository { Stored = investment };
@@ -68,8 +68,12 @@ public class InvestmentCashFlowTests
         await service.AddContributionAsync(investment.Id, investment.UserId,
             new InvestmentContributionCreateDto { Amount = 10m });
 
-        Assert.Equal(60m, investment.InitialAmount);       // capital base sube
-        Assert.Equal(49.20m, investment.CurrentValue);    // valor de mercado no se toca
+        // Un aporte compra participaciones: sube el coste y el valor por igual.
+        // Lo que no puede hacer es crear ni destruir plusvalía latente, que sigue
+        // siendo -0,80 antes y después. Los movimientos de precio son AddRecordAsync.
+        Assert.Equal(60m, investment.InitialAmount);
+        Assert.Equal(59.20m, investment.CurrentValue);
+        Assert.Equal(-0.80m, investment.CurrentValue - investment.InitialAmount);
         Assert.Equal(10m, repository.AddedContribution!.Amount);
     }
 
@@ -221,6 +225,86 @@ public class InvestmentCashFlowTests
         CurrentValue = currentValue,
         PurchaseDate = new DateOnly(2026, 7, 1)
     };
+
+    /// <summary>
+    /// Reproduce el caso real del Fondo Acumulación: importación, aporte y
+    /// valorización posterior. Si el aporte no sube CurrentValue, la valorización
+    /// se calcula contra un valor rancio y vuelve a acreditar el aporte al ledger.
+    /// </summary>
+    [Fact]
+    public async Task ContributionThenValuation_KeepsLedgerInSyncWithPositionValue()
+    {
+        var repository = new FakeInvestmentRepository();
+        var ledger = new LedgerRecordingAccountService();
+        var service = new InvestmentService(repository, ledger, new PassThroughUnitOfWork());
+        var userId = Guid.NewGuid();
+
+        var created = await service.CreateAsync(userId, new InvestmentCreateDto
+        {
+            Name = "Fondo Acumulación",
+            Type = "etf",
+            InitialAmount = 4382.24m,
+            CurrentValue = 4382.24m,
+            PurchaseDate = new DateOnly(2026, 8, 18),
+            IsHistoricalImport = false
+        });
+
+        await service.AddContributionAsync(created.Id, userId, new InvestmentContributionCreateDto
+        {
+            Amount = 123.50m,
+            ContributionDate = new DateOnly(2026, 8, 26)
+        });
+
+        Assert.Equal(4505.74m, repository.Stored!.InitialAmount);
+        Assert.Equal(4505.74m, repository.Stored.CurrentValue);
+        Assert.Equal(4505.74m, ledger.InvestmentBalance);
+
+        await service.AddRecordAsync(created.Id, userId, new InvestmentRecordCreateDto
+        {
+            RecordDate = new DateOnly(2026, 8, 26),
+            Value = 4512.03m
+        });
+
+        Assert.Equal(4512.03m, repository.Stored.CurrentValue);
+        Assert.Equal(repository.Stored.CurrentValue, ledger.InvestmentBalance);
+    }
+
+    /// <summary>Acumula en un solo número lo que el servicio manda a la cuenta de inversión.</summary>
+    private sealed class LedgerRecordingAccountService : IFinancialAccountService
+    {
+        public decimal InvestmentBalance { get; private set; }
+
+        public Task<FinancialAccountResponseDto> GetOrCreateDefaultAsync(
+            Guid userId, FinancialAccountType type, CancellationToken cancellationToken = default)
+            => Task.FromResult(new FinancialAccountResponseDto());
+
+        public Task SyncTransferAsync(
+            Guid userId, FinancialAccountType fromType, FinancialAccountType toType,
+            decimal amount, DateOnly date, string sourceType, Guid sourceId,
+            string description, CancellationToken cancellationToken = default)
+        {
+            if (toType == FinancialAccountType.Investment) InvestmentBalance += amount;
+            if (fromType == FinancialAccountType.Investment) InvestmentBalance -= amount;
+            return Task.CompletedTask;
+        }
+
+        public Task SyncMovementAsync(
+            Guid userId, Guid? accountId, FinancialAccountType fallbackType,
+            decimal signedAmount, DateOnly date, string sourceType, Guid sourceId,
+            string description, CancellationToken cancellationToken = default)
+        {
+            if (fallbackType == FinancialAccountType.Investment) InvestmentBalance += signedAmount;
+            return Task.CompletedTask;
+        }
+
+        public Task<IReadOnlyList<FinancialAccountResponseDto>> GetAllAsync(Guid userId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<IReadOnlyList<AccountTransactionResponseDto>> GetRecentTransactionsAsync(Guid userId, int count, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<FinancialAccountResponseDto> CreateAsync(Guid userId, FinancialAccountCreateDto dto, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<FinancialAccountResponseDto> UpdateAsync(Guid id, Guid userId, FinancialAccountUpdateDto dto, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<AccountTransferResponseDto> TransferAsync(Guid userId, AccountTransferCreateDto dto, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<decimal> GetAvailableBalanceAsync(Guid userId, Guid? accountId, FinancialAccountType fallbackType, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task SyncTransferBetweenAccountsAsync(Guid userId, Guid? fromAccountId, FinancialAccountType fromFallbackType, Guid? toAccountId, FinancialAccountType toFallbackType, decimal amount, DateOnly date, string sourceType, Guid sourceId, string description, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    }
 
     private sealed class FakeInvestmentRepository : IInvestmentRepository
     {

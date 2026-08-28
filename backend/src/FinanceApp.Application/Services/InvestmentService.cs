@@ -323,7 +323,12 @@ public class InvestmentService : IInvestmentService
                 userId, FinancialAccountType.Investment, cancellationToken);
         }
         investment.InitialAmount += dto.Amount;
-        // CurrentValue NO se toca: la valoración de mercado es un evento separado (AddRecordAsync).
+        // El aporte compra participaciones: sube el coste y el valor en el mismo
+        // importe. Los movimientos de precio siguen siendo evento aparte
+        // (AddRecordAsync), pero dejar CurrentValue quieto fabricaba una pérdida
+        // latente falsa y hacía que la siguiente valorización volviera a acreditar
+        // el aporte en el ledger, duplicándolo.
+        investment.CurrentValue += dto.Amount;
         var contribution = new InvestmentContribution
         {
             InvestmentId = investmentId,

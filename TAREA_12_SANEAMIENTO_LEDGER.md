@@ -39,18 +39,36 @@
 
 ## Estado de los datos en producción (Neon)
 
-- **4 cuentas predeterminadas por cada tipo** (Cash, Savings, Investment).
-- Descuadre **espejo de ±4.368,93** entre `Cuenta principal` (`4c707b0b`) y
-  `Portafolio de inversión` (`66664c6e`). Se cancelan: el patrimonio total está
-  intacto, lo roto es la atribución por cuenta.
-- `Efectivo` (`aced52f8`): descuadre de 28,65 y ledger negativo (-11,45) por
-  falta de fila de apertura.
-- Varias cuentas gemelas vacías, todas marcadas como predeterminadas.
-- `account_reconciliations` **vacía**: el flujo de conciliación nunca registró
-  nada. Los 9 ajustes del 30 de julio son del camino viejo (`Ajuste de saldo`),
-  carga inicial de saldos.
-- Cabo suelto por confirmar: un `account-adjustment` de **+243,33** en
-  `Billetera Operativa` que no apareció en el primer listado.
+> Rehecho el 2026-08-27 tras aplicar el bloque A. **El diagnóstico del 26 estaba
+> equivocado en su premisa central** y esta sección lo corrige.
+
+Hay **cuatro usuarios**, y todo está aislado por `user_id`:
+
+| Usuario | Email | Qué es |
+|---|---|---|
+| `a6bb89be` | carlosadmin@gmail.com | **La cuenta viva.** Creada el 6 de agosto |
+| `ce2839d8` | carloshopex2000@gmail.com | Primer intento, con los datos del año migrados. **No se toca** |
+| `6443ed98` | admin@admin.com | Prueba |
+| `bb450bac` | test@test.com | Prueba |
+
+- **No había cuentas predeterminadas duplicadas.** Las "4 por tipo" eran una por
+  usuario en cuatro usuarios distintos. El índice único entró sin degradar nada
+  y el `UPDATE` de normalización no tocó ninguna fila.
+- **El espejo de ±4.368,93 y el enredo del 30 de julio son de `ce2839d8`**, no de
+  la cuenta viva: tres aperturas repetidas del mismo fondo, un ACUMULAC importado
+  dos veces (4.241,03 el 2025-01-17 y otra vez el 2026-06-25) y ajustes manuales
+  para cuadrar. No contamina nada de `a6bb89be`. Se deja como está; si algún día
+  se migran esos datos a la cuenta viva, hay que sanear su ledger antes.
+- **En la cuenta viva** todo cuadra al céntimo salvo `Efectivo` (`aced52f8`), al
+  que le falta su apertura: saldo 17,20 con ledger en −11,45, o sea 28,65.
+- **No existe ni una fila `account-opening` en toda la base.** Las aperturas viven
+  bajo `savings-opening` (7.829,80) e `investment-opening` (13.014,48), source
+  types huérfanos. En la cuenta viva son tres filas que suman 5.933,83.
+- `account_reconciliations` tiene **una fila**: el +243,33 de `Billetera Operativa`
+  del 27 de agosto, hecho desde la app tras el deploy del bloque A. Confirma que
+  el flujo nuevo funciona en producción. El usuario lo da por erróneo.
+- Pendiente de datos: el `Portafolio` de la cuenta viva marca 4.737,12 en saldo y
+  ledger, pero el usuario dice 3.737,12. Mil dólares exactos de diferencia.
 
 ## Plan
 
@@ -61,16 +79,18 @@
 | 3 | ✅ `GetOrCreateDefaultEntityAsync`: limpiar defaults previos + escribir apertura | A — código |
 | 4 | ✅ Quitar el ajuste silencioso de `UpdateAsync` | A — código |
 | 5 | ✅ Envolver `ApplyAsync` en `ExecuteInTransactionAsync` | A — código |
-| 6 | Consolidar cuentas gemelas (decidir cuál sobrevive por tipo) | B — datos |
-| 7 | Normalizar los `*-opening` huérfanos | B — datos |
-| 8 | Reparar descuadres con conciliaciones explícitas y notas | B — datos |
-| 9 | Módulo de reportes | C — solo después de A y B |
+| 6 | ~~Consolidar cuentas gemelas~~ — **no aplica**: no había duplicados | B — datos |
+| 7 | Normalizar los `*-opening` huérfanos a `account-opening` | B — datos |
+| 8 | Escribir la apertura que falta en `Efectivo` (28,65) | B — datos |
+| 9 | Aclarar los 1.000 del `Portafolio` y revertir el +243,33 | B — datos |
+| 10 | Módulo de reportes | C — solo después de B |
 
-**Dependencia crítica:** el índice único del punto 1 **fallará al aplicarse**
-contra los datos actuales, porque ya hay 4 defaults por tipo. La migración debe
-normalizar los duplicados antes de crear el índice.
+El bloque B quedó reducido a la cuenta viva: los puntos 7 a 9. El script está en
+`scratchpad/b2-saneamiento.sql` (una transacción, con `ROLLBACK` puesto a
+propósito para correrlo en seco antes de confirmar), pero **sus pasos 2, 3 y 4
+apuntan a `ce2839d8` y hay que quitarlos** — esa cuenta no se toca.
 
-**Antes del bloque B:** backup de la base en Neon.
+**Antes de escribir:** backup de la base en Neon.
 
 ---
 
